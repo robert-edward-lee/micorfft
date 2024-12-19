@@ -24,6 +24,7 @@ template<typename T> constexpr bool is_valid_fft_type_v = is_valid_fft_type<T>::
 
 constexpr float_max_t PI = 3.141592653589793238462643383279502884l;
 constexpr float_max_t SQRT2 = 1.414213562373095048801688724209698079l;
+constexpr float_max_t SQRT1_2 = 1.0l / SQRT2;
 
 template<typename T> constexpr std::enable_if_t<std::is_integral_v<T>, bool> is_pow_of_2(T x) {
     return x && !(x & (x - T(1)));

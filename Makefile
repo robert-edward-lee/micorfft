@@ -2,11 +2,13 @@ CC = gcc
 CXX = g++
 LD = $(CC)
 
-INCLUDES = include
+INCLUDES = include test
 
 CFLAGS = $(addprefix -I,$(INCLUDES))
 CXXFLAGS = $(addprefix -I,$(INCLUDES))
 
+
+.PHONY: test
 test:
-	@$(CXX) $(CXXFLAGS) $@.cpp -o $@
+	@$(CXX) $(CXXFLAGS) $@/$@.cpp $@/print_hist.c -o $@
 	@./$@
