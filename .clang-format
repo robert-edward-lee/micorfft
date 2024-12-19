@@ -1,0 +1,34 @@
+---
+# base settings
+Language: Cpp
+ColumnLimit: 120
+# indent settings
+IndentWidth: 4
+AccessModifierOffset: -4
+IndentCaseLabels: true
+# alignment settings
+AlignEscapedNewlines: DontAlign
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: Never
+# break lines settings
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Attach
+InsertBraces: true
+CompactNamespaces: true
+# insert/remove spaces settings
+BitFieldColonSpacing: After
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCtorInitializerColon: false
+SpaceBeforeInheritanceColon: false
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceInEmptyBlock: false
+# sort
+SortUsingDeclarations: Never
+...
