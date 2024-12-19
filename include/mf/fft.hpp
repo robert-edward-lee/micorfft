@@ -25,15 +25,15 @@ public:
         transpos.fill_table(tmp);
         pBitRevTable = tmp;
         /* 2. создание таблицы поворотных коэффициентов */
-        fill_twiddle_coeff(TwiddleCfft);
+        fill_twiddle_coeff<DataType, IdxType, CFFT_LEN * 2>(TwiddleCfft);
     }
 
 protected:
     template<IdxType L, IdxType TwidCoefModifier> constexpr void radix8(DataType *pSrc) {
-        uint32_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
-        uint32_t i1, i2, i3, i4, i5, i6, i7, i8;
-        uint32_t id;
-        uint32_t n1, n2, j;
+        uint_fast_t<IdxType> ia1, ia2, ia3, ia4, ia5, ia6, ia7;
+        uint_fast_t<IdxType> i1, i2, i3, i4, i5, i6, i7, i8;
+        uint_fast_t<IdxType> id;
+        uint_fast_t<IdxType> n1, n2, j;
 
         DataType r1, r2, r3, r4, r5, r6, r7, r8;
         DataType t1, t2;
@@ -42,7 +42,7 @@ protected:
         DataType co2, co3, co4, co5, co6, co7, co8;
         DataType si2, si3, si4, si5, si6, si7, si8;
 
-        IdxType twidCoefModifier = TwidCoefModifier;
+        uint_fast_t<IdxType> twidCoefModifier = TwidCoefModifier;
 
         n2 = L;
 
@@ -265,7 +265,7 @@ protected:
     }
     constexpr void radix8by2(DataType *p1) {
         /* Define new length */
-        constexpr IdxType L = Size >> 1;
+        constexpr uint_fast_t<IdxType> L = Size >> 1;
 
         DataType *pCol1, *pCol2, *pMid1, *pMid2;
         DataType *p2 = p1 + Size;
@@ -281,7 +281,7 @@ protected:
         pMid2 = p2 + L;
 
         /* do two dot Fourier transform */
-        for(IdxType l = L >> 2; l > 0; l--) {
+        for(uint_fast_t<IdxType> l = L >> 2; l > 0; l--) {
             t1[0] = p1[0];
             t1[1] = p1[1];
             t1[2] = p1[2];
@@ -374,7 +374,7 @@ protected:
     }
     constexpr void radix8by4(DataType *p1) {
         /* Define new length */
-        constexpr IdxType L = Size >> 2;
+        constexpr uint_fast_t<IdxType> L = Size >> 2;
 
         DataType *pCol1, *pCol2, *pCol3, *pCol4, *pEnd1, *pEnd2, *pEnd3, *pEnd4;
         const DataType *tw2, *tw3, *tw4;
@@ -384,7 +384,7 @@ protected:
         DataType t2[4], t3[4], t4[4], twR, twI;
         DataType p1ap3_0, p1sp3_0, p1ap3_1, p1sp3_1;
         DataType m0, m1, m2, m3;
-        uint32_t l, twMod2, twMod3, twMod4;
+        uint_fast_t<IdxType> l, twMod2, twMod3, twMod4;
 
         pCol1 = p1; /* points to real values by default */
         pCol2 = p2;
@@ -613,9 +613,9 @@ protected:
         radix8<L, 4>(pCol4);
     }
     constexpr void bitreversal(DataType *pSrc) {
-        for(IdxType i = 0; i < bitRevLength; i += 2) {
-            IdxType a = pBitRevTable[i] >> 2;
-            IdxType b = pBitRevTable[i + 1] >> 2;
+        for(uint_fast_t<IdxType> i = 0; i < bitRevLength; i += 2) {
+            uint_fast_t<IdxType> a = pBitRevTable[i] >> 2;
+            uint_fast_t<IdxType> b = pBitRevTable[i + 1] >> 2;
             // real
             std::swap(pSrc[a], pSrc[b]);
             // complex
@@ -625,7 +625,7 @@ protected:
     template<bool Inverse, bool BitReverse> constexpr void cfft(DataType *p1) {
         if constexpr(Inverse) { /* Conjugate input data */
             DataType *pSrc = p1 + 1;
-            for(IdxType l = 0; l != Size; ++l) {
+            for(uint_fast_t<IdxType> l = 0; l != Size; ++l) {
                 *pSrc = -*pSrc;
                 pSrc += 2;
             }
@@ -658,7 +658,7 @@ protected:
         if constexpr(Inverse) { /* Conjugate and scale output data */
             constexpr DataType factor = DataType(1) / DataType(Size);
             DataType *pSrc = p1;
-            for(IdxType l = 0; l != Size; ++l) {
+            for(uint_fast_t<IdxType> l = 0; l != Size; ++l) {
                 *pSrc++ *= factor;
                 *pSrc = -(*pSrc) * factor;
                 pSrc++;
@@ -684,7 +684,7 @@ public:
 
     Rfft() {
         /* 1. создание таблицы поворотных коэффициентов */
-        fill_rfft_twiddle_coeff(TwiddleRfft);
+        fill_rfft_twiddle_coeff<DataType, IdxType, RFFT_LEN * 2>(TwiddleRfft);
     }
 
     constexpr void forward(DataType *pIn, DataType *pOut) {
@@ -711,7 +711,7 @@ private:
         DataType t1a, t1b; /* temporary variables */
         DataType p0, p1, p2, p3; /* temporary variables */
 
-        IdxType k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
+        uint_fast_t<IdxType> k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
 
         /* Pack first and last sample of the frequency domain together */
         xBR = pB[0];
@@ -788,7 +788,7 @@ private:
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
         DataType t1a, t1b, r, s, t, u; /* temporary variables */
 
-        IdxType k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
+        uint_fast_t<IdxType> k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
 
         xAR = pA[0];
         xAI = pA[1];
