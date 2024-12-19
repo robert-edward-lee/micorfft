@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdlib.h>
 #include <windows.h>
 
@@ -133,10 +132,6 @@ void fprint_hist_horiz(FILE *f, const hist_t *hist, size_t size, size_t chars) {
     }
     /* поиск максимума для нормировки */
     for(i = 0, max = 0; i != size; ++i) {
-        if(hist[i] == INFINITE || hist[i] == NAN) {
-            hist_t *kostyl = (hist_t *)hist;
-            kostyl[i] = 0;
-        }
         if(hist[i] > max) {
             max = hist[i];
         }
