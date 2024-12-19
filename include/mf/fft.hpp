@@ -1,11 +1,11 @@
-#ifndef HPP_MICRO_FFT_FFT
-#define HPP_MICRO_FFT_FFT
+#ifndef HPP_MF_FFT
+#define HPP_MF_FFT
 
 #include <cstdint>
 
-#include "microfft/transposition.hpp"
+#include "mf/transposition.hpp"
 
-namespace microfft {
+namespace mf {
 template<typename FloatType, typename IdxType, IdxType Size> class Cfft {
 public:
     static constexpr IdxType CFFT_LEN = Size;
@@ -42,6 +42,6 @@ private:
     FloatType pTwiddleRfft[RFFT_LEN];
 };
 
-} // namespace microfft
+} // namespace mf
 
-#endif /* HPP_MICRO_FFT_FFT */
+#endif // HPP_MF_FFT

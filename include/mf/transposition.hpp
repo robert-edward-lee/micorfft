@@ -1,14 +1,14 @@
-#ifndef HPP_MICROFFT_TRANSPOSITION
-#define HPP_MICROFFT_TRANSPOSITION
+#ifndef HPP_MF_TRANSPOSITION
+#define HPP_MF_TRANSPOSITION
 
 #include <bitset>
 #include <cstring>
 #include <iostream>
 #include <type_traits>
 
-#include "microfft/utils.hpp"
+#include "mf/utils.hpp"
 
-namespace microfft {
+namespace mf {
 template<typename T, T N, T Radix> class Transposition {
     static_assert(std::is_unsigned_v<T>);
     static_assert(is_pow_of_2(N) && N > Radix);
@@ -278,6 +278,6 @@ private:
     T table[2 * N];
     T table_size = 0;
 };
-} // namespace microfft
+} // namespace mf
 
-#endif // HPP_MICROFFT_TRANSPOSITION
+#endif // HPP_MF_TRANSPOSITION
