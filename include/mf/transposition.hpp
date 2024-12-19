@@ -5,7 +5,9 @@
 #include <cstring>
 #include <iostream>
 
-#include "mf/utils.hpp"
+#include "mf/utils/math.hpp"
+#include "mf/utils/traits.hpp"
+#include "mf/utils/types.hpp"
 
 namespace mf {
 template<typename IdxType, IdxType N, IdxType Radix> class Transposition {

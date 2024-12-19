@@ -1,18 +1,18 @@
 #ifndef HPP_MF_TWIDDLE
 #define HPP_MF_TWIDDLE
 
-#include <cmath>
 #include <iostream>
 
-#include "mf/utils.hpp"
+#include "mf/utils/math.hpp"
+#include "mf/utils/types.hpp"
 
 namespace mf {
 
 template<typename DataType, typename IdxType, IdxType Size> constexpr void fill_twiddle_coeff(DataType (&table)[Size]) {
     constexpr float_max_t factor = float_max_t(2) * PI / float_max_t(Size / 2);
     for(uint_fast_t<IdxType> i = 0; i != Size / 2; ++i) {
-        table[2 * i] = std::cos(float_max_t(i) * factor);
-        table[2 * i + 1] = std::sin(float_max_t(i) * factor);
+        table[2 * i] = cos(float_max_t(i) * factor);
+        table[2 * i + 1] = sin(float_max_t(i) * factor);
     }
 }
 
@@ -20,8 +20,8 @@ template<typename DataType, typename IdxType, IdxType Size>
 constexpr void fill_rfft_twiddle_coeff(DataType (&table)[Size]) {
     constexpr float_max_t factor = float_max_t(2) * PI / float_max_t(Size);
     for(uint_fast_t<IdxType> i = 0; i != Size / 2; ++i) {
-        table[2 * i] = std::sin(float_max_t(i) * factor);
-        table[2 * i + 1] = std::cos(float_max_t(i) * factor);
+        table[2 * i] = sin(float_max_t(i) * factor);
+        table[2 * i + 1] = cos(float_max_t(i) * factor);
     }
 }
 

@@ -3,7 +3,8 @@
 
 #include "mf/transposition.hpp"
 #include "mf/twiddle.hpp"
-#include "mf/utils.hpp"
+#include "mf/utils/math.hpp"
+#include "mf/utils/types.hpp"
 
 namespace mf {
 
