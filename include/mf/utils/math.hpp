@@ -1,5 +1,5 @@
-#ifndef HPP_MF_UTILS
-#define HPP_MF_UTILS
+#ifndef HPP_MF_UTILS_MATH
+#define HPP_MF_UTILS_MATH
 
 #include <cmath>
 
@@ -28,4 +28,4 @@ template<typename T> constexpr enable_if_t<is_integral_v<T>, T> log2(T x) {
 }
 } // namespace mf
 
-#endif // HPP_MF_UTILS
+#endif // HPP_MF_UTILS_MATH

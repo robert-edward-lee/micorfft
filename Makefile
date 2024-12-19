@@ -13,7 +13,7 @@ test:
 	@$(CXX) $(CXXFLAGS) $@/$@.cpp $@/print_hist.c -o $@
 	@./$@
 
-WORK_DIRS = . test include include/mf
+WORK_DIRS = . test include include/mf include/mf/utils
 
 format:
 	@clang-format -style=file:./.clang-format -i \

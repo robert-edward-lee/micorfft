@@ -1,5 +1,5 @@
-#ifndef HPP_MF_TRAITS
-#define HPP_MF_TRAITS
+#ifndef HPP_MF_UTILS_TRAITS
+#define HPP_MF_UTILS_TRAITS
 
 #include <type_traits>
 
@@ -20,4 +20,4 @@ template<> struct is_valid_fft_type<float64_t>: std::true_type {};
 template<typename IdxType> constexpr bool is_valid_fft_type_v = is_valid_fft_type<IdxType>::value;
 } // namespace mf
 
-#endif // HPP_MF_TRAITS
+#endif // HPP_MF_UTILS_TRAITS

@@ -1,5 +1,5 @@
-#ifndef HPP_MF_TYPES
-#define HPP_MF_TYPES
+#ifndef HPP_MF_UTILS_TYPES
+#define HPP_MF_UTILS_TYPES
 
 #include <cstdint>
 
@@ -24,4 +24,4 @@ using float_max_t = long double;
 
 } // namespace mf
 
-#endif // HPP_MF_TYPES
+#endif // HPP_MF_UTILS_TYPES
