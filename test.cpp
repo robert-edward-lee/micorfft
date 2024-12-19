@@ -1,10 +1,17 @@
 #include "mf/fft.hpp"
+#include "mf/twiddle.hpp"
 
 using namespace mf;
 
 int main(void) {
-    Transposition<uint16_t, 32, 8> t;
-    Rfft<float, uint16_t, 512> rfft;
+    // Transposition<unsigned short, 32, 8> t;
+    Rfft<float32_t, uint16_t, 32> rfft;
+
+    // float w[512];
+    // fill_twiddle_coeff(w);
+    print_twiddle_coeff(rfft.TwiddleCfft);
+    print_rfft_twiddle_coeff(rfft.TwiddleRfft);
+    print_bit_rev_index_table(rfft.pBitRevTable, rfft.bitRevLength);
 
     return 0;
 }

@@ -4,13 +4,12 @@
 #include <bitset>
 #include <cstring>
 #include <iostream>
-#include <type_traits>
 
 #include "mf/utils.hpp"
 
 namespace mf {
 template<typename T, T N, T Radix> class Transposition {
-    static_assert(std::is_unsigned_v<T>);
+    static_assert(is_valid_idx_type_v<T>);
     static_assert(is_pow_of_2(N) && N > Radix);
 
 public:
@@ -278,6 +277,16 @@ private:
     T table[2 * N];
     T table_size = 0;
 };
+
+template<typename T> constexpr void print_bit_rev_index_table(const T *table, T size) {
+    printf("const uint16_t armBitRevIndexTable[%d] ARM_DSP_TABLE_ATTRIBUTE = {\n", size);
+    printf("/* , size %d*/\n", size);
+    for(T i = 0; i != size / 2; ++i) {
+        printf("   %d, %d,\n", table[2 * i], table[2 * i + 1]);
+    }
+    printf("};\n");
+}
+
 } // namespace mf
 
 #endif // HPP_MF_TRANSPOSITION

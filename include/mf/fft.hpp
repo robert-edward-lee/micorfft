@@ -1,12 +1,15 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
 
-#include <cstdint>
-
 #include "mf/transposition.hpp"
+#include "mf/twiddle.hpp"
+#include "mf/utils.hpp"
 
 namespace mf {
-template<typename FloatType, typename IdxType, IdxType Size> class Cfft {
+template<typename DataType, typename IdxType, IdxType Size> class Cfft {
+    static_assert(is_valid_fft_type_v<DataType>);
+    static_assert(is_valid_idx_type_v<IdxType>);
+
 public:
     static constexpr IdxType CFFT_LEN = Size;
 
@@ -21,25 +24,32 @@ public:
         transpos.fill_table(tmp);
         pBitRevTable = tmp;
         /* 2. создание таблицы поворотных коэффициентов */
+        fill_twiddle_coeff(TwiddleCfft);
     }
 
-private:
     /** points to the Twiddle factor table. */
-    FloatType TwiddleCfft[CFFT_LEN];
+    DataType TwiddleCfft[CFFT_LEN * 2];
     /** points to the bit reversal table. */
     const IdxType *pBitRevTable;
     /** bit reversal table length. */
     IdxType bitRevLength;
+private:
 };
-template<typename FloatType, typename IdxType, IdxType Size> class Rfft: public Cfft<FloatType, IdxType, Size / 2> {
+template<typename DataType, typename IdxType, IdxType Size> class Rfft: public Cfft<DataType, IdxType, Size / 2> {
+    static_assert(is_valid_fft_type_v<DataType>);
+    static_assert(is_valid_idx_type_v<IdxType>);
+
 public:
     static constexpr IdxType RFFT_LEN = Size;
 
-    Rfft() {}
+    Rfft() {
+        /*  */
+        fill_rfft_twiddle_coeff(TwiddleRfft);
+    }
 
-private:
     /** Twiddle factors real stage  */
-    FloatType pTwiddleRfft[RFFT_LEN];
+    DataType TwiddleRfft[RFFT_LEN];
+private:
 };
 
 } // namespace mf
