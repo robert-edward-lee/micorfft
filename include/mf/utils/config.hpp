@@ -131,4 +131,11 @@
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
+//                            Compiler Intrinsics                             //
+////////////////////////////////////////////////////////////////////////////////
+#if MF_HAS_BUILTIN(__builtin_clz) || MF_GCC_VERSION_CHECK(3, 4, 0)
+#define MF_HAS_BUILTIN_CLZ
+#endif
+
 #endif // HPP_MF_UTILS_CONFIG
