@@ -11,27 +11,29 @@
 
 namespace mf {
 template<typename IdxType, IdxType N, IdxType Radix> class Transposition {
-    static_assert(is_valid_idx_type_v<IdxType>);
-    static_assert(is_pow_of_2(N) && N > Radix);
+    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
+    MF_STATIC_ASSERT(is_pow_of_2(N) && N > Radix);
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
 
 public:
-    constexpr Transposition() {
-        constexpr IdxType log2N = log2(N);
-        constexpr IdxType log2Radix = log2(Radix);
-        constexpr IdxType bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
+    static MF_CONST_OR_CONSTEXPR IdxType log2N = log2(N);
+    static MF_CONST_OR_CONSTEXPR IdxType log2Radix = log2(Radix);
+    static MF_CONST_OR_CONSTEXPR IdxType bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
+
+    MF_CONSTEXPR_14 Transposition() {
 
         /* decompose */
         IdxType bits_list[bits_list_size];
-        for(uint_fast_t<IdxType> i = 0; i != log2N / log2Radix; ++i) {
+        for(idx_fast_t i = 0; i != log2N / log2Radix; ++i) {
             bits_list[i] = log2Radix;
         }
 
-        if constexpr(log2N % log2Radix) {
+        MF_IF_CONSTEXPR(log2N % log2Radix) {
             bits_list[bits_list_size - 1] = log2N % log2Radix;
         }
         /* make permutation idx */
         IdxType perm_idx[N];
-        for(uint_fast_t<IdxType> i = 0; i != N; ++i) {
+        for(idx_fast_t i = 0; i != N; ++i) {
             IdxType x = i;
             IdxType result = 0;
             for(IdxType j = 0; j != bits_list_size; ++j) {
@@ -44,26 +46,26 @@ public:
         /* cyclic form permutation */
         container<container<IdxType>> cycles = oneline2cyclic(perm_idx);
         for(auto &c: cycles) {
-            for(uint_fast_t<IdxType> i = 0; i != c.size() - 1; ++i) {
+            for(idx_fast_t i = 0; i != c.size() - 1; ++i) {
                 table[table_size++] = c[i] * 8;
                 table[table_size++] = c[c.size() - 1] * 8;
             }
         }
     }
 
-    constexpr IdxType size() const noexcept {
+    MF_CONSTEXPR IdxType size() const MF_NOEXCEPT {
         return table_size;
     }
-    constexpr void fill_table(IdxType *t) const noexcept {
+    MF_CONSTEXPR_14 void fill_table(IdxType *t) const MF_NOEXCEPT {
         if(!t) {
             return;
         }
         std::memcpy(t, table, table_size * sizeof(IdxType));
     }
 
-    void print() const noexcept {
+    void print() const MF_NOEXCEPT {
         std::cout << "[";
-        for(uint_fast_t<IdxType> i = 0; i != table_size - 2; i += 2) {
+        for(idx_fast_t i = 0; i != table_size - 2; i += 2) {
             std::cout << "[" << table[i] << ", " << table[i + 1] << "], ";
         }
         std::cout << "[" << table[table_size - 2] << ", " << table[table_size - 1] << "]]\n";
@@ -71,14 +73,14 @@ public:
 
     template<IdxType Size> void print_transpos(const IdxType (&bits_list)[Size]) {
         std::cout << log2(N) << " [";
-        for(uint_fast_t<IdxType> it = std::begin(bits_list); it != std::end(bits_list) - 1; ++it) {
+        for(idx_fast_t it = std::begin(bits_list); it != std::end(bits_list) - 1; ++it) {
             std::cout << *it << ", ";
         }
         std::cout << *(std::end(bits_list) - 1) << "]\n";
     }
     template<IdxType Size> void print_rev(const IdxType (&perm_idx)[Size]) {
         std::cout << "[";
-        for(uint_fast_t<IdxType> it = std::begin(perm_idx); it != std::end(perm_idx) - 1; ++it) {
+        for(idx_fast_t it = std::begin(perm_idx); it != std::end(perm_idx) - 1; ++it) {
             std::cout << *it << ", ";
         }
         std::cout << *(std::end(perm_idx) - 1) << "]\n";
@@ -86,12 +88,12 @@ public:
 
 private:
     template<typename ItemType> class container {
-        static constexpr IdxType INIT_SIZE = 4;
-        static constexpr IdxType STEP = 2;
+        static MF_CONST_OR_CONSTEXPR IdxType INIT_SIZE = 4;
+        static MF_CONST_OR_CONSTEXPR IdxType STEP = 2;
 
     public:
-        constexpr container() noexcept: items(nullptr), len(0), cap(0) {}
-        ~container() noexcept {
+        MF_CONSTEXPR container() MF_NOEXCEPT: items(nullptr), len(0), cap(0) {}
+        ~container() MF_NOEXCEPT {
             if(items) {
                 delete[] items;
             }
@@ -100,12 +102,12 @@ private:
         container(const container &) = delete;
         container &operator=(const container &) = delete;
 
-        constexpr container(container &&other) noexcept: items(other.items), len(other.len), cap(other.cap) {
+        MF_CONSTEXPR_14 container(container &&other) MF_NOEXCEPT: items(other.items), len(other.len), cap(other.cap) {
             other.items = nullptr;
             other.len = 0;
             other.cap = 0;
         }
-        constexpr container &operator=(container &&other) noexcept {
+        MF_CONSTEXPR_14 container &operator=(container &&other) MF_NOEXCEPT {
             if(this != &other) {
                 if(items) {
                     delete[] items;
@@ -120,7 +122,7 @@ private:
             return *this;
         }
 
-        constexpr bool append(const ItemType &v) noexcept {
+        MF_CONSTEXPR_14 bool append(const ItemType &v) MF_NOEXCEPT {
             bool rc = true;
 
             if(!cap) {
@@ -136,7 +138,7 @@ private:
             items[len++] = v;
             return rc;
         }
-        constexpr bool append(ItemType &&v) noexcept {
+        MF_CONSTEXPR_14 bool append(ItemType &&v) MF_NOEXCEPT {
             bool rc = true;
 
             if(!cap) {
@@ -153,47 +155,47 @@ private:
             return rc;
         }
 
-        constexpr IdxType size() const noexcept {
+        MF_CONSTEXPR IdxType size() const MF_NOEXCEPT {
             return len;
         }
 
-        constexpr ItemType &operator[](IdxType i) noexcept {
+        MF_CONSTEXPR_14 ItemType &operator[](IdxType i) MF_NOEXCEPT {
             return items[i];
         }
-        constexpr const ItemType &operator[](IdxType i) const noexcept {
+        MF_CONSTEXPR_14 const ItemType &operator[](IdxType i) const MF_NOEXCEPT {
             return items[i];
         }
 
         class iterator {
         public:
-            constexpr iterator(ItemType *p) noexcept: it(p) {}
+            MF_CONSTEXPR iterator(ItemType *p) MF_NOEXCEPT: it(p) {}
 
-            constexpr iterator &operator++() noexcept {
+            MF_CONSTEXPR_14 iterator &operator++() MF_NOEXCEPT {
                 ++it;
                 return *this;
             }
-            constexpr const iterator &operator++() const noexcept {
+            MF_CONSTEXPR_14 const iterator &operator++() const MF_NOEXCEPT {
                 ++it;
                 return *this;
             }
-            constexpr bool operator!=(const iterator &rhs) const noexcept {
+            MF_CONSTEXPR bool operator!=(const iterator &rhs) const MF_NOEXCEPT {
                 return it != rhs.it;
             }
-            constexpr const ItemType &operator*() const noexcept {
+            MF_CONSTEXPR const ItemType &operator*() const MF_NOEXCEPT {
                 return *it;
             }
 
         private:
             ItemType *it;
         };
-        constexpr iterator begin() const noexcept {
+        MF_CONSTEXPR iterator begin() const MF_NOEXCEPT {
             return iterator(items);
         }
-        constexpr iterator end() const noexcept {
+        MF_CONSTEXPR iterator end() const MF_NOEXCEPT {
             return iterator(items + len);
         }
 
-        void print() const noexcept {
+        void print() const MF_NOEXCEPT {
             std::cout << "[";
             if(len) {
                 for(auto i = 0; i != len - 1; ++i) {
@@ -205,10 +207,10 @@ private:
             }
             std::cout << "]\n";
         }
-        void print(void (*item_printer)(const ItemType &)) const noexcept {
+        void print(void (*item_printer)(const ItemType &)) const MF_NOEXCEPT {
             std::cout << "[";
             if(len) {
-                for(uint_fast_t<IdxType> i = 0; i != len - 1; ++i) {
+                for(idx_fast_t i = 0; i != len - 1; ++i) {
                     item_printer(items[i]);
                     std::cout << ", ";
                 }
@@ -220,7 +222,7 @@ private:
         }
 
     private:
-        constexpr bool realloc(IdxType new_cap) noexcept {
+        MF_CONSTEXPR_14 bool realloc(IdxType new_cap) MF_NOEXCEPT {
             if(new_cap <= cap) {
                 return false;
             }
@@ -244,10 +246,10 @@ private:
         IdxType len;
         IdxType cap;
     };
-    constexpr container<container<IdxType>> oneline2cyclic(const IdxType (&oneline)[N]) {
+    MF_CONSTEXPR_14 container<container<IdxType>> oneline2cyclic(const IdxType (&oneline)[N]) {
         container<container<IdxType>> cyclic_form;
         std::bitset<N> checked;
-        for(uint_fast_t<IdxType> i = 0; i != N; ++i) {
+        for(idx_fast_t i = 0; i != N; ++i) {
             if(!checked[i]) {
                 container<IdxType> cycle;
                 if(!cycle.append(i)) {
@@ -280,10 +282,11 @@ private:
     IdxType table_size = 0;
 };
 
-template<typename IdxType> constexpr void print_bit_rev_index_table(const IdxType *table, IdxType size) {
+template<typename IdxType> MF_CONSTEXPR void print_bit_rev_index_table(const IdxType *table, IdxType size) {
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
     printf("const uint16_t armBitRevIndexTable[%d] ARM_DSP_TABLE_ATTRIBUTE = {\n", size);
     printf("/* , size %d*/\n", size);
-    for(uint_fast_t<IdxType> i = 0; i != size / 2; ++i) {
+    for(idx_fast_t i = 0; i != size / 2; ++i) {
         printf("   %d, %d,\n", table[2 * i], table[2 * i + 1]);
     }
     printf("};\n");

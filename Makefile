@@ -2,11 +2,14 @@ CC = gcc
 CXX = g++
 LD = $(CC)
 
+C_STD = -std=c99
+CXX_STD = -std=c++11
+
 INCLUDES = include test
+WARN_FLAGS = -Wall -Wextra -pedantic
 
-CFLAGS = $(addprefix -I,$(INCLUDES))
-CXXFLAGS = $(addprefix -I,$(INCLUDES))
-
+CFLAGS = $(C_STD) $(addprefix -I,$(INCLUDES)) $(WARN_FLAGS)
+CXXFLAGS = $(CXX_STD) $(addprefix -I,$(INCLUDES)) $(WARN_FLAGS)
 
 TEST_SRC = \
 	test/print_hist.c \
