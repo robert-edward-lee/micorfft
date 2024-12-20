@@ -7,24 +7,21 @@
 #include "mf/utils/types.hpp"
 
 namespace mf {
-constexpr float_max_t PI = 3.141592653589793238462643383279502884l;
-constexpr float_max_t SQRT2 = 1.414213562373095048801688724209698079l;
-constexpr float_max_t SQRT1_2 = 1.0l / SQRT2;
+static MF_CONST_OR_CONSTEXPR float_max_t PI = 3.141592653589793238462643383279502884l;
+static MF_CONST_OR_CONSTEXPR float_max_t SQRT2 = 1.414213562373095048801688724209698079l;
+static MF_CONST_OR_CONSTEXPR float_max_t SQRT1_2 = 1.0l / SQRT2;
 
 using std::sin;
 using std::cos;
 
-template<typename T> constexpr enable_if_t<is_integral_v<T>, bool> is_pow_of_2(T x) {
+template<typename T> MF_CONSTEXPR typename enable_if<is_integral<T>::value, bool>::type is_pow_of_2(T x) MF_NOEXCEPT {
     return x && !(x & (x - 1));
 }
-template<typename T> constexpr enable_if_t<is_integral_v<T>, T> log2(T x) {
-    if constexpr(sizeof(T) <= sizeof(unsigned)) {
-        return 8 * sizeof(unsigned) - 1 - __builtin_clz(x);
-    } else if constexpr(sizeof(T) == sizeof(long unsigned)) {
-        return 8 * sizeof(T) - 1 - __builtin_clzl(x);
-    } else if constexpr(sizeof(T) == sizeof(long long unsigned)) {
-        return 8 * sizeof(T) - 1 - __builtin_clzll(x);
-    }
+template<typename T> MF_CONSTEXPR typename enable_if<is_integral<T>::value, T>::type log2(T x) MF_NOEXCEPT {
+    return sizeof(T) <= sizeof(unsigned)           ? 8 * sizeof(unsigned) - 1 - __builtin_clz(x)
+         : sizeof(T) == sizeof(long unsigned)      ? 8 * sizeof(T) - 1 - __builtin_clzl(x)
+         : sizeof(T) == sizeof(long long unsigned) ? 8 * sizeof(T) - 1 - __builtin_clzll(x)
+                                                   : 0;
 }
 } // namespace mf
 

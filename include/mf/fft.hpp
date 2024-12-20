@@ -9,11 +9,11 @@
 namespace mf {
 
 template<typename DataType, typename IdxType, IdxType Size> class Cfft {
-    static_assert(is_valid_fft_type_v<DataType>);
-    static_assert(is_valid_idx_type_v<IdxType>);
+    MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
+    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
 public:
-    static constexpr IdxType CFFT_LEN = Size;
+    static MF_CONST_OR_CONSTEXPR IdxType CFFT_LEN = Size;
 
     Cfft(): pBitRevTable(nullptr), bitRevLength(0) {
         /* 1. создание таблицы для битреверса */
@@ -30,11 +30,13 @@ public:
     }
 
 protected:
-    template<IdxType L, IdxType TwidCoefModifier> constexpr void radix8(DataType *pSrc) {
-        uint_fast_t<IdxType> ia1, ia2, ia3, ia4, ia5, ia6, ia7;
-        uint_fast_t<IdxType> i1, i2, i3, i4, i5, i6, i7, i8;
-        uint_fast_t<IdxType> id;
-        uint_fast_t<IdxType> n1, n2, j;
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
+
+    template<IdxType L, IdxType TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *pSrc) {
+        idx_fast_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
+        idx_fast_t i1, i2, i3, i4, i5, i6, i7, i8;
+        idx_fast_t id;
+        idx_fast_t n1, n2, j;
 
         DataType r1, r2, r3, r4, r5, r6, r7, r8;
         DataType t1, t2;
@@ -43,7 +45,7 @@ protected:
         DataType co2, co3, co4, co5, co6, co7, co8;
         DataType si2, si3, si4, si5, si6, si7, si8;
 
-        uint_fast_t<IdxType> twidCoefModifier = TwidCoefModifier;
+        idx_fast_t twidCoefModifier = TwidCoefModifier;
 
         n2 = L;
 
@@ -264,9 +266,9 @@ protected:
             twidCoefModifier <<= 3;
         } while(n2 > 7);
     }
-    constexpr void radix8by2(DataType *p1) {
+    MF_CONSTEXPR_14 void radix8by2(DataType *p1) {
         /* Define new length */
-        constexpr uint_fast_t<IdxType> L = Size >> 1;
+        MF_CONST_OR_CONSTEXPR idx_fast_t L = Size >> 1;
 
         DataType *pCol1, *pCol2, *pMid1, *pMid2;
         DataType *p2 = p1 + Size;
@@ -282,7 +284,7 @@ protected:
         pMid2 = p2 + L;
 
         /* do two dot Fourier transform */
-        for(uint_fast_t<IdxType> l = L >> 2; l > 0; l--) {
+        for(idx_fast_t l = L >> 2; l > 0; l--) {
             t1[0] = p1[0];
             t1[1] = p1[1];
             t1[2] = p1[2];
@@ -373,7 +375,7 @@ protected:
         /* second col */
         radix8<L, 2>(pCol2);
     }
-    constexpr void radix8by4(DataType *p1) {
+    MF_CONSTEXPR_14 void radix8by4(DataType *p1) {
         DataType *p2 = p1 + CFFT_LEN / 2;
         DataType *p3 = p2 + CFFT_LEN / 2;
         DataType *p4 = p3 + CFFT_LEN / 2;
@@ -393,9 +395,9 @@ protected:
         tw2 = tw3 = tw4 = (const DataType *)&TwiddleCfft;
 
         /* do four dot Fourier transform */
-        uint_fast_t<IdxType> twMod2 = 2;
-        uint_fast_t<IdxType> twMod3 = 4;
-        uint_fast_t<IdxType> twMod4 = 6;
+        idx_fast_t twMod2 = 2;
+        idx_fast_t twMod3 = 4;
+        idx_fast_t twMod4 = 6;
 
         /* TOP */
         DataType p1ap3_0 = p1[0] + p3[0];
@@ -428,7 +430,7 @@ protected:
         tw3 += twMod3;
         tw4 += twMod4;
 
-        for(uint_fast_t<IdxType> l = (CFFT_LEN / 4 - 2) / 2; l != 0; --l) {
+        for(idx_fast_t l = (CFFT_LEN / 4 - 2) / 2; l != 0; --l) {
             /* TOP */
             p1ap3_0 = p1[0] + p3[0];
             p1sp3_0 = p1[0] - p3[0];
@@ -606,20 +608,20 @@ protected:
         /* fourth col */
         radix8<CFFT_LEN / 4, 4>(pCol4);
     }
-    constexpr void bitreversal(DataType *pSrc) {
-        for(uint_fast_t<IdxType> i = 0; i < bitRevLength; i += 2) {
-            uint_fast_t<IdxType> a = pBitRevTable[i] >> 2;
-            uint_fast_t<IdxType> b = pBitRevTable[i + 1] >> 2;
+    MF_CONSTEXPR void bitreversal(DataType *pSrc) {
+        for(idx_fast_t i = 0; i < bitRevLength; i += 2) {
+            idx_fast_t a = pBitRevTable[i] >> 2;
+            idx_fast_t b = pBitRevTable[i + 1] >> 2;
             // real
             std::swap(pSrc[a], pSrc[b]);
             // complex
             std::swap(pSrc[a + 1], pSrc[b + 1]);
         }
     }
-    template<bool Inverse, bool BitReverse> constexpr void cfft(DataType *p1) {
-        if constexpr(Inverse) { /* Conjugate input data */
+    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) {
+        MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
             DataType *pSrc = p1 + 1;
-            for(uint_fast_t<IdxType> l = 0; l != Size; ++l) {
+            for(idx_fast_t l = 0; l != Size; ++l) {
                 *pSrc = -*pSrc;
                 pSrc += 2;
             }
@@ -645,14 +647,14 @@ protected:
                 break;
         }
 
-        if constexpr(BitReverse) { /* BITREVERSE */
+        MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
             bitreversal(p1);
         }
 
-        if constexpr(Inverse) { /* Conjugate and scale output data */
-            constexpr DataType factor = DataType(1) / DataType(Size);
+        MF_IF_CONSTEXPR(Inverse) { /* Conjugate and scale output data */
+            MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
             DataType *pSrc = p1;
-            for(uint_fast_t<IdxType> l = 0; l != Size; ++l) {
+            for(idx_fast_t l = 0; l != Size; ++l) {
                 *pSrc++ *= factor;
                 *pSrc = -(*pSrc) * factor;
                 pSrc++;
@@ -668,27 +670,27 @@ protected:
     IdxType bitRevLength;
 };
 template<typename DataType, typename IdxType, IdxType Size> class Rfft: public Cfft<DataType, IdxType, Size / 2> {
-    static_assert(is_valid_fft_type_v<DataType>);
-    static_assert(is_valid_idx_type_v<IdxType>);
+    MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
+    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
-    using ParentCfft = Cfft<DataType, IdxType, Size / 2>;
+    typedef Cfft<DataType, IdxType, Size / 2> ParentCfft;
 
 public:
-    static constexpr IdxType RFFT_LEN = Size;
+    static MF_CONST_OR_CONSTEXPR IdxType RFFT_LEN = Size;
 
     Rfft() {
         /* 1. создание таблицы поворотных коэффициентов */
         fill_rfft_twiddle_coeff<DataType, IdxType, RFFT_LEN>(TwiddleRfft);
     }
 
-    constexpr void forward(DataType *pIn, DataType *pOut) {
+    MF_CONSTEXPR_14 void forward(DataType *pIn, DataType *pOut) {
         /* Calculation of RFFT of input */
         ParentCfft::template cfft<false, true>(pIn);
         /* Real FFT extraction */
         stage(pIn, pOut);
     }
 
-    constexpr void inverse(DataType *pIn, DataType *pOut) {
+    MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) {
         /*  Real FFT compression */
         merge(pIn, pOut);
         /* Complex radix-4 IFFT process */
@@ -696,7 +698,9 @@ public:
     }
 
 private:
-    constexpr void stage(const DataType *pIn, DataType *pOut) {
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
+
+    MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */
@@ -705,7 +709,7 @@ private:
         DataType t1a, t1b; /* temporary variables */
         DataType p0, p1, p2, p3; /* temporary variables */
 
-        uint_fast_t<IdxType> k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
+        idx_fast_t k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
 
         /* Pack first and last sample of the frequency domain together */
         xBR = pB[0];
@@ -774,7 +778,7 @@ private:
         } while(k);
     }
 
-    constexpr void merge(const DataType *pIn, DataType *pOut) {
+    MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */
@@ -782,7 +786,7 @@ private:
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
         DataType t1a, t1b, r, s, t, u; /* temporary variables */
 
-        uint_fast_t<IdxType> k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
+        idx_fast_t k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
 
         xAR = pA[0];
         xAI = pA[1];

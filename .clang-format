@@ -10,6 +10,9 @@ IndentCaseLabels: true
 AlignEscapedNewlines: DontAlign
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: Never
+QualifierAlignment: Custom
+QualifierOrder:
+    ["static", "inline", "constexpr", "const", "volatile", "type", "restrict"]
 # break lines settings
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
@@ -31,4 +34,5 @@ SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyBlock: false
 # sort
 SortUsingDeclarations: Never
-...
+# macros
+IfMacros: [MF_IF_CONSTEXPR]
