@@ -15,14 +15,14 @@ int main(void) {
     float mag[TEST_N];
 
     for(uint16_t i = 0; i < TEST_N; ++i) {
-        signal_t[i] = 1 + sin(i * 2 * M_PI * TEST_F / TEST_N);
+        signal_t[i] = 2 + sin(i * 2 * M_PI * TEST_F / TEST_N);
         signal_t[i] += sin(i * 2 * M_PI * TEST_F1 / TEST_N);
     }
 
     // print_hist_horiz(signal_t, TEST_N, 60);
 
     arm_rfft_fast_init_f32(&rfft_inst, TEST_N);
-    arm_rfft_fast_f32(&rfft_inst, signal_t, signal_f, 0);
+    arm_rfft_fast_f32(&rfft_inst, signal_t, signal_f, TEST_INVERSE);
 
     for(uint16_t i = 0; i < TEST_N / 2; ++i) {
         mag[i] = sqrt(signal_f[2 * i] * signal_f[2 * i] + signal_f[2 * i + 1] * signal_f[2 * i + 1]);

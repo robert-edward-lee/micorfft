@@ -13,7 +13,9 @@ void print_f32(const float *p, size_t size) {
         } else {
             printf("\n[%02d]  ", i / 2);
         }
-        tmp = fabsf(p[i]) < 1 ? 0 : p[i];
+        tmp =
+            fabsf(p[i]) < 1 ? 0 :
+            p[i];
         printf("%+.1e,", tmp);
     }
     printf("\n};\n");

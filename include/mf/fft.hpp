@@ -692,7 +692,7 @@ public:
         /*  Real FFT compression */
         merge(pIn, pOut);
         /* Complex radix-4 IFFT process */
-        ParentCfft::template cfft<false, true>(pOut);
+        ParentCfft::template cfft<true, true>(pOut);
     }
 
 private:
