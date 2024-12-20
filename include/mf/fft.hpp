@@ -374,41 +374,34 @@ protected:
         radix8<L, 2>(pCol2);
     }
     constexpr void radix8by4(DataType *p1) {
-        /* Define new length */
-        constexpr uint_fast_t<IdxType> L = Size >> 2;
-
-        DataType *pCol1, *pCol2, *pCol3, *pCol4, *pEnd1, *pEnd2, *pEnd3, *pEnd4;
-        const DataType *tw2, *tw3, *tw4;
-        DataType *p2 = p1 + (Size >> 1);
-        DataType *p3 = p2 + (Size >> 1);
-        DataType *p4 = p3 + (Size >> 1);
+        DataType *p2 = p1 + CFFT_LEN / 2;
+        DataType *p3 = p2 + CFFT_LEN / 2;
+        DataType *p4 = p3 + CFFT_LEN / 2;
         DataType t2[4], t3[4], t4[4], twR, twI;
-        DataType p1ap3_0, p1sp3_0, p1ap3_1, p1sp3_1;
         DataType m0, m1, m2, m3;
-        uint_fast_t<IdxType> l, twMod2, twMod3, twMod4;
 
-        pCol1 = p1; /* points to real values by default */
-        pCol2 = p2;
-        pCol3 = p3;
-        pCol4 = p4;
-        pEnd1 = p2 - 1; /* points to imaginary values by default */
-        pEnd2 = p3 - 1;
-        pEnd3 = p4 - 1;
-        pEnd4 = pEnd3 + (Size >> 1);
+        DataType *pCol1 = p1; /* points to real values by default */
+        DataType *pCol2 = p2;
+        DataType *pCol3 = p3;
+        DataType *pCol4 = p4;
+        DataType *pEnd1 = p2 - 1; /* points to imaginary values by default */
+        DataType *pEnd2 = p3 - 1;
+        DataType *pEnd3 = p4 - 1;
+        DataType *pEnd4 = pEnd3 + CFFT_LEN / 2;
 
+        const DataType *tw2, *tw3, *tw4;
         tw2 = tw3 = tw4 = (const DataType *)&TwiddleCfft;
 
         /* do four dot Fourier transform */
-
-        twMod2 = 2;
-        twMod3 = 4;
-        twMod4 = 6;
+        uint_fast_t<IdxType> twMod2 = 2;
+        uint_fast_t<IdxType> twMod3 = 4;
+        uint_fast_t<IdxType> twMod4 = 6;
 
         /* TOP */
-        p1ap3_0 = p1[0] + p3[0];
-        p1sp3_0 = p1[0] - p3[0];
-        p1ap3_1 = p1[1] + p3[1];
-        p1sp3_1 = p1[1] - p3[1];
+        DataType p1ap3_0 = p1[0] + p3[0];
+        DataType p1sp3_0 = p1[0] - p3[0];
+        DataType p1ap3_1 = p1[1] + p3[1];
+        DataType p1sp3_1 = p1[1] - p3[1];
 
         /* col 2 */
         t2[0] = p1sp3_0 + p2[1] - p4[1];
@@ -435,7 +428,7 @@ protected:
         tw3 += twMod3;
         tw4 += twMod4;
 
-        for(l = (L - 2) >> 1; l > 0; l--) {
+        for(uint_fast_t<IdxType> l = (CFFT_LEN / 4 - 2) / 2; l != 0; --l) {
             /* TOP */
             p1ap3_0 = p1[0] + p3[0];
             p1sp3_0 = p1[0] - p3[0];
@@ -602,16 +595,16 @@ protected:
         *p4++ = m2 - m3;
 
         /* first col */
-        radix8<L, 4>(pCol1);
+        radix8<CFFT_LEN / 4, 4>(pCol1);
 
         /* second col */
-        radix8<L, 4>(pCol2);
+        radix8<CFFT_LEN / 4, 4>(pCol2);
 
         /* third col */
-        radix8<L, 4>(pCol3);
+        radix8<CFFT_LEN / 4, 4>(pCol3);
 
         /* fourth col */
-        radix8<L, 4>(pCol4);
+        radix8<CFFT_LEN / 4, 4>(pCol4);
     }
     constexpr void bitreversal(DataType *pSrc) {
         for(uint_fast_t<IdxType> i = 0; i < bitRevLength; i += 2) {
