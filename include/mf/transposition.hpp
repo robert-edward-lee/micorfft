@@ -4,24 +4,25 @@
 #include <bitset>
 #include <cstring>
 #include <iostream>
-#include <type_traits>
 
-#include "mf/utils.hpp"
+#include "mf/utils/math.hpp"
+#include "mf/utils/traits.hpp"
+#include "mf/utils/types.hpp"
 
 namespace mf {
-template<typename T, T N, T Radix> class Transposition {
-    static_assert(std::is_unsigned_v<T>);
+template<typename IdxType, IdxType N, IdxType Radix> class Transposition {
+    static_assert(is_valid_idx_type_v<IdxType>);
     static_assert(is_pow_of_2(N) && N > Radix);
 
 public:
     constexpr Transposition() {
-        constexpr T log2N = log2(N);
-        constexpr T log2Radix = log2(Radix);
-        constexpr T bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
+        constexpr IdxType log2N = log2(N);
+        constexpr IdxType log2Radix = log2(Radix);
+        constexpr IdxType bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
 
         /* decompose */
-        T bits_list[bits_list_size];
-        for(T i = 0; i != log2N / log2Radix; ++i) {
+        IdxType bits_list[bits_list_size];
+        for(uint_fast_t<IdxType> i = 0; i != log2N / log2Radix; ++i) {
             bits_list[i] = log2Radix;
         }
 
@@ -29,62 +30,62 @@ public:
             bits_list[bits_list_size - 1] = log2N % log2Radix;
         }
         /* make permutation idx */
-        T perm_idx[N];
-        for(T i = 0; i != N; ++i) {
-            T x = i;
-            T result = 0;
-            for(T j = 0; j != bits_list_size; ++j) {
-                T mask = T(-1) >> (sizeof(T) * 8 - bits_list[j]);
+        IdxType perm_idx[N];
+        for(uint_fast_t<IdxType> i = 0; i != N; ++i) {
+            IdxType x = i;
+            IdxType result = 0;
+            for(IdxType j = 0; j != bits_list_size; ++j) {
+                IdxType mask = IdxType(-1) >> (sizeof(IdxType) * 8 - bits_list[j]);
                 result = (result << bits_list[j]) | (x & mask);
                 x = x >> bits_list[j];
             }
             perm_idx[i] = result;
         }
         /* cyclic form permutation */
-        container<T, container<T, T>> cycles = oneline2cyclic(perm_idx);
+        container<container<IdxType>> cycles = oneline2cyclic(perm_idx);
         for(auto &c: cycles) {
-            for(T i = 0; i != c.size() - 1; ++i) {
+            for(uint_fast_t<IdxType> i = 0; i != c.size() - 1; ++i) {
                 table[table_size++] = c[i] * 8;
                 table[table_size++] = c[c.size() - 1] * 8;
             }
         }
     }
 
-    constexpr T size() const noexcept {
+    constexpr IdxType size() const noexcept {
         return table_size;
     }
-    constexpr void fill_table(T *t) const noexcept {
+    constexpr void fill_table(IdxType *t) const noexcept {
         if(!t) {
             return;
         }
-        std::memcpy(t, table, table_size * sizeof(T));
+        std::memcpy(t, table, table_size * sizeof(IdxType));
     }
 
     void print() const noexcept {
         std::cout << "[";
-        for(auto i = 0; i != table_size - 2; i += 2) {
+        for(uint_fast_t<IdxType> i = 0; i != table_size - 2; i += 2) {
             std::cout << "[" << table[i] << ", " << table[i + 1] << "], ";
         }
         std::cout << "[" << table[table_size - 2] << ", " << table[table_size - 1] << "]]\n";
     }
 
-    template<T Size> void print_transpos(const T (&bits_list)[Size]) {
+    template<IdxType Size> void print_transpos(const IdxType (&bits_list)[Size]) {
         std::cout << log2(N) << " [";
-        for(auto it = std::begin(bits_list); it != std::end(bits_list) - 1; ++it) {
+        for(uint_fast_t<IdxType> it = std::begin(bits_list); it != std::end(bits_list) - 1; ++it) {
             std::cout << *it << ", ";
         }
         std::cout << *(std::end(bits_list) - 1) << "]\n";
     }
-    template<T Size> void print_rev(const T (&perm_idx)[Size]) {
+    template<IdxType Size> void print_rev(const IdxType (&perm_idx)[Size]) {
         std::cout << "[";
-        for(auto it = std::begin(perm_idx); it != std::end(perm_idx) - 1; ++it) {
+        for(uint_fast_t<IdxType> it = std::begin(perm_idx); it != std::end(perm_idx) - 1; ++it) {
             std::cout << *it << ", ";
         }
         std::cout << *(std::end(perm_idx) - 1) << "]\n";
     }
 
 private:
-    template<typename IdxType, typename ItemType> class container {
+    template<typename ItemType> class container {
         static constexpr IdxType INIT_SIZE = 4;
         static constexpr IdxType STEP = 2;
 
@@ -207,7 +208,7 @@ private:
         void print(void (*item_printer)(const ItemType &)) const noexcept {
             std::cout << "[";
             if(len) {
-                for(auto i = 0; i != len - 1; ++i) {
+                for(uint_fast_t<IdxType> i = 0; i != len - 1; ++i) {
                     item_printer(items[i]);
                     std::cout << ", ";
                 }
@@ -243,18 +244,18 @@ private:
         IdxType len;
         IdxType cap;
     };
-    constexpr container<T, container<T, T>> oneline2cyclic(const T (&oneline)[N]) {
-        container<T, container<T, T>> cyclic_form;
+    constexpr container<container<IdxType>> oneline2cyclic(const IdxType (&oneline)[N]) {
+        container<container<IdxType>> cyclic_form;
         std::bitset<N> checked;
-        for(T i = 0; i != N; ++i) {
+        for(uint_fast_t<IdxType> i = 0; i != N; ++i) {
             if(!checked[i]) {
-                container<T, T> cycle;
+                container<IdxType> cycle;
                 if(!cycle.append(i)) {
                     /* ошибка */
                     std::cout << "if(!cycle.append(i))\n";
                 }
                 checked[i] = true;
-                T j = i;
+                IdxType j = i;
                 while(!checked[oneline[j]]) {
                     j = oneline[j];
                     if(!cycle.append(j)) {
@@ -275,9 +276,19 @@ private:
         return cyclic_form;
     }
 
-    T table[2 * N];
-    T table_size = 0;
+    IdxType table[2 * N];
+    IdxType table_size = 0;
 };
+
+template<typename IdxType> constexpr void print_bit_rev_index_table(const IdxType *table, IdxType size) {
+    printf("const uint16_t armBitRevIndexTable[%d] ARM_DSP_TABLE_ATTRIBUTE = {\n", size);
+    printf("/* , size %d*/\n", size);
+    for(uint_fast_t<IdxType> i = 0; i != size / 2; ++i) {
+        printf("   %d, %d,\n", table[2 * i], table[2 * i + 1]);
+    }
+    printf("};\n");
+}
+
 } // namespace mf
 
 #endif // HPP_MF_TRANSPOSITION

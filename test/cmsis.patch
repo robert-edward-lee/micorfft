@@ -1,0 +1,21 @@
+diff --git a/Include/arm_math_types.h b/Include/arm_math_types.h
+index 74ae8485..5cdccf9a 100755
+--- a/Include/arm_math_types.h
++++ b/Include/arm_math_types.h
+@@ -100,8 +100,15 @@ extern "C"
+ #define __STATIC_FORCEINLINE static inline __attribute__((always_inline)) 
+ #define __STATIC_INLINE static inline
+ #define __WEAK
+-#else
++#elif defined(__arm__)
+ #include "cmsis_compiler.h"
++#else
++#include <stdint.h>
++#define __STATIC_INLINE static inline
++#define __STATIC_FORCEINLINE __STATIC_INLINE __attribute__((always_inline))
++#define __SSAT
++#define __CLZ
++#define __ALIGNED(x) __attribute__((aligned(x)))
+ #endif
+ 
+ 
