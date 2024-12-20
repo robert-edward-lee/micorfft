@@ -685,7 +685,7 @@ public:
 
     Rfft() {
         /* 1. создание таблицы поворотных коэффициентов */
-        fill_rfft_twiddle_coeff<DataType, IdxType, RFFT_LEN * 2>(TwiddleRfft);
+        fill_rfft_twiddle_coeff<DataType, IdxType, RFFT_LEN>(TwiddleRfft);
     }
 
     constexpr void forward(DataType *pIn, DataType *pOut) {
@@ -835,7 +835,7 @@ private:
 
 private:
     /** Twiddle factors real stage  */
-    DataType TwiddleRfft[RFFT_LEN * 2];
+    DataType TwiddleRfft[RFFT_LEN];
 };
 
 } // namespace mf
