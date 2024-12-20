@@ -26,6 +26,7 @@ int main(void) {
     for(auto i = 0; i < N; ++i) {
         mag[i] = std::sqrt(signal_f[2 * i] * signal_f[2 * i] + signal_f[2 * i + 1] * signal_f[2 * i + 1]);
     }
+    printf("\n\n");
     print_hist_horiz(mag, N / 2, 60);
 
     return 0;
