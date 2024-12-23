@@ -11,26 +11,29 @@ namespace mf {
 template<typename DataType, typename IdxType, IdxType Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
+    static MF_CONSTEXPR IdxType BitRevLenCalc(IdxType s) MF_NOEXCEPT {
+        return s == 16   ? 20
+             : s == 32   ? 48
+             : s == 64   ? 56
+             : s == 128  ? 208
+             : s == 256  ? 440
+             : s == 512  ? 448
+             : s == 1024 ? 1800
+             : s == 2048 ? 3808
+             : s == 4096 ? 4032
+                         : 0;
+    }
 
 public:
     static MF_CONST_OR_CONSTEXPR IdxType CFFT_LEN = Size;
+    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = BitRevLenCalc(CFFT_LEN);
 
-    MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT: pBitRevTable(nullptr), bitRevLength(0) {
+    MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
         /* 1. создание таблицы для битреверса */
         Transposition<IdxType, Size, 8> transpos;
-        bitRevLength = transpos.size();
-        IdxType *tmp = new(std::nothrow) IdxType[bitRevLength];
-        if(!tmp) {
-            /* ошибка */
-        }
-        transpos.fill_table(tmp);
-        pBitRevTable = tmp;
+        transpos.fill_table(BitRevTable);
         /* 2. создание таблицы поворотных коэффициентов */
         fill_twiddle_coeff<DataType, IdxType, CFFT_LEN * 2>(TwiddleCfft);
-    }
-
-    ~Cfft() { /* TODO: отказаться от выделения на куче! */
-        delete[] pBitRevTable;
     }
 
     MF_CONSTEXPR_14 void forward(DataType *p) const MF_NOEXCEPT {
@@ -43,6 +46,51 @@ public:
 protected:
     typedef typename uint_fast<IdxType>::type idx_fast_t;
 
+    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
+        MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
+            DataType *pSrc = p1 + 1;
+            for(idx_fast_t l = 0; l != Size; ++l) {
+                *pSrc = -*pSrc;
+                pSrc += 2;
+            }
+        }
+
+        switch(Size) {
+            case 16:
+            case 128:
+            case 1024:
+                radix8by2(p1);
+                break;
+            case 32:
+            case 256:
+            case 2048:
+                radix8by4(p1);
+                break;
+            case 64:
+            case 512:
+            case 4096:
+                radix8<Size, 1>(p1);
+                break;
+            default:
+                break;
+        }
+
+        MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
+            bitreversal(p1);
+        }
+
+        MF_IF_CONSTEXPR(Inverse) { /* Conjugate and scale output data */
+            MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
+            DataType *pSrc = p1;
+            for(idx_fast_t l = 0; l != Size; ++l) {
+                *pSrc++ *= factor;
+                *pSrc = -(*pSrc) * factor;
+                pSrc++;
+            }
+        }
+    }
+
+private:
     template<IdxType L, IdxType TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *pSrc) const MF_NOEXCEPT {
         idx_fast_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
         idx_fast_t i1, i2, i3, i4, i5, i6, i7, i8;
@@ -620,65 +668,20 @@ protected:
         radix8<CFFT_LEN / 4, 4>(pCol4);
     }
     MF_CONSTEXPR void bitreversal(DataType *pSrc) const MF_NOEXCEPT {
-        for(idx_fast_t i = 0; i < bitRevLength; i += 2) {
-            const idx_fast_t a = pBitRevTable[i] >> 2;
-            const idx_fast_t b = pBitRevTable[i + 1] >> 2;
+        for(idx_fast_t i = 0; i < BIT_REV_LEN; i += 2) {
+            const idx_fast_t a = BitRevTable[i] >> 2;
+            const idx_fast_t b = BitRevTable[i + 1] >> 2;
             // real
             std::swap(pSrc[a], pSrc[b]);
             // complex
             std::swap(pSrc[a + 1], pSrc[b + 1]);
         }
     }
-    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
-        MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
-            DataType *pSrc = p1 + 1;
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                *pSrc = -*pSrc;
-                pSrc += 2;
-            }
-        }
-
-        switch(Size) {
-            case 16:
-            case 128:
-            case 1024:
-                radix8by2(p1);
-                break;
-            case 32:
-            case 256:
-            case 2048:
-                radix8by4(p1);
-                break;
-            case 64:
-            case 512:
-            case 4096:
-                radix8<Size, 1>(p1);
-                break;
-            default:
-                break;
-        }
-
-        MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
-            bitreversal(p1);
-        }
-
-        MF_IF_CONSTEXPR(Inverse) { /* Conjugate and scale output data */
-            MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
-            DataType *pSrc = p1;
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                *pSrc++ *= factor;
-                *pSrc = -(*pSrc) * factor;
-                pSrc++;
-            }
-        }
-    }
 
     /** points to the Twiddle factor table. */
     DataType TwiddleCfft[CFFT_LEN * 2];
     /** points to the bit reversal table. */
-    const IdxType *pBitRevTable;
-    /** bit reversal table length. */
-    IdxType bitRevLength;
+    IdxType BitRevTable[BIT_REV_LEN];
 };
 
 template<typename DataType, typename IdxType, IdxType Size> class Rfft: public Cfft<DataType, IdxType, Size / 2> {
