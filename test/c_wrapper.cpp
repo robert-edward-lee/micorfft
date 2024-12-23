@@ -45,6 +45,11 @@ extern "C" void rfft_forward_4096_f32(float32_t *pIn, float32_t *pOut) {
     rfft.forward(pIn, pOut);
 }
 
+extern "C" void rfft_forward_8192_f32(float32_t *pIn, float32_t *pOut) {
+    Rfft<float32_t, uint16_t, 8192> rfft;
+    rfft.forward(pIn, pOut);
+}
+
 extern "C" void rfft_inverse_32_f32(float32_t *pIn, float32_t *pOut) {
     Rfft<float32_t, uint16_t, 32> rfft;
     rfft.inverse(pIn, pOut);
@@ -82,6 +87,11 @@ extern "C" void rfft_inverse_2048_f32(float32_t *pIn, float32_t *pOut) {
 
 extern "C" void rfft_inverse_4096_f32(float32_t *pIn, float32_t *pOut) {
     Rfft<float32_t, uint16_t, 4096> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+extern "C" void rfft_inverse_8192_f32(float32_t *pIn, float32_t *pOut) {
+    Rfft<float32_t, uint16_t, 8192> rfft;
     rfft.inverse(pIn, pOut);
 }
 
@@ -128,6 +138,11 @@ extern "C" void rfft_forward_4096_f64(float64_t *pIn, float64_t *pOut) {
     rfft.forward(pIn, pOut);
 }
 
+extern "C" void rfft_forward_8192_f64(float64_t *pIn, float64_t *pOut) {
+    Rfft<float64_t, uint16_t, 8192> rfft;
+    rfft.forward(pIn, pOut);
+}
+
 extern "C" void rfft_inverse_32_f64(float64_t *pIn, float64_t *pOut) {
     Rfft<float64_t, uint16_t, 32> rfft;
     rfft.inverse(pIn, pOut);
@@ -165,5 +180,10 @@ extern "C" void rfft_inverse_2048_f64(float64_t *pIn, float64_t *pOut) {
 
 extern "C" void rfft_inverse_4096_f64(float64_t *pIn, float64_t *pOut) {
     Rfft<float64_t, uint16_t, 4096> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+extern "C" void rfft_inverse_8192_f64(float64_t *pIn, float64_t *pOut) {
+    Rfft<float64_t, uint16_t, 8192> rfft;
     rfft.inverse(pIn, pOut);
 }

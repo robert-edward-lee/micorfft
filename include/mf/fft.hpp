@@ -22,6 +22,7 @@ template<typename DataType, typename IdxType, IdxType Size> class Cfft {
                                              : x == 1024 ? 1800
                                              : x == 2048 ? 3808
                                              : x == 4096 ? 4032
+                                             : x == 8192 ? 14576
                                                          : 0;
     };
 
@@ -75,7 +76,6 @@ protected:
             default:
                 break;
         }
-        // p1[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
 
         MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
             bitreversal(p1);
