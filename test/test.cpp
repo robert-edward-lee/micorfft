@@ -22,10 +22,11 @@ int main(void) {
         csignal[2 * i] = signal_t[i];
         csignal[2 * i + 1] = 0;
     }
-
-    // print_hist_horiz(signal_t, TEST_N, 60);
+    printf("signal(%d):\n", TEST_N);
+    print_hist_horiz(signal_t, TEST_N, 60);
 
     /* rfft */
+    printf("rfft(%d):\n", TEST_N);
     mf::Rfft<TEST_FLOAT_T, unsigned, TEST_N> rfft;
     (void)sizeof(rfft);
 #if TEST_INVERSE
@@ -37,10 +38,10 @@ int main(void) {
     for(auto i = 0; i < TEST_N / 2; ++i) {
         mag[i] = std::sqrt(signal_f[2 * i] * signal_f[2 * i] + signal_f[2 * i + 1] * signal_f[2 * i + 1]);
     }
-    printf("rfft(%d):\n", TEST_N);
     print_hist_horiz((const TEST_FLOAT_T *)mag, TEST_N / 2, 60);
 
     /* cfft */
+    printf("cfft(%d):\n", TEST_N);
     mf::Cfft<TEST_FLOAT_T, unsigned, TEST_N> cfft;
 #if TEST_INVERSE
     cfft.inverse(csignal);
@@ -50,7 +51,6 @@ int main(void) {
     for(auto i = 0; i < TEST_N; ++i) {
         cmag[i] = sqrt(csignal[2 * i] * csignal[2 * i] + csignal[2 * i + 1] * csignal[2 * i + 1]);
     }
-    printf("cfft(%d):\n", TEST_N);
     print_hist_horiz(cmag, TEST_N / 1, 60);
 
     return 0;
