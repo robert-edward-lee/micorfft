@@ -33,8 +33,8 @@ template<int Size> struct UIntTypeWidth {
 #endif
 };
 
-typedef typename UIntTypeWidth<16>::type uint16_t;
-typedef typename UIntTypeWidth<32>::type uint32_t;
+typedef UIntTypeWidth<16>::type uint16_t;
+typedef UIntTypeWidth<32>::type uint32_t;
 
 template<typename IdxType> struct is_valid_idx_type: false_type {};
 template<> struct is_valid_idx_type<uint16_t>: true_type {};
