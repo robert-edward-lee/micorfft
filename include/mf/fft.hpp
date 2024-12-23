@@ -1,5 +1,6 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
+
 #include "mf/transposition.hpp"
 #include "mf/twiddle.hpp"
 #include "mf/utils/math.hpp"
@@ -74,6 +75,7 @@ protected:
             default:
                 break;
         }
+        // p1[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
 
         MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
             bitreversal(p1);
@@ -703,6 +705,7 @@ public:
         ParentCfft::template cfft<false, true>(pIn);
         /* Real FFT extraction */
         stage(pIn, pOut);
+        pOut[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
 
     MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {

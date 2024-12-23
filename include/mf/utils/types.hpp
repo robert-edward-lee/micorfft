@@ -6,6 +6,10 @@
 #include "mf/utils/config.hpp"
 #include "mf/utils/traits.hpp"
 
+#if MF_CXX_VER > 199711L
+#include <cstdint>
+#endif
+
 namespace mf {
 
 template<int Size> struct UIntTypeWidth {
@@ -42,7 +46,7 @@ template<> struct uint_fast<uint32_t> {
 };
 #else
 template<typename IdxType> struct uint_fast {
-    typedef uint32_t type;
+    typedef unsigned type;
 };
 #endif
 

@@ -1,3 +1,6 @@
+PROJECT_NAME = mf
+SHARED_LIB = c_wrapper.dll
+
 CC = gcc
 CXX = g++
 LD = $(CC)
@@ -5,19 +8,43 @@ LD = $(CC)
 C_STD = -std=c99
 CXX_STD = -std=c++11
 
+DEFINES =
 INCLUDES = include test
+OPT_LEVEL = 3
 WARN_FLAGS = -Wall -Wextra -pedantic
+LIBS =
 
-CFLAGS = $(C_STD) $(addprefix -I,$(INCLUDES)) $(WARN_FLAGS)
-CXXFLAGS = $(CXX_STD) $(addprefix -I,$(INCLUDES)) $(WARN_FLAGS)
+CFLAGS = \
+	$(addprefix -D,$(DEFINES)) \
+	$(addprefix -I,$(INCLUDES)) \
+	$(addprefix -O,$(OPT_LEVEL)) \
+	$(WARN_FLAGS) \
+	$(C_STD)
+CXXFLAGS = \
+	$(addprefix -D,$(DEFINES)) \
+	$(addprefix -I,$(INCLUDES)) \
+	$(addprefix -O,$(OPT_LEVEL)) \
+	$(WARN_FLAGS) \
+	$(CXX_STD)
+LDFLAGS = -shared \
+	$(addprefix -l,$(LIBS))
 
 TEST_SRC = \
 	test/print_hist.c \
 	test/print_table.c
 
-.PHONY: test cmsis_test
+.PHONY: test mf_test cmsis_test
+
 test:
-	@$(CXX) $(CXXFLAGS) $@/$@.cpp $(TEST_SRC) -o $@
+	@echo '  CXX ' c_wrapper
+	@$(CXX) -c $(CXXFLAGS) test/c_wrapper.cpp -o test/c_wrapper.cpp.o
+	@echo '  LD  ' c_wrapper
+	@$(LD) $(LDFLAGS) -o $(SHARED_LIB) test/c_wrapper.cpp.o $(LDLIBS)
+	@echo '  PY  ' pytest
+	@python test/pytest
+
+mf_test:
+	@$(CXX) $(CXXFLAGS) test/$@.cpp $(TEST_SRC) -o $@
 	@./$@
 
 CMSIS_SRC = \

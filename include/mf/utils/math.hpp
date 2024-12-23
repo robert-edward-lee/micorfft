@@ -1,6 +1,8 @@
 #ifndef HPP_MF_UTILS_MATH
 #define HPP_MF_UTILS_MATH
 
+#include <cmath>
+
 #include "mf/utils/traits.hpp"
 #include "mf/utils/types.hpp"
 
