@@ -1,6 +1,5 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
-
 #include "mf/transposition.hpp"
 #include "mf/twiddle.hpp"
 #include "mf/utils/math.hpp"
@@ -11,6 +10,7 @@ namespace mf {
 template<typename DataType, typename IdxType, IdxType Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
+
     static MF_CONSTEXPR IdxType BitRevLenCalc(IdxType s) MF_NOEXCEPT {
         return s == 16   ? 20
              : s == 32   ? 48
@@ -669,8 +669,8 @@ private:
     }
     MF_CONSTEXPR void bitreversal(DataType *pSrc) const MF_NOEXCEPT {
         for(idx_fast_t i = 0; i < BIT_REV_LEN; i += 2) {
-            const idx_fast_t a = BitRevTable[i] >> 2;
-            const idx_fast_t b = BitRevTable[i + 1] >> 2;
+            const idx_fast_t a = BitRevTable[i];
+            const idx_fast_t b = BitRevTable[i + 1];
             // real
             std::swap(pSrc[a], pSrc[b]);
             // complex
