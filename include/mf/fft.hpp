@@ -12,22 +12,22 @@ template<typename DataType, typename IdxType, IdxType Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
-    static MF_CONSTEXPR IdxType BitRevLenCalc(IdxType s) MF_NOEXCEPT {
-        return s == 16   ? 20
-             : s == 32   ? 48
-             : s == 64   ? 56
-             : s == 128  ? 208
-             : s == 256  ? 440
-             : s == 512  ? 448
-             : s == 1024 ? 1800
-             : s == 2048 ? 3808
-             : s == 4096 ? 4032
-                         : 0;
-    }
+    template<typename T, T x> struct bit_rev_len_helper {
+        static MF_CONST_OR_CONSTEXPR T value = x == 16   ? 20
+                                             : x == 32   ? 48
+                                             : x == 64   ? 56
+                                             : x == 128  ? 208
+                                             : x == 256  ? 440
+                                             : x == 512  ? 448
+                                             : x == 1024 ? 1800
+                                             : x == 2048 ? 3808
+                                             : x == 4096 ? 4032
+                                                         : 0;
+    };
 
 public:
     static MF_CONST_OR_CONSTEXPR IdxType CFFT_LEN = Size;
-    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = BitRevLenCalc(CFFT_LEN);
+    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = bit_rev_len_helper<IdxType, CFFT_LEN>::value;
 
     MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
         /* 1. создание таблицы для битреверса */

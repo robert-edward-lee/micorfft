@@ -24,9 +24,13 @@ template<int Size> struct UIntTypeWidth {
                 unsigned int,
                 typename conditional<Size == sizeof(unsigned long) * CHAR_BIT,
                                      unsigned long,
+#if MF_CXX_VER > 199711L
                                      typename conditional<Size == sizeof(unsigned long long) * CHAR_BIT,
                                                           unsigned long long,
                                                           void>::type>::type>::type>::type>::type type;
+#else
+                                     void>::type>::type>::type>::type type;
+#endif
 };
 
 typedef typename UIntTypeWidth<16>::type uint16_t;

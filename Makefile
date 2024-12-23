@@ -6,7 +6,7 @@ CXX = g++
 LD = $(CXX)
 
 C_STD = -std=c99
-CXX_STD = -std=c++11
+CXX_STD = -std=c++98
 
 DEFINES =
 INCLUDES = include test
