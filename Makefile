@@ -3,7 +3,7 @@ SHARED_LIB = c_wrapper.dll
 
 CC = gcc
 CXX = g++
-LD = $(CC)
+LD = $(CXX)
 
 C_STD = -std=c99
 CXX_STD = -std=c++11
