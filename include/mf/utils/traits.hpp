@@ -1,9 +1,17 @@
 #ifndef HPP_MF_UTILS_TRAITS
 #define HPP_MF_UTILS_TRAITS
 
-#include "mf/utils/types.hpp"
+#include "mf/utils/config.hpp"
 
 namespace mf {
+
+template<bool Cond, class T1, class T2> struct conditional {
+    typedef T1 type;
+};
+template<class T1, class T2> struct conditional<false, T1, T2> {
+    typedef T2 type;
+};
+
 template<typename T> struct remove_cv {
     typedef T type;
 };
@@ -54,13 +62,6 @@ template<typename T> struct enable_if<true, T> {
     typedef T type;
 };
 
-template<typename IdxType> struct is_valid_idx_type: false_type {};
-template<> struct is_valid_idx_type<uint16_t>: true_type {};
-template<> struct is_valid_idx_type<uint32_t>: true_type {};
-
-template<typename IdxType> struct is_valid_fft_type: false_type {};
-template<> struct is_valid_fft_type<float32_t>: true_type {};
-template<> struct is_valid_fft_type<float64_t>: true_type {};
 } // namespace mf
 
 #endif // HPP_MF_UTILS_TRAITS

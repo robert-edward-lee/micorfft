@@ -4,8 +4,10 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "config.h"
+
 #if !defined(HIST_TYPE)
-#define HIST_TYPE float
+#define HIST_TYPE TEST_FLOAT_T
 #endif
 
 #ifdef __cplusplus
