@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 from ctypes import *
+from enum import Enum
 
 import numpy as np
 from scipy.fft import rfft
@@ -33,25 +34,48 @@ VALID_RFFT_SIZES = [
 ]
 
 
+class DataTypes(Enum):
+    FLOAT32 = 'f32'
+    FLOAT64 = 'f64'
+
+
 class Test(object):
     dll = CDLL('./c_wrapper.dll')
 
-    def __init__(self, size: int):
+    def __init__(self, size: int, data_type: DataTypes):
         if size not in VALID_RFFT_SIZES:
             print(f'size == {size}, expected one of {VALID_RFFT_SIZES}')
             return
 
         self._size = size
-        if size <= 128:
-            self._epsilon = 1e-6
-        elif size <= 2048:
-            self._epsilon = 1e-5
-        else:
-            self._epsilon = 1e-4
-        self._real_data = (c_float * self._size)()
-        self._complex_data = (c_float * self._size)()
-        self._c_fft = getattr(self.dll, f'rfft_forward_{self._size}_f32')
-        self._c_ifft = getattr(self.dll, f'rfft_inverse_{self._size}_f32')
+        self._data_type = data_type
+
+
+        self._epsilon = 1e-14
+
+        if self._data_type == DataTypes.FLOAT32:
+            if size <= 128:
+                self._epsilon = 1e-6
+            elif size <= 2048:
+                self._epsilon = 1e-5
+            else:
+                self._epsilon = 1e-4
+
+            self._real_data = (c_float * self._size)()
+            self._complex_data = (c_float * self._size)()
+        elif self._data_type == DataTypes.FLOAT64:
+            if size <= 512:
+                self._epsilon = 1e-14
+            else:
+                self._epsilon = 1e-13
+
+            self._real_data = (c_double * self._size)()
+            self._complex_data = (c_double * self._size)()
+
+        self._c_fft = getattr(self.dll, f'rfft_forward_{
+                              self._size}_{self._data_type.value}')
+        self._c_ifft = getattr(self.dll, f'rfft_inverse_{
+                               self._size}_{self._data_type.value}')
 
     def forward_test(self, data_t, data_f):
         # print('data:')
@@ -61,12 +85,17 @@ class Test(object):
             self._real_data[i] = data_t[i]
 
         self._c_fft(self._real_data, self._complex_data)
-        testing_data = np.array(
-            self._complex_data, dtype=np.float32).view(np.complex64)
+        if self._data_type == DataTypes.FLOAT32:
+            testing_data = np.array(
+                self._complex_data, dtype=np.float32).view(np.complex64)
+        elif self._data_type == DataTypes.FLOAT64:
+            testing_data = np.array(
+                self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for rfft<{self._size}>::forward ... ', end='')
+        print(f'test for rfft<{self._data_type.value}, {
+              self._size}>::forward ... ', end='')
         mismatches = 0
         for i in range(testing_data.size):
             xn = testing_data[i]
@@ -88,12 +117,17 @@ class Test(object):
             self._complex_data[2 * i + 1] = data_f[i].imag
 
         self._c_ifft(self._complex_data, self._real_data)
-        testing_data = np.array(
-            self._complex_data, dtype=np.float32).view(np.complex64)
+        if self._data_type == DataTypes.FLOAT32:
+            testing_data = np.array(
+                self._complex_data, dtype=np.float32).view(np.complex64)
+        elif self._data_type == DataTypes.FLOAT64:
+            testing_data = np.array(
+                self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for rfft<{self._size}>::inverse ... ', end='')
+        print(f'test for rfft<{self._data_type.value}, {
+              self._size}>::inverse ... ', end='')
         mismatches = 0
         for i in range(testing_data.size // 2):
             xn = testing_data[i]
@@ -114,8 +148,16 @@ class Test(object):
         self.inverse_test(data_t, data_f)
 
 
+# 32 bit floating
 for size in VALID_RFFT_SIZES:
-    test = Test(size)
+    test = Test(size, DataTypes.FLOAT32)
 
     x = np.random.rand(size).astype(np.float32)
+    test.test(x)
+print('')
+# 64 bit floating
+for size in VALID_RFFT_SIZES:
+    test = Test(size, DataTypes.FLOAT64)
+
+    x = np.random.rand(size).astype(np.float64)
     test.test(x)
