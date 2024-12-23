@@ -54,6 +54,10 @@ template<typename IdxType> struct uint_fast {
 };
 #endif
 
+template<size_t Size> struct idx_type_chooser {
+    typedef typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t, uint32_t>::type type;
+};
+
 template<int Size> struct FloatTypeWidth {
     typedef typename conditional<
         Size == sizeof(float) * CHAR_BIT,

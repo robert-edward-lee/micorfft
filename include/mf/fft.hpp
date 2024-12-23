@@ -8,10 +8,11 @@
 
 namespace mf {
 
-template<typename DataType, typename IdxType, IdxType Size> class Cfft {
+template<typename DataType, size_t Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
-    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
+    typedef typename idx_type_chooser<Size>::type IdxType;
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
     template<typename T, T x> struct bit_rev_len_helper {
         static MF_CONST_OR_CONSTEXPR T value = x == 16   ? 20
                                              : x == 32   ? 48
@@ -46,8 +47,6 @@ public:
     }
 
 protected:
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
-
     template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
         MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
             DataType *pSrc = p1 + 1;
@@ -686,11 +685,12 @@ private:
     IdxType BitRevTable[BIT_REV_LEN];
 };
 
-template<typename DataType, typename IdxType, IdxType Size> class Rfft: public Cfft<DataType, IdxType, Size / 2> {
+template<typename DataType, size_t Size> class Rfft: public Cfft<DataType, Size / 2> {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
-    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
-    typedef Cfft<DataType, IdxType, Size / 2> ParentCfft;
+    typedef typename idx_type_chooser<Size>::type IdxType;
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
+    typedef Cfft<DataType, Size / 2> ParentCfft;
 
 public:
     static MF_CONST_OR_CONSTEXPR IdxType RFFT_LEN = Size;
@@ -724,8 +724,6 @@ public:
     }
 
 private:
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
-
     MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
