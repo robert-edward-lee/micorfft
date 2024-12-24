@@ -11,8 +11,10 @@ static MF_CONST_OR_CONSTEXPR float_max_t PI = 3.14159265358979323846264338327950
 static MF_CONST_OR_CONSTEXPR float_max_t SQRT2 = 1.414213562373095048801688724209698079l;
 static MF_CONST_OR_CONSTEXPR float_max_t SQRT1_2 = 1.0l / SQRT2;
 
-using std::sin;
+using std::abs;
 using std::cos;
+using std::min;
+using std::sin;
 
 /**
  * @tparam T Тип числа
