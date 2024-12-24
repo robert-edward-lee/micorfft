@@ -1,51 +1,38 @@
+################################################################################
+#                              НАСТРОЙКА ПРОЕКТА                               #
+################################################################################
 PROJECT_NAME = mf
 SHARED_LIB = c_wrapper.dll
 
+################################################################################
+#                              НАСТРОЙКА ТУЛЧЕЙНА                              #
+################################################################################
 CC = gcc
-CXX = g++
-LD = $(CXX)
-
-C_STD = -std=c99
-CXX_STD = -std=c++98
+CFLAGS = \
+	$(DEF_FLAGS) \
+	$(DEPEND_FLAGS) \
+	$(EXTRA_FLAGS) \
+	$(INC_FLAGS) \
+	$(OPT_FLAGS) \
+	$(WARN_FLAGS) \
+	$(STDC_FLAGS)
+CXXFLAGS = \
+	$(DEF_FLAGS) \
+	$(DEPEND_FLAGS) \
+	$(EXTRA_FLAGS) \
+	$(INC_FLAGS) \
+	$(OPT_FLAGS) \
+	$(WARN_FLAGS) \
+	$(STDCXX_FLAGS)
 
 DEFINES =
 INCLUDES = include test
 OPT_LEVEL = 3
-WARN_FLAGS = -Wall -Wextra -pedantic
 LIBS =
-
-CFLAGS = \
-	$(addprefix -D,$(DEFINES)) \
-	$(addprefix -I,$(INCLUDES)) \
-	$(addprefix -O,$(OPT_LEVEL)) \
-	$(WARN_FLAGS) \
-	$(C_STD)
-CXXFLAGS = \
-	$(addprefix -D,$(DEFINES)) \
-	$(addprefix -I,$(INCLUDES)) \
-	$(addprefix -O,$(OPT_LEVEL)) \
-	$(WARN_FLAGS) \
-	$(CXX_STD)
-LDFLAGS = -shared \
-	$(addprefix -l,$(LIBS))
 
 TEST_SRC = \
 	test/print_hist.c \
 	test/print_table.c
-
-.PHONY: test mf_test cmsis_test
-
-test:
-	@echo '  CXX ' c_wrapper
-	@$(CXX) -c $(CXXFLAGS) test/c_wrapper.cpp -o test/c_wrapper.cpp.o
-	@echo '  LD  ' c_wrapper
-	@$(LD) $(LDFLAGS) -o $(SHARED_LIB) test/c_wrapper.cpp.o $(LDLIBS)
-	@echo '  PY  ' pytest
-	@python test/pytest
-
-mf_test:
-	@$(CXX) $(CXXFLAGS) test/$@.cpp $(TEST_SRC) -o $@
-	@./$@
 
 CMSIS_SRC = \
 	CMSIS-DSP/Source/TransformFunctions/arm_rfft_fast_init_f32.c \
@@ -57,9 +44,15 @@ CMSIS_SRC = \
 	CMSIS-DSP/Source/TransformFunctions/arm_cfft_radix8_f32.c \
 	CMSIS-DSP/Source/TransformFunctions/arm_rfft_fast_f32.c
 
-cmsis_test:
-	@$(CC) $(CFLAGS) $(addprefix -D,$(CMSIS_DEFS)) -ICMSIS-DSP/Include test/$@.c $(TEST_SRC) $(CMSIS_SRC) -o $@
-	@./$@
+ifeq ($(CC),gcc)
+include platforms/gcc.mk
+else ifeq ($(CC),clang)
+include platforms/clang.mk
+else ifeq ($(CC),cl)
+include platforms/msvc.mk
+else
+$(error Unknown compiler!)
+endif
 
 WORK_DIRS = . test include include/mf include/mf/utils
 
@@ -77,6 +70,8 @@ clean:
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.d,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.dll,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.exe,$(dir))) \
+		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.exp,$(dir))) \
+		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.lib,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.o,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.obj,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.tds,$(dir))) \

@@ -5,6 +5,8 @@
 *.dll*
 *.err
 *.exe
+*.exp
+*.lib
 *.log
 *.o
 *.obj
