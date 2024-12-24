@@ -1,7 +1,7 @@
 #ifndef HPP_MF_UTILS_CONFIG
 #define HPP_MF_UTILS_CONFIG
 
-#define MF_DO_CONCAT(x, y) a##y
+#define MF_DO_CONCAT(x, y) x##y
 #define MF_CONCAT(x, y) MF_DO_CONCAT(x, y)
 
 #define MF_DO_STR(x) #x
@@ -83,6 +83,12 @@
 #define MF_CONSTEXPR
 #define MF_CONSTEXPR_14
 #define MF_CONSTEXPR_20
+#endif
+
+#if MF_CXX_VER >= 201103
+#define MF_DELETED = delete
+#else
+#define MF_DELETED
 #endif
 
 #if defined(__cpp_if_constexpr)

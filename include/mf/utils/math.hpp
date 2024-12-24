@@ -14,12 +14,29 @@ static MF_CONST_OR_CONSTEXPR float_max_t SQRT1_2 = 1.0l / SQRT2;
 using std::sin;
 using std::cos;
 
+/**
+ * @tparam T Тип числа
+ * @tparam x Само число
+ * @brief Признак того, что число является степенью двойки
+ */
 template<typename T, T x> struct is_pow_of_2: false_type {};
+template<uint8_t x> struct is_pow_of_2<uint8_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
 template<uint16_t x> struct is_pow_of_2<uint16_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
 template<uint32_t x> struct is_pow_of_2<uint32_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
 
+/**
+ * @tparam T Тип числа
+ * @tparam x Само число
+ * @brief Вычисление целочисленного логарифма по основанию 2
+ */
 template<typename T, T x> struct log2 {
     static MF_CONST_OR_CONSTEXPR T value = 1 + log2<T, (x >> 1)>::value;
+};
+template<> struct log2<uint8_t, 1> {
+    static MF_CONST_OR_CONSTEXPR uint8_t value = 0;
+};
+template<> struct log2<uint8_t, 0> {
+    static MF_CONST_OR_CONSTEXPR uint8_t value = -1;
 };
 template<> struct log2<uint16_t, 1> {
     static MF_CONST_OR_CONSTEXPR uint16_t value = 0;

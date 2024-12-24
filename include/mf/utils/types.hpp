@@ -33,20 +33,25 @@ template<int Size> struct UIntTypeWidth {
 #endif
 };
 
+typedef UIntTypeWidth<8>::type uint8_t;
 typedef UIntTypeWidth<16>::type uint16_t;
 typedef UIntTypeWidth<32>::type uint32_t;
 
 template<typename IdxType> struct is_valid_idx_type: false_type {};
+template<> struct is_valid_idx_type<uint8_t>: true_type {};
 template<> struct is_valid_idx_type<uint16_t>: true_type {};
 template<> struct is_valid_idx_type<uint32_t>: true_type {};
 
 #if MF_CXX_VER > 199711L
 template<typename IdxType> struct uint_fast {};
+template<> struct uint_fast<uint8_t> {
+    typedef std::uint_fast8_t type;
+};
 template<> struct uint_fast<uint16_t> {
-    using type = std::uint_fast16_t;
+    typedef std::uint_fast16_t type;
 };
 template<> struct uint_fast<uint32_t> {
-    using type = std::uint_fast32_t;
+    typedef std::uint_fast32_t type;
 };
 #else
 template<typename IdxType> struct uint_fast {
@@ -55,7 +60,11 @@ template<typename IdxType> struct uint_fast {
 #endif
 
 template<size_t Size> struct idx_type_chooser {
-    typedef typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t, uint32_t>::type type;
+    typedef
+        typename conditional<Size <= (size_t(1) << size_t(6)),
+                             uint8_t,
+                             typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t, uint32_t>::type>::type
+            type;
 };
 
 template<int Size> struct FloatTypeWidth {

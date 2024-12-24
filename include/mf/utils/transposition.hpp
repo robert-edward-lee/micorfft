@@ -10,6 +10,12 @@
 #include "mf/utils/types.hpp"
 
 namespace mf {
+/**
+ * @tparam IdxType Тип индекса
+ * @tparam N Размер БПФ
+ * @tparam Radix Основание БПФ
+ * @brief Класс для генерации таблицы индексов перестановок
+ */
 template<typename IdxType, IdxType N, IdxType Radix> class Transposition {
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
     MF_STATIC_ASSERT((is_pow_of_2<IdxType, N>::value) && N > Radix);

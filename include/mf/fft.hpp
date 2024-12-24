@@ -1,52 +1,62 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
 
-#include "mf/transposition.hpp"
-#include "mf/twiddle.hpp"
 #include "mf/utils/math.hpp"
+#include "mf/utils/transposition.hpp"
+#include "mf/utils/twiddle.hpp"
 #include "mf/utils/types.hpp"
 
 namespace mf {
-
+/**
+ * @tparam DataType Тип данных действительного числа для вычисления комплексного БПФ
+ * @tparam Size Размер комплексного вектора
+ * @brief Класс для вычисления комплексного БПФ. Не кидает исключений и не использует кучу
+ */
 template<typename DataType, size_t Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
 
-    typedef typename idx_type_chooser<Size>::type IdxType;
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
-    template<typename T, T x> struct bit_rev_len_helper {
-        static MF_CONST_OR_CONSTEXPR T value = x == 16   ? 20
-                                             : x == 32   ? 48
-                                             : x == 64   ? 56
-                                             : x == 128  ? 208
-                                             : x == 256  ? 440
-                                             : x == 512  ? 448
-                                             : x == 1024 ? 1800
-                                             : x == 2048 ? 3808
-                                             : x == 4096 ? 4032
-                                             : x == 8192 ? 14576
-                                                         : 0;
-    };
-
 public:
-    static MF_CONST_OR_CONSTEXPR IdxType CFFT_LEN = Size;
-    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = bit_rev_len_helper<IdxType, CFFT_LEN>::value;
-
     MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
-        /* 1. создание таблицы для битреверса */
-        Transposition<IdxType, Size, 8> transpos;
+        /* создание таблицы для перестановок по основанию 8 */
+        Transposition<idx_t, Size, 8> transpos;
         transpos.fill_table(BitRevTable);
-        /* 2. создание таблицы поворотных коэффициентов */
-        fill_twiddle_coeff<DataType, IdxType, CFFT_LEN * 2>(TwiddleCfft);
+        /* создание таблицы поворотных коэффициентов */
+        fill_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(TwiddleCfft);
     }
-
+    /**
+     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @brief Прямое комплексное БПФ на месте
+     */
     MF_CONSTEXPR_14 void forward(DataType *p) const MF_NOEXCEPT {
         cfft<false, true>(p);
     }
+    /**
+     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @brief Обратное комплексное БПФ на месте
+     */
     MF_CONSTEXPR_14 void inverse(DataType *p) const MF_NOEXCEPT {
         cfft<true, true>(p);
     }
 
 protected:
+    /**
+     * @brief Тип для хранения индексов перестановок в таблице
+     */
+    typedef typename idx_type_chooser<Size>::type idx_t;
+    /**
+     * @brief Тип для работы с индексом на стеке, максимально быстрый тип, шириной не менее @ref idx_t
+     */
+    typedef typename uint_fast<idx_t>::type idx_fast_t;
+    /**
+     * @brief Размер комплексного БПФ
+     */
+    static MF_CONST_OR_CONSTEXPR idx_t CFFT_LEN = Size;
+    /**
+     * @tparam Inverse Флаг обратного БПФ
+     * @tparam BitReverse Флаг перестановки индексов
+     * @param[in,out] p1 Указатель на данные
+     * @brief БПФ на месте
+     */
     template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
         MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
             DataType *pSrc = p1 + 1;
@@ -92,7 +102,44 @@ protected:
     }
 
 private:
-    template<IdxType L, IdxType TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *pSrc) const MF_NOEXCEPT {
+    /* конструкторы копирования и перемещения не подразумевается */
+    Cfft(const Cfft &) MF_DELETED;
+    void operator=(const Cfft &) MF_DELETED;
+#if MF_CXX_VER >= 201103
+    Cfft(Cfft &&) MF_DELETED;
+    void operator=(Cfft &&) MF_DELETED;
+#endif
+    /**
+     * @tparam x Размер БПФ
+     * @brief Пока такой вот костыль для статического выделения памяти под таблицу индексов перестановок
+     */
+    template<idx_t x> struct bit_rev_len_helper {
+        /**
+         * @brief Размер таблицы индексов перестановок в зависимости от размера БПФ
+         */
+        static MF_CONST_OR_CONSTEXPR idx_t value = x == 16   ? 20
+                                                 : x == 32   ? 48
+                                                 : x == 64   ? 56
+                                                 : x == 128  ? 208
+                                                 : x == 256  ? 440
+                                                 : x == 512  ? 448
+                                                 : x == 1024 ? 1800
+                                                 : x == 2048 ? 3808
+                                                 : x == 4096 ? 4032
+                                                 : x == 8192 ? 14576
+                                                             : 0;
+    };
+    /**
+     * @brief Размер таблицы индексов перестановок
+     */
+    static MF_CONST_OR_CONSTEXPR idx_t BIT_REV_LEN = bit_rev_len_helper<CFFT_LEN>::value;
+    /**
+     * @tparam L Размер БПФ степенью 8
+     * @tparam TwidCoefModifier Модификатор поворотных коэффициент
+     * @param[in,out] pSrc Указатель на данные
+     * @brief БПФ по основанию 8 на месте
+     */
+    template<idx_t L, idx_t TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *pSrc) const MF_NOEXCEPT {
         idx_fast_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
         idx_fast_t i1, i2, i3, i4, i5, i6, i7, i8;
         idx_fast_t id;
@@ -326,6 +373,10 @@ private:
             twidCoefModifier <<= 3;
         } while(n2 > 7);
     }
+    /**
+     * @param[in,out] p1 Указатель на данные
+     * @brief БПФ 8х2 на месте
+     */
     MF_CONSTEXPR_14 void radix8by2(DataType *p1) const MF_NOEXCEPT {
         /* Define new length */
         MF_CONST_OR_CONSTEXPR idx_fast_t L = Size >> 1;
@@ -435,6 +486,10 @@ private:
         /* second col */
         radix8<L, 2>(pCol2);
     }
+    /**
+     * @param[in,out] p1 Указатель на данные
+     * @brief БПФ 8х4 на месте
+     */
     MF_CONSTEXPR_14 void radix8by4(DataType *p1) const MF_NOEXCEPT {
         DataType *p2 = p1 + CFFT_LEN / 2;
         DataType *p3 = p2 + CFFT_LEN / 2;
@@ -668,38 +723,68 @@ private:
         /* fourth col */
         radix8<CFFT_LEN / 4, 4>(pCol4);
     }
+    /**
+     * @param[in,out] pSrc Указатель на данные
+     * @brief Перестановка элементов БПФ
+     */
     MF_CONSTEXPR void bitreversal(DataType *pSrc) const MF_NOEXCEPT {
-        for(idx_fast_t i = 0; i < BIT_REV_LEN; i += 2) {
-            const idx_fast_t a = BitRevTable[i];
-            const idx_fast_t b = BitRevTable[i + 1];
+        for(idx_fast_t i = 0; i < BIT_REV_LEN / 2; ++i) {
+            const idx_fast_t a = BitRevTable[2 * i + 0];
+            const idx_fast_t b = BitRevTable[2 * i + 1];
             // real
             std::swap(pSrc[a], pSrc[b]);
-            // complex
+            // imag
             std::swap(pSrc[a + 1], pSrc[b + 1]);
         }
     }
 
-    /** points to the Twiddle factor table. */
+    /**
+     * @brief Таблица поворотных коэффициентов
+     */
     DataType TwiddleCfft[CFFT_LEN * 2];
-    /** points to the bit reversal table. */
-    IdxType BitRevTable[BIT_REV_LEN];
+    /**
+     * @brief Таблица индексов перестановок
+     */
+    idx_t BitRevTable[BIT_REV_LEN];
 };
-
+/**
+ * @tparam DataType Тип данных действительного числа для вычисления БПФ
+ * @tparam Size Размер действительного вектора
+ * @brief Класс для вычисления действительного БПФ и комплексного вдвое меньшего размера. Не кидает исключений и не
+ * использует кучу
+ */
 template<typename DataType, size_t Size> class Rfft: public Cfft<DataType, Size / 2> {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
 
-    typedef typename idx_type_chooser<Size>::type IdxType;
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
+    /**
+     * @brief Тип родительского класса комплексного БПФ
+     */
     typedef Cfft<DataType, Size / 2> ParentCfft;
+    /**
+     * @brief Тип для хранения индексов перестановок в таблице
+     */
+    typedef typename ParentCfft::idx_t idx_t;
+    /**
+     * @brief Тип для работы с индексом на стеке, максимально быстрый тип, шириной не менее @ref idx_t
+     */
+    typedef typename ParentCfft::idx_fast_t idx_fast_t;
+    /**
+     * @brief Размер действительного БПФ
+     */
+    static MF_CONST_OR_CONSTEXPR idx_t RFFT_LEN = Size;
 
 public:
-    static MF_CONST_OR_CONSTEXPR IdxType RFFT_LEN = Size;
-
     MF_CONSTEXPR_14 Rfft() MF_NOEXCEPT {
-        /* 1. создание таблицы поворотных коэффициентов */
-        fill_rfft_twiddle_coeff<DataType, IdxType, RFFT_LEN>(TwiddleRfft);
+        /* создание таблицы поворотных коэффициентов для действительного БПФ */
+        fill_rfft_twiddle_coeff<DataType, idx_t, RFFT_LEN>(TwiddleRfft);
     }
-
+    /**
+     * @param[in] pIn Входные данные во временном представлении
+     * @param[out] pOut Выходные данные в частотном представлении в положительной области частот
+     * @brief Прямое действительное БПФ
+     *
+     * @note входные данные модифицируются!
+     */
     MF_CONSTEXPR_14 void forward(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         /* Calculation of RFFT of input */
         ParentCfft::template cfft<false, true>(pIn);
@@ -707,23 +792,47 @@ public:
         stage(pIn, pOut);
         pOut[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
-
+    /**
+     * @param[in] pIn Выходные данные во временном представлении
+     * @param[out] pOut Входные данные в частотном представлении в положительной области частот
+     * @brief Обратное действительное БПФ
+     *
+     * @note входные данные модифицируются!
+     */
     MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         /*  Real FFT compression */
         merge(pIn, pOut);
         /* Complex radix-4 IFFT process */
         ParentCfft::template cfft<true, true>(pOut);
     }
-
+    /**
+     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @brief Прямое комплексное БПФ на месте размеров вдвое меньше rfft
+     */
     MF_CONSTEXPR_14 void cfft_forward(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<false, true>(p);
     }
-
+    /**
+     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @brief Обратное комплексное БПФ на месте размеров вдвое меньше rfft
+     */
     MF_CONSTEXPR_14 void cfft_inverse(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<true, true>(p);
     }
 
 private:
+    /* конструкторы копирования и перемещения не подразумевается */
+    Rfft(const Rfft &) MF_DELETED;
+    void operator=(const Rfft &) MF_DELETED;
+#if MF_CXX_VER >= 201103
+    Rfft(Rfft &&) MF_DELETED;
+    void operator=(Rfft &&) MF_DELETED;
+#endif
+    /**
+     * @param[in] pIn
+     * @param[out] pOut
+     * @brief
+     */
     MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
@@ -801,7 +910,11 @@ private:
             k--;
         } while(k);
     }
-
+    /**
+     * @param[in] pIn
+     * @param[out] pOut
+     * @brief
+     */
     MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
@@ -854,8 +967,9 @@ private:
         }
     }
 
-private:
-    /** Twiddle factors real stage  */
+    /**
+     * @brief Поворотные коэффициенты для действительного БПФ
+     */
     DataType TwiddleRfft[RFFT_LEN];
 };
 
