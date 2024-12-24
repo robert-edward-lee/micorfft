@@ -861,8 +861,8 @@ private:
 
         // real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI);
         // imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI);
-        *pOut++ = DataType(0.5l) * (t1a + t1b);
-        *pOut++ = DataType(0.5l) * (t1a - t1b);
+        *pOut++ = (DataType(1) / DataType(2)) * (t1a + t1b);
+        *pOut++ = (DataType(1) / DataType(2)) * (t1a - t1b);
 
         // XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) ));
         pB = pIn + 2 * k;
@@ -902,8 +902,8 @@ private:
             p2 = twR * t1b;
             p3 = twI * t1b;
 
-            *pOut++ = DataType(0.5l) * (xAR + xBR + p0 + p3); // xAR
-            *pOut++ = DataType(0.5l) * (xAI - xBI + p1 - p2); // xAI
+            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR + p0 + p3); // xAR
+            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + p1 - p2); // xAI
 
             pA += 2;
             pB -= 2;
@@ -930,8 +930,8 @@ private:
 
         pCoeff += 2;
 
-        *pOut++ = 0.5f * (xAR + xAI);
-        *pOut++ = 0.5f * (xAR - xAI);
+        *pOut++ = (DataType(1) / DataType(2)) * (xAR + xAI);
+        *pOut++ = (DataType(1) / DataType(2)) * (xAR - xAI);
 
         pB = pIn + 2 * k;
         pA += 2;
@@ -958,8 +958,8 @@ private:
 
             // real(tw * (xA - xB)) = twR * (xAR - xBR) - twI * (xAI - xBI);
             // imag(tw * (xA - xB)) = twI * (xAR - xBR) + twR * (xAI - xBI);
-            *pOut++ = 0.5f * (xAR + xBR - r - s); // xAR
-            *pOut++ = 0.5f * (xAI - xBI + t - u); // xAI
+            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR - r - s); // xAR
+            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + t - u); // xAI
 
             pA += 2;
             pB -= 2;
