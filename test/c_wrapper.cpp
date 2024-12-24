@@ -3,6 +3,99 @@
 using namespace mf;
 
 ////////////////////////////////////////////////////////////////////////////////
+//                                FLOAT32 CFFT                                //
+////////////////////////////////////////////////////////////////////////////////
+extern "C" void cfft_forward_16_f32(float32_t *p) {
+    Cfft<float32_t, 16> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_32_f32(float32_t *p) {
+    Cfft<float32_t, 32> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_64_f32(float32_t *p) {
+    Cfft<float32_t, 64> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_128_f32(float32_t *p) {
+    Cfft<float32_t, 128> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_256_f32(float32_t *p) {
+    Cfft<float32_t, 256> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_512_f32(float32_t *p) {
+    Cfft<float32_t, 512> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_1024_f32(float32_t *p) {
+    Cfft<float32_t, 1024> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_2048_f32(float32_t *p) {
+    Cfft<float32_t, 2048> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_4096_f32(float32_t *p) {
+    Cfft<float32_t, 4096> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_inverse_16_f32(float32_t *p) {
+    Cfft<float32_t, 16> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_32_f32(float32_t *p) {
+    Cfft<float32_t, 32> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_64_f32(float32_t *p) {
+    Cfft<float32_t, 64> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_128_f32(float32_t *p) {
+    Cfft<float32_t, 128> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_256_f32(float32_t *p) {
+    Cfft<float32_t, 256> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_512_f32(float32_t *p) {
+    Cfft<float32_t, 512> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_1024_f32(float32_t *p) {
+    Cfft<float32_t, 1024> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_2048_f32(float32_t *p) {
+    Cfft<float32_t, 2048> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_4096_f32(float32_t *p) {
+    Cfft<float32_t, 4096> cfft;
+    cfft.inverse(p);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //                                FLOAT32 RFFT                                //
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" void rfft_forward_32_f32(float32_t *pIn, float32_t *pOut) {
@@ -93,6 +186,99 @@ extern "C" void rfft_inverse_4096_f32(float32_t *pIn, float32_t *pOut) {
 extern "C" void rfft_inverse_8192_f32(float32_t *pIn, float32_t *pOut) {
     Rfft<float32_t, 8192> rfft;
     rfft.inverse(pIn, pOut);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                FLOAT32 CFFT                                //
+////////////////////////////////////////////////////////////////////////////////
+extern "C" void cfft_forward_16_f64(float64_t *p) {
+    Cfft<float64_t, 16> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_32_f64(float64_t *p) {
+    Cfft<float64_t, 32> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_64_f64(float64_t *p) {
+    Cfft<float64_t, 64> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_128_f64(float64_t *p) {
+    Cfft<float64_t, 128> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_256_f64(float64_t *p) {
+    Cfft<float64_t, 256> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_512_f64(float64_t *p) {
+    Cfft<float64_t, 512> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_1024_f64(float64_t *p) {
+    Cfft<float64_t, 1024> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_2048_f64(float64_t *p) {
+    Cfft<float64_t, 2048> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_forward_4096_f64(float64_t *p) {
+    Cfft<float64_t, 4096> cfft;
+    cfft.forward(p);
+}
+
+extern "C" void cfft_inverse_16_f64(float64_t *p) {
+    Cfft<float64_t, 16> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_32_f64(float64_t *p) {
+    Cfft<float64_t, 32> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_64_f64(float64_t *p) {
+    Cfft<float64_t, 64> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_128_f64(float64_t *p) {
+    Cfft<float64_t, 128> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_256_f64(float64_t *p) {
+    Cfft<float64_t, 256> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_512_f64(float64_t *p) {
+    Cfft<float64_t, 512> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_1024_f64(float64_t *p) {
+    Cfft<float64_t, 1024> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_2048_f64(float64_t *p) {
+    Cfft<float64_t, 2048> cfft;
+    cfft.inverse(p);
+}
+
+extern "C" void cfft_inverse_4096_f64(float64_t *p) {
+    Cfft<float64_t, 4096> cfft;
+    cfft.inverse(p);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
