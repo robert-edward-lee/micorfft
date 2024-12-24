@@ -17,7 +17,7 @@ extern void print_f32(const float *p, size_t size);
 int main(void) {
     int i;
 
-    TEST_FLOAT_T signal_t[TEST_N];
+    TEST_FLOAT_T signal_t[TEST_N] = TEST_FLOAT_32;
     TEST_FLOAT_T signal_f[2 * TEST_N];
     TEST_FLOAT_T mag[TEST_N];
 
@@ -25,33 +25,41 @@ int main(void) {
     TEST_FLOAT_T cmag[TEST_N];
 
     for(i = 0; i < TEST_N; ++i) {
-        signal_t[i] = 2 + sin(i * 2 * M_PI * TEST_F / TEST_N);
-        signal_t[i] += sin(i * 2 * M_PI * TEST_F1 / TEST_N);
+        // signal_t[i] = 2 + sin(i * 2 * M_PI * TEST_F / TEST_N);
+        // signal_t[i] += sin(i * 2 * M_PI * TEST_F1 / TEST_N);
 
         csignal[2 * i] = signal_t[i];
         csignal[2 * i + 1] = 0;
     }
+    // printf("signal(%d):\n", TEST_N);
     // print_hist_horiz(signal_t, TEST_N, 60);
 
     /* rfft */
+    printf("cmsis rfft(%d):\n", TEST_N);
     arm_rfft_fast_init_f32(&rfft_inst, TEST_N);
     arm_rfft_fast_f32(&rfft_inst, signal_t, signal_f, TEST_INVERSE);
-
+#if TEST_INVERSE
+    // for(i = 0; i < TEST_N; ++i) {
+    //     printf("%g\n", signal_f[i]);
+    // }
+    print_hist_horiz(signal_f, TEST_N, 60);
+#else
     for(i = 0; i < TEST_N / 2; ++i) {
+        printf("%g, %g\n", signal_f[2 * i], signal_f[2 * i + 1]);
         mag[i] = sqrt(signal_f[2 * i] * signal_f[2 * i] + signal_f[2 * i + 1] * signal_f[2 * i + 1]);
     }
-    printf("rfft(%d):\n", TEST_N);
-    print_hist_horiz(mag, TEST_N / 2, 60);
+    // print_hist_horiz(mag, TEST_N / 2, 60);
+#endif
 
     /* cfft */
-    ARM_CFFT_FN(TEST_N)(&cfft_inst);
-    arm_cfft_f32(&cfft_inst, csignal, TEST_INVERSE, 1);
+    // ARM_CFFT_FN(TEST_N)(&cfft_inst);
+    // arm_cfft_f32(&cfft_inst, csignal, TEST_INVERSE, 1);
 
-    for(i = 0; i < TEST_N; ++i) {
-        cmag[i] = sqrt(csignal[2 * i] * csignal[2 * i] + csignal[2 * i + 1] * csignal[2 * i + 1]);
-    }
-    printf("cfft(%d):\n", TEST_N);
-    print_hist_horiz(cmag, TEST_N, 60);
+    // for(i = 0; i < TEST_N; ++i) {
+    //     cmag[i] = sqrt(csignal[2 * i] * csignal[2 * i] + csignal[2 * i + 1] * csignal[2 * i + 1]);
+    // }
+    // printf("cfft(%d):\n", TEST_N);
+    // print_hist_horiz(cmag, TEST_N, 60);
 
     return 0;
 }

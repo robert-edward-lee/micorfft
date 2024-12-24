@@ -1,5 +1,6 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
+
 #include "mf/transposition.hpp"
 #include "mf/twiddle.hpp"
 #include "mf/utils/math.hpp"
@@ -7,26 +8,28 @@
 
 namespace mf {
 
-template<typename DataType, typename IdxType, IdxType Size> class Cfft {
+template<typename DataType, size_t Size> class Cfft {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
-    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
-    static MF_CONSTEXPR IdxType BitRevLenCalc(IdxType s) MF_NOEXCEPT {
-        return s == 16   ? 20
-             : s == 32   ? 48
-             : s == 64   ? 56
-             : s == 128  ? 208
-             : s == 256  ? 440
-             : s == 512  ? 448
-             : s == 1024 ? 1800
-             : s == 2048 ? 3808
-             : s == 4096 ? 4032
-                         : 0;
-    }
+    typedef typename idx_type_chooser<Size>::type IdxType;
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
+    template<typename T, T x> struct bit_rev_len_helper {
+        static MF_CONST_OR_CONSTEXPR T value = x == 16   ? 20
+                                             : x == 32   ? 48
+                                             : x == 64   ? 56
+                                             : x == 128  ? 208
+                                             : x == 256  ? 440
+                                             : x == 512  ? 448
+                                             : x == 1024 ? 1800
+                                             : x == 2048 ? 3808
+                                             : x == 4096 ? 4032
+                                             : x == 8192 ? 14576
+                                                         : 0;
+    };
 
 public:
     static MF_CONST_OR_CONSTEXPR IdxType CFFT_LEN = Size;
-    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = BitRevLenCalc(CFFT_LEN);
+    static MF_CONST_OR_CONSTEXPR IdxType BIT_REV_LEN = bit_rev_len_helper<IdxType, CFFT_LEN>::value;
 
     MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
         /* 1. создание таблицы для битреверса */
@@ -44,8 +47,6 @@ public:
     }
 
 protected:
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
-
     template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
         MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
             DataType *pSrc = p1 + 1;
@@ -153,10 +154,10 @@ private:
                 pSrc[2 * i7] = t1 - s3;
                 pSrc[2 * i3 + 1] = t2 - r3;
                 pSrc[2 * i7 + 1] = t2 + r3;
-                r1 = (r6 - r8) * SQRT1_2;
-                r6 = (r6 + r8) * SQRT1_2;
-                r2 = (s6 - s8) * SQRT1_2;
-                s6 = (s6 + s8) * SQRT1_2;
+                r1 = (r6 - r8) * DataType(SQRT1_2);
+                r6 = (r6 + r8) * DataType(SQRT1_2);
+                r2 = (s6 - s8) * DataType(SQRT1_2);
+                s6 = (s6 + s8) * DataType(SQRT1_2);
                 t1 = r5 - r1;
                 r5 = r5 + r1;
                 r8 = r7 - r6;
@@ -271,10 +272,10 @@ private:
                     p4 = si7 * t1;
                     pSrc[2 * i7] = p1 + p2;
                     pSrc[2 * i7 + 1] = p3 - p4;
-                    r1 = (r6 - r8) * SQRT1_2;
-                    r6 = (r6 + r8) * SQRT1_2;
-                    s1 = (s6 - s8) * SQRT1_2;
-                    s6 = (s6 + s8) * SQRT1_2;
+                    r1 = (r6 - r8) * DataType(SQRT1_2);
+                    r6 = (r6 + r8) * DataType(SQRT1_2);
+                    s1 = (s6 - s8) * DataType(SQRT1_2);
+                    s6 = (s6 + s8) * DataType(SQRT1_2);
                     t1 = r5 - r1;
                     r5 = r5 + r1;
                     r8 = r7 - r6;
@@ -684,11 +685,12 @@ private:
     IdxType BitRevTable[BIT_REV_LEN];
 };
 
-template<typename DataType, typename IdxType, IdxType Size> class Rfft: public Cfft<DataType, IdxType, Size / 2> {
+template<typename DataType, size_t Size> class Rfft: public Cfft<DataType, Size / 2> {
     MF_STATIC_ASSERT(is_valid_fft_type<DataType>::value);
-    MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
 
-    typedef Cfft<DataType, IdxType, Size / 2> ParentCfft;
+    typedef typename idx_type_chooser<Size>::type IdxType;
+    typedef typename uint_fast<IdxType>::type idx_fast_t;
+    typedef Cfft<DataType, Size / 2> ParentCfft;
 
 public:
     static MF_CONST_OR_CONSTEXPR IdxType RFFT_LEN = Size;
@@ -703,6 +705,7 @@ public:
         ParentCfft::template cfft<false, true>(pIn);
         /* Real FFT extraction */
         stage(pIn, pOut);
+        pOut[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
 
     MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
@@ -721,8 +724,6 @@ public:
     }
 
 private:
-    typedef typename uint_fast<IdxType>::type idx_fast_t;
-
     MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */

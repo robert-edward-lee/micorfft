@@ -6,6 +6,10 @@
 #include "mf/utils/config.hpp"
 #include "mf/utils/traits.hpp"
 
+#if MF_CXX_VER > 199711L
+#include <cstdint>
+#endif
+
 namespace mf {
 
 template<int Size> struct UIntTypeWidth {
@@ -20,13 +24,17 @@ template<int Size> struct UIntTypeWidth {
                 unsigned int,
                 typename conditional<Size == sizeof(unsigned long) * CHAR_BIT,
                                      unsigned long,
+#if MF_CXX_VER > 199711L
                                      typename conditional<Size == sizeof(unsigned long long) * CHAR_BIT,
                                                           unsigned long long,
                                                           void>::type>::type>::type>::type>::type type;
+#else
+                                     void>::type>::type>::type>::type type;
+#endif
 };
 
-typedef typename UIntTypeWidth<16>::type uint16_t;
-typedef typename UIntTypeWidth<32>::type uint32_t;
+typedef UIntTypeWidth<16>::type uint16_t;
+typedef UIntTypeWidth<32>::type uint32_t;
 
 template<typename IdxType> struct is_valid_idx_type: false_type {};
 template<> struct is_valid_idx_type<uint16_t>: true_type {};
@@ -42,9 +50,13 @@ template<> struct uint_fast<uint32_t> {
 };
 #else
 template<typename IdxType> struct uint_fast {
-    typedef uint32_t type;
+    typedef unsigned type;
 };
 #endif
+
+template<size_t Size> struct idx_type_chooser {
+    typedef typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t, uint32_t>::type type;
+};
 
 template<int Size> struct FloatTypeWidth {
     typedef typename conditional<

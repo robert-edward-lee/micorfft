@@ -12,12 +12,12 @@
 namespace mf {
 template<typename IdxType, IdxType N, IdxType Radix> class Transposition {
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
-    MF_STATIC_ASSERT(is_pow_of_2(N) && N > Radix);
+    MF_STATIC_ASSERT((is_pow_of_2<IdxType, N>::value) && N > Radix);
     typedef typename uint_fast<IdxType>::type idx_fast_t;
 
 public:
-    static MF_CONST_OR_CONSTEXPR IdxType log2N = log2(N);
-    static MF_CONST_OR_CONSTEXPR IdxType log2Radix = log2(Radix);
+    static MF_CONST_OR_CONSTEXPR IdxType log2N = log2<IdxType, N>::value;
+    static MF_CONST_OR_CONSTEXPR IdxType log2Radix = log2<IdxType, Radix>::value;
     static MF_CONST_OR_CONSTEXPR IdxType bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
 
     MF_CONSTEXPR_14 Transposition() MF_NOEXCEPT {
