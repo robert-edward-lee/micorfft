@@ -76,3 +76,11 @@ clean:
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.obj,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.tds,$(dir))) \
 		2> /dev/null ||:
+
+gen_test:
+	@echo '  GEN ' c_wrapper
+	@python pytest -g
+
+test: build_test
+	@echo '  PY  ' pytest
+	@python pytest -t

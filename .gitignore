@@ -12,3 +12,4 @@
 *.obj
 *.out
 *.tds
+c_wrapper.cpp

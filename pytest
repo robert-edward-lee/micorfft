@@ -1,25 +1,13 @@
 #!/usr/bin/env python
+import argparse
 import os
 from ctypes import *
 from enum import Enum
 
 import numpy as np
-from scipy.fft import rfft, fft
+from scipy.fft import fft, rfft
 
-# Добавление папок из переменной PATH в поиск dll библиотек, т.к. собранная либа
-# зависит от dll, находящейся, например, в папке gcc/bin. Подразумевается, что
-# она находится где-то в этой переменной.
-path = os.environ['PATH']
-if os.name == 'nt':
-    paths = path.split(';')
-elif os.name == 'posix':
-    paths = path.split(':')
-else:
-    print('Error: Unknown OS!')
-    exit()
-for p in paths:
-    if os.path.exists(p):
-        os.add_dll_directory(p)
+FILE_NAME = 'c_wrapper'
 
 VALID_FFT_SIZES = [
     16,
@@ -35,14 +23,13 @@ VALID_FFT_SIZES = [
 
 
 class DataTypes(Enum):
-    FLOAT32 = 'f32'
-    FLOAT64 = 'f64'
+    FLOAT32 = 'float32_t'
+    FLOAT64 = 'float64_t'
 
 
 class Test(object):
-    dll = CDLL('./c_wrapper.dll')
-
-    def __init__(self, size: int, data_type: DataTypes):
+    def __init__(self, dll, size: int, data_type: DataTypes):
+        self._dll = dll
         if size not in VALID_FFT_SIZES:
             print(f'size == {size}, expected one of {VALID_FFT_SIZES}')
             return
@@ -69,11 +56,11 @@ class Test(object):
             self._complex_data = (c_double * (self._size * 2))()
             self._real_data = (c_double * (self._size * 2))()
 
-        self._c_fft = getattr(self.dll, f'cfft_forward_{self._size}_{self._data_type.value}')
-        self._c_ifft = getattr(self.dll, f'cfft_inverse_{self._size}_{self._data_type.value}')
+        self._c_fft = getattr(self._dll, f'cfft_forward_{self._size}_{self._data_type.value}')
+        self._c_ifft = getattr(self._dll, f'cfft_inverse_{self._size}_{self._data_type.value}')
 
-        self._c_rfft = getattr(self.dll, f'rfft_forward_{self._size * 2}_{self._data_type.value}')
-        self._c_irfft = getattr(self.dll, f'rfft_inverse_{self._size * 2}_{self._data_type.value}')
+        self._c_rfft = getattr(self._dll, f'rfft_forward_{self._size * 2}_{self._data_type.value}')
+        self._c_irfft = getattr(self._dll, f'rfft_inverse_{self._size * 2}_{self._data_type.value}')
 
     def fft_test(self, data_t):
         data_f = fft(data_t)
@@ -90,11 +77,9 @@ class Test(object):
 
         self._c_fft(self._complex_data)
         if self._data_type == DataTypes.FLOAT32:
-            testing_data = np.array(
-                self._complex_data, dtype=np.float32).view(np.complex64)
+            testing_data = np.array(self._complex_data, dtype=np.float32).view(np.complex64)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(
-                self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
@@ -108,8 +93,7 @@ class Test(object):
             if abs(xn - ref) > self._epsilon:
                 print(f'[{i:03}]: {xn} != {ref}')
                 mismatches += 1
-        print(f'{'passed' if not mismatches else f'failed, {
-            mismatches} mismatches'}')
+        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
         return mismatches
 
     def fft_inverse_test(self, data_t, data_f):
@@ -122,9 +106,11 @@ class Test(object):
 
         self._c_ifft(self._complex_data)
         if self._data_type == DataTypes.FLOAT32:
-            testing_data = np.array(self._complex_data, dtype=np.float32).view(np.complex64)
+            testing_data = np.array(
+                self._complex_data, dtype=np.float32).view(np.complex64)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(
+                self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
@@ -156,9 +142,11 @@ class Test(object):
 
         self._c_rfft(self._real_data, self._complex_data)
         if self._data_type == DataTypes.FLOAT32:
-            testing_data = np.array(self._complex_data, dtype=np.float32).view(np.complex64)
+            testing_data = np.array(
+                self._complex_data, dtype=np.float32).view(np.complex64)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(
+                self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
@@ -205,23 +193,98 @@ class Test(object):
         return mismatches
 
 
-# 32 bit floating
-for size in VALID_FFT_SIZES:
-    test = Test(size, DataTypes.FLOAT32)
+def generate_source():
+    # генерация исходника
+    with open(f'{FILE_NAME}.cpp', '+w') as f:
+        f.write("""#include "mf/fft.hpp"
 
-    x = np.random.rand(size * 2).astype(np.float32).view(np.complex64)
-    test.fft_test(x)
+#if defined(_MSC_VER)
+#define EXPORT_DLL_C extern "C" __declspec(dllexport)
+#else
+#define EXPORT_DLL_C extern "C"
+#endif
+
+using namespace mf;
+
+""")
+
+        for t in DataTypes:
+            f.write(f"""////////////////////////////////////////////////////////////////////////////////
+//                                {t.name} CFFT                                //
+////////////////////////////////////////////////////////////////////////////////
+""")
+            # cfft
+            for size in VALID_FFT_SIZES:
+                f.write(f"""EXPORT_DLL_C void cfft_forward_{size}_{t.value}({t.value} *p) {{
+    Cfft<{t.value}, {size}> cfft;
+    cfft.forward(p);
+}}
+
+EXPORT_DLL_C void cfft_inverse_{size}_{t.value}({t.value} *p) {{
+    Cfft<{t.value}, {size}> cfft;
+    cfft.inverse(p);
+}}
+
+""")
+        # rfft
+            for size in VALID_FFT_SIZES:
+                f.write(f"""EXPORT_DLL_C void rfft_forward_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+    Rfft<{t.value}, {size * 2}> rfft;
+    rfft.forward(p1, p2);
+}}
+
+EXPORT_DLL_C void rfft_inverse_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+    Rfft<{t.value}, {size * 2}> rfft;
+    rfft.inverse(p1, p2);
+}}
+
+""")
+
+
+def test():
+    # Добавление папок из переменной PATH в поиск dll библиотек, т.к. собранная либа
+    # зависит от dll, находящейся, например, в папке gcc/bin. Подразумевается, что
+    # она находится где-то в этой переменной.
+    path = os.environ['PATH']
+    if os.name == 'nt':
+        paths = path.split(';')
+    elif os.name == 'posix':
+        paths = path.split(':')
+    else:
+        print('Error: Unknown OS!')
+        exit()
+    for p in paths:
+        if os.path.exists(p):
+            os.add_dll_directory(p)
+
+    dll = CDLL(f'./{FILE_NAME}.dll')
+    # 32 bit floating
+    for size in VALID_FFT_SIZES:
+        test = Test(dll, size, DataTypes.FLOAT32)
+
+        x = np.random.rand(size * 2).astype(np.float32).view(np.complex64)
+        test.fft_test(x)
+        print('')
+        x = np.random.rand(size * 2).astype(np.float32)
+        test.rfft_test(x)
+
     print('')
-    x = np.random.rand(size * 2).astype(np.float32)
-    test.rfft_test(x)
+    # 64 bit floating
+    for size in VALID_FFT_SIZES:
+        test = Test(dll, size, DataTypes.FLOAT64)
 
-print('')
-# 64 bit floating
-for size in VALID_FFT_SIZES:
-    test = Test(size, DataTypes.FLOAT64)
+        x = np.random.rand(size * 2).astype(np.float64).view(np.complex128)
+        test.fft_test(x)
+        print('')
+        x = np.random.rand(size * 2).astype(np.float64)
+        test.rfft_test(x)
 
-    x = np.random.rand(size * 2).astype(np.float64).view(np.complex128)
-    test.fft_test(x)
-    print('')
-    x = np.random.rand(size * 2).astype(np.float64)
-    test.rfft_test(x)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-g', '--generate', help='generate c wrapper', action='store_true')
+parser.add_argument('-t', '--test', help='test c wrapper', action='store_true')
+args = parser.parse_args()
+if args.generate:
+    generate_source()
+elif args.test:
+    test()

@@ -17,13 +17,11 @@ LDLIBS = $(addprefix -l,$(LIBS))
 
 .PHONY: test mf_test cmsis_test
 
-test:
+build_test: gen_test
 	@echo '  CXX ' c_wrapper
-	@$(CXX) -c $(CXXFLAGS) test/c_wrapper.cpp -o test/c_wrapper.cpp.o
+	@$(CXX) -c $(CXXFLAGS) c_wrapper.cpp -o c_wrapper.cpp.o
 	@echo '  LD  ' c_wrapper
-	@$(LD) $(LDFLAGS) -o $(SHARED_LIB) test/c_wrapper.cpp.o $(LDLIBS)
-	@echo '  PY  ' pytest
-	@python test/pytest
+	@$(LD) $(LDFLAGS) -o $(SHARED_LIB) c_wrapper.cpp.o $(LDLIBS)
 
 mf_test:
 	@$(CXX) $(CXXFLAGS) test/$@.cpp $(TEST_SRC) /Fe:$@
