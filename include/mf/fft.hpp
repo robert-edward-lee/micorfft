@@ -19,9 +19,9 @@ public:
     MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
         /* создание таблицы для перестановок по основанию 8 */
         Transposition<idx_t, Size, 8> transpos;
-        transpos.fill_table(BitRevTable);
+        transpos.fill_table(bit_rev_table);
         /* создание таблицы поворотных коэффициентов */
-        fill_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(TwiddleCfft);
+        fill_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(cfft_twiddle);
     }
     /**
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
@@ -54,15 +54,13 @@ protected:
     /**
      * @tparam Inverse Флаг обратного БПФ
      * @tparam BitReverse Флаг перестановки индексов
-     * @param[in,out] p1 Указатель на данные
-     * @brief БПФ на месте
+     * @param[in,out] p Указатель на данные
+     * @brief БПФ с прореживанием по частоте на месте
      */
-    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p1) const MF_NOEXCEPT {
-        MF_IF_CONSTEXPR(Inverse) { /* Conjugate input data */
-            DataType *pSrc = p1 + 1;
+    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p) const MF_NOEXCEPT {
+        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение для обратного БПФ */
             for(idx_fast_t l = 0; l != Size; ++l) {
-                *pSrc = -*pSrc;
-                pSrc += 2;
+                p[2 * l + 1] = -p[2 * l + 1];
             }
         }
 
@@ -70,33 +68,36 @@ protected:
             case 16:
             case 128:
             case 1024:
-                radix8by2(p1);
+                radix8by2(p);
                 break;
             case 32:
             case 256:
             case 2048:
-                radix8by4(p1);
+                radix8by4(p);
                 break;
             case 64:
             case 512:
             case 4096:
-                radix8<Size, 1>(p1);
+                radix8<Size, 1>(p);
                 break;
             default:
                 break;
         }
 
-        MF_IF_CONSTEXPR(BitReverse) { /* BITREVERSE */
-            bitreversal(p1);
+        MF_IF_CONSTEXPR(BitReverse) { /* перестановка выходной последовательности */
+            for(idx_fast_t l = 0; l != BIT_REV_LEN / 2; ++l) {
+                const idx_fast_t a = bit_rev_table[2 * l];
+                const idx_fast_t b = bit_rev_table[2 * l + 1];
+                std::swap(p[a], p[b]); // real
+                std::swap(p[a + 1], p[b + 1]); // imag
+            }
         }
 
-        MF_IF_CONSTEXPR(Inverse) { /* Conjugate and scale output data */
+        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение и нормализация для обратного БПФ */
             MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
-            DataType *pSrc = p1;
             for(idx_fast_t l = 0; l != Size; ++l) {
-                *pSrc++ *= factor;
-                *pSrc = -(*pSrc) * factor;
-                pSrc++;
+                p[2 * l] = factor * p[2 * l];
+                p[2 * l + 1] = -factor * p[2 * l + 1];
             }
         }
     }
@@ -136,10 +137,10 @@ private:
     /**
      * @tparam L Размер БПФ степенью 8
      * @tparam TwidCoefModifier Модификатор поворотных коэффициент
-     * @param[in,out] pSrc Указатель на данные
+     * @param[in,out] p Указатель на данные
      * @brief БПФ по основанию 8 на месте
      */
-    template<idx_t L, idx_t TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *pSrc) const MF_NOEXCEPT {
+    template<idx_t L, idx_t TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *p) const MF_NOEXCEPT {
         idx_fast_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
         idx_fast_t i1, i2, i3, i4, i5, i6, i7, i8;
         idx_fast_t id;
@@ -169,38 +170,38 @@ private:
                 i6 = i5 + n2;
                 i7 = i6 + n2;
                 i8 = i7 + n2;
-                r1 = pSrc[2 * i1] + pSrc[2 * i5];
-                r5 = pSrc[2 * i1] - pSrc[2 * i5];
-                r2 = pSrc[2 * i2] + pSrc[2 * i6];
-                r6 = pSrc[2 * i2] - pSrc[2 * i6];
-                r3 = pSrc[2 * i3] + pSrc[2 * i7];
-                r7 = pSrc[2 * i3] - pSrc[2 * i7];
-                r4 = pSrc[2 * i4] + pSrc[2 * i8];
-                r8 = pSrc[2 * i4] - pSrc[2 * i8];
+                r1 = p[2 * i1] + p[2 * i5];
+                r5 = p[2 * i1] - p[2 * i5];
+                r2 = p[2 * i2] + p[2 * i6];
+                r6 = p[2 * i2] - p[2 * i6];
+                r3 = p[2 * i3] + p[2 * i7];
+                r7 = p[2 * i3] - p[2 * i7];
+                r4 = p[2 * i4] + p[2 * i8];
+                r8 = p[2 * i4] - p[2 * i8];
                 t1 = r1 - r3;
                 r1 = r1 + r3;
                 r3 = r2 - r4;
                 r2 = r2 + r4;
-                pSrc[2 * i1] = r1 + r2;
-                pSrc[2 * i5] = r1 - r2;
-                r1 = pSrc[2 * i1 + 1] + pSrc[2 * i5 + 1];
-                s5 = pSrc[2 * i1 + 1] - pSrc[2 * i5 + 1];
-                r2 = pSrc[2 * i2 + 1] + pSrc[2 * i6 + 1];
-                s6 = pSrc[2 * i2 + 1] - pSrc[2 * i6 + 1];
-                s3 = pSrc[2 * i3 + 1] + pSrc[2 * i7 + 1];
-                s7 = pSrc[2 * i3 + 1] - pSrc[2 * i7 + 1];
-                r4 = pSrc[2 * i4 + 1] + pSrc[2 * i8 + 1];
-                s8 = pSrc[2 * i4 + 1] - pSrc[2 * i8 + 1];
+                p[2 * i1] = r1 + r2;
+                p[2 * i5] = r1 - r2;
+                r1 = p[2 * i1 + 1] + p[2 * i5 + 1];
+                s5 = p[2 * i1 + 1] - p[2 * i5 + 1];
+                r2 = p[2 * i2 + 1] + p[2 * i6 + 1];
+                s6 = p[2 * i2 + 1] - p[2 * i6 + 1];
+                s3 = p[2 * i3 + 1] + p[2 * i7 + 1];
+                s7 = p[2 * i3 + 1] - p[2 * i7 + 1];
+                r4 = p[2 * i4 + 1] + p[2 * i8 + 1];
+                s8 = p[2 * i4 + 1] - p[2 * i8 + 1];
                 t2 = r1 - s3;
                 r1 = r1 + s3;
                 s3 = r2 - r4;
                 r2 = r2 + r4;
-                pSrc[2 * i1 + 1] = r1 + r2;
-                pSrc[2 * i5 + 1] = r1 - r2;
-                pSrc[2 * i3] = t1 + s3;
-                pSrc[2 * i7] = t1 - s3;
-                pSrc[2 * i3 + 1] = t2 - r3;
-                pSrc[2 * i7 + 1] = t2 + r3;
+                p[2 * i1 + 1] = r1 + r2;
+                p[2 * i5 + 1] = r1 - r2;
+                p[2 * i3] = t1 + s3;
+                p[2 * i7] = t1 - s3;
+                p[2 * i3 + 1] = t2 - r3;
+                p[2 * i7 + 1] = t2 + r3;
                 r1 = (r6 - r8) * DataType(SQRT1_2);
                 r6 = (r6 + r8) * DataType(SQRT1_2);
                 r2 = (s6 - s8) * DataType(SQRT1_2);
@@ -213,14 +214,14 @@ private:
                 s5 = s5 + r2;
                 s8 = s7 - s6;
                 s7 = s7 + s6;
-                pSrc[2 * i2] = r5 + s7;
-                pSrc[2 * i8] = r5 - s7;
-                pSrc[2 * i6] = t1 + s8;
-                pSrc[2 * i4] = t1 - s8;
-                pSrc[2 * i2 + 1] = s5 - r7;
-                pSrc[2 * i8 + 1] = s5 + r7;
-                pSrc[2 * i6 + 1] = t2 - r8;
-                pSrc[2 * i4 + 1] = t2 + r8;
+                p[2 * i2] = r5 + s7;
+                p[2 * i8] = r5 - s7;
+                p[2 * i6] = t1 + s8;
+                p[2 * i4] = t1 - s8;
+                p[2 * i2 + 1] = s5 - r7;
+                p[2 * i8 + 1] = s5 + r7;
+                p[2 * i6 + 1] = t2 - r8;
+                p[2 * i4 + 1] = t2 + r8;
 
                 i1 += n1;
             } while(i1 < L);
@@ -243,20 +244,20 @@ private:
                 ia6 = ia5 + id;
                 ia7 = ia6 + id;
 
-                co2 = TwiddleCfft[2 * ia1];
-                co3 = TwiddleCfft[2 * ia2];
-                co4 = TwiddleCfft[2 * ia3];
-                co5 = TwiddleCfft[2 * ia4];
-                co6 = TwiddleCfft[2 * ia5];
-                co7 = TwiddleCfft[2 * ia6];
-                co8 = TwiddleCfft[2 * ia7];
-                si2 = TwiddleCfft[2 * ia1 + 1];
-                si3 = TwiddleCfft[2 * ia2 + 1];
-                si4 = TwiddleCfft[2 * ia3 + 1];
-                si5 = TwiddleCfft[2 * ia4 + 1];
-                si6 = TwiddleCfft[2 * ia5 + 1];
-                si7 = TwiddleCfft[2 * ia6 + 1];
-                si8 = TwiddleCfft[2 * ia7 + 1];
+                co2 = cfft_twiddle[2 * ia1];
+                co3 = cfft_twiddle[2 * ia2];
+                co4 = cfft_twiddle[2 * ia3];
+                co5 = cfft_twiddle[2 * ia4];
+                co6 = cfft_twiddle[2 * ia5];
+                co7 = cfft_twiddle[2 * ia6];
+                co8 = cfft_twiddle[2 * ia7];
+                si2 = cfft_twiddle[2 * ia1 + 1];
+                si3 = cfft_twiddle[2 * ia2 + 1];
+                si4 = cfft_twiddle[2 * ia3 + 1];
+                si5 = cfft_twiddle[2 * ia4 + 1];
+                si6 = cfft_twiddle[2 * ia5 + 1];
+                si7 = cfft_twiddle[2 * ia6 + 1];
+                si8 = cfft_twiddle[2 * ia7 + 1];
 
                 i1 = j;
 
@@ -269,35 +270,35 @@ private:
                     i6 = i5 + n2;
                     i7 = i6 + n2;
                     i8 = i7 + n2;
-                    r1 = pSrc[2 * i1] + pSrc[2 * i5];
-                    r5 = pSrc[2 * i1] - pSrc[2 * i5];
-                    r2 = pSrc[2 * i2] + pSrc[2 * i6];
-                    r6 = pSrc[2 * i2] - pSrc[2 * i6];
-                    r3 = pSrc[2 * i3] + pSrc[2 * i7];
-                    r7 = pSrc[2 * i3] - pSrc[2 * i7];
-                    r4 = pSrc[2 * i4] + pSrc[2 * i8];
-                    r8 = pSrc[2 * i4] - pSrc[2 * i8];
+                    r1 = p[2 * i1] + p[2 * i5];
+                    r5 = p[2 * i1] - p[2 * i5];
+                    r2 = p[2 * i2] + p[2 * i6];
+                    r6 = p[2 * i2] - p[2 * i6];
+                    r3 = p[2 * i3] + p[2 * i7];
+                    r7 = p[2 * i3] - p[2 * i7];
+                    r4 = p[2 * i4] + p[2 * i8];
+                    r8 = p[2 * i4] - p[2 * i8];
                     t1 = r1 - r3;
                     r1 = r1 + r3;
                     r3 = r2 - r4;
                     r2 = r2 + r4;
-                    pSrc[2 * i1] = r1 + r2;
+                    p[2 * i1] = r1 + r2;
                     r2 = r1 - r2;
-                    s1 = pSrc[2 * i1 + 1] + pSrc[2 * i5 + 1];
-                    s5 = pSrc[2 * i1 + 1] - pSrc[2 * i5 + 1];
-                    s2 = pSrc[2 * i2 + 1] + pSrc[2 * i6 + 1];
-                    s6 = pSrc[2 * i2 + 1] - pSrc[2 * i6 + 1];
-                    s3 = pSrc[2 * i3 + 1] + pSrc[2 * i7 + 1];
-                    s7 = pSrc[2 * i3 + 1] - pSrc[2 * i7 + 1];
-                    s4 = pSrc[2 * i4 + 1] + pSrc[2 * i8 + 1];
-                    s8 = pSrc[2 * i4 + 1] - pSrc[2 * i8 + 1];
+                    s1 = p[2 * i1 + 1] + p[2 * i5 + 1];
+                    s5 = p[2 * i1 + 1] - p[2 * i5 + 1];
+                    s2 = p[2 * i2 + 1] + p[2 * i6 + 1];
+                    s6 = p[2 * i2 + 1] - p[2 * i6 + 1];
+                    s3 = p[2 * i3 + 1] + p[2 * i7 + 1];
+                    s7 = p[2 * i3 + 1] - p[2 * i7 + 1];
+                    s4 = p[2 * i4 + 1] + p[2 * i8 + 1];
+                    s8 = p[2 * i4 + 1] - p[2 * i8 + 1];
                     t2 = s1 - s3;
                     s1 = s1 + s3;
                     s3 = s2 - s4;
                     s2 = s2 + s4;
                     r1 = t1 + s3;
                     t1 = t1 - s3;
-                    pSrc[2 * i1 + 1] = s1 + s2;
+                    p[2 * i1 + 1] = s1 + s2;
                     s2 = s1 - s2;
                     s1 = t2 - r3;
                     t2 = t2 + r3;
@@ -305,20 +306,20 @@ private:
                     p2 = si5 * s2;
                     p3 = co5 * s2;
                     p4 = si5 * r2;
-                    pSrc[2 * i5] = p1 + p2;
-                    pSrc[2 * i5 + 1] = p3 - p4;
+                    p[2 * i5] = p1 + p2;
+                    p[2 * i5 + 1] = p3 - p4;
                     p1 = co3 * r1;
                     p2 = si3 * s1;
                     p3 = co3 * s1;
                     p4 = si3 * r1;
-                    pSrc[2 * i3] = p1 + p2;
-                    pSrc[2 * i3 + 1] = p3 - p4;
+                    p[2 * i3] = p1 + p2;
+                    p[2 * i3 + 1] = p3 - p4;
                     p1 = co7 * t1;
                     p2 = si7 * t2;
                     p3 = co7 * t2;
                     p4 = si7 * t1;
-                    pSrc[2 * i7] = p1 + p2;
-                    pSrc[2 * i7 + 1] = p3 - p4;
+                    p[2 * i7] = p1 + p2;
+                    p[2 * i7 + 1] = p3 - p4;
                     r1 = (r6 - r8) * DataType(SQRT1_2);
                     r6 = (r6 + r8) * DataType(SQRT1_2);
                     s1 = (s6 - s8) * DataType(SQRT1_2);
@@ -343,26 +344,26 @@ private:
                     p2 = si2 * s1;
                     p3 = co2 * s1;
                     p4 = si2 * r1;
-                    pSrc[2 * i2] = p1 + p2;
-                    pSrc[2 * i2 + 1] = p3 - p4;
+                    p[2 * i2] = p1 + p2;
+                    p[2 * i2 + 1] = p3 - p4;
                     p1 = co8 * r5;
                     p2 = si8 * s5;
                     p3 = co8 * s5;
                     p4 = si8 * r5;
-                    pSrc[2 * i8] = p1 + p2;
-                    pSrc[2 * i8 + 1] = p3 - p4;
+                    p[2 * i8] = p1 + p2;
+                    p[2 * i8 + 1] = p3 - p4;
                     p1 = co6 * r6;
                     p2 = si6 * s6;
                     p3 = co6 * s6;
                     p4 = si6 * r6;
-                    pSrc[2 * i6] = p1 + p2;
-                    pSrc[2 * i6 + 1] = p3 - p4;
+                    p[2 * i6] = p1 + p2;
+                    p[2 * i6 + 1] = p3 - p4;
                     p1 = co4 * t1;
                     p2 = si4 * t2;
                     p3 = co4 * t2;
                     p4 = si4 * t1;
-                    pSrc[2 * i4] = p1 + p2;
-                    pSrc[2 * i4 + 1] = p3 - p4;
+                    p[2 * i4] = p1 + p2;
+                    p[2 * i4 + 1] = p3 - p4;
 
                     i1 += n1;
                 } while(i1 < L);
@@ -383,7 +384,7 @@ private:
 
         DataType *pCol1, *pCol2, *pMid1, *pMid2;
         DataType *p2 = p1 + Size;
-        const DataType *tw = (const DataType *)&TwiddleCfft;
+        const DataType *tw = (const DataType *)&cfft_twiddle;
         DataType t1[4], t2[4], t3[4], t4[4], twR, twI;
         DataType m0, m1, m2, m3;
 
@@ -507,7 +508,7 @@ private:
         DataType *pEnd4 = pEnd3 + CFFT_LEN / 2;
 
         const DataType *tw2, *tw3, *tw4;
-        tw2 = tw3 = tw4 = (const DataType *)&TwiddleCfft;
+        tw2 = tw3 = tw4 = (const DataType *)&cfft_twiddle;
 
         /* do four dot Fourier transform */
         idx_fast_t twMod2 = 2;
@@ -723,29 +724,15 @@ private:
         /* fourth col */
         radix8<CFFT_LEN / 4, 4>(pCol4);
     }
-    /**
-     * @param[in,out] pSrc Указатель на данные
-     * @brief Перестановка элементов БПФ
-     */
-    MF_CONSTEXPR void bitreversal(DataType *pSrc) const MF_NOEXCEPT {
-        for(idx_fast_t i = 0; i < BIT_REV_LEN / 2; ++i) {
-            const idx_fast_t a = BitRevTable[2 * i + 0];
-            const idx_fast_t b = BitRevTable[2 * i + 1];
-            // real
-            std::swap(pSrc[a], pSrc[b]);
-            // imag
-            std::swap(pSrc[a + 1], pSrc[b + 1]);
-        }
-    }
 
     /**
      * @brief Таблица поворотных коэффициентов
      */
-    DataType TwiddleCfft[CFFT_LEN * 2];
+    DataType cfft_twiddle[CFFT_LEN * 2];
     /**
      * @brief Таблица индексов перестановок
      */
-    idx_t BitRevTable[BIT_REV_LEN];
+    idx_t bit_rev_table[BIT_REV_LEN];
 };
 /**
  * @tparam DataType Тип данных действительного числа для вычисления БПФ
@@ -776,7 +763,7 @@ template<typename DataType, size_t Size> class Rfft: public Cfft<DataType, Size 
 public:
     MF_CONSTEXPR_14 Rfft() MF_NOEXCEPT {
         /* создание таблицы поворотных коэффициентов для действительного БПФ */
-        fill_rfft_twiddle_coeff<DataType, idx_t, RFFT_LEN>(TwiddleRfft);
+        fill_rfft_twiddle_coeff<DataType, idx_t, RFFT_LEN>(rfft_twiddle);
     }
     /**
      * @param[in] pIn Входные данные во временном представлении
@@ -807,14 +794,14 @@ public:
     }
     /**
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
-     * @brief Прямое комплексное БПФ на месте размеров вдвое меньше rfft
+     * @brief Прямое комплексное БПФ на месте размером вдвое меньше rfft
      */
     MF_CONSTEXPR_14 void cfft_forward(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<false, true>(p);
     }
     /**
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
-     * @brief Обратное комплексное БПФ на месте размеров вдвое меньше rfft
+     * @brief Обратное комплексное БПФ на месте размером вдвое меньше rfft
      */
     MF_CONSTEXPR_14 void cfft_inverse(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<true, true>(p);
@@ -835,7 +822,7 @@ private:
      */
     MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
-        const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
+        const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */
         const DataType *pB = pIn; /* decreasing pointer */
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
@@ -917,7 +904,7 @@ private:
      */
     MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
-        const DataType *pCoeff = TwiddleRfft; /* Points to RFFT Twiddle factors */
+        const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */
         const DataType *pB = pIn; /* decreasing pointer */
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
@@ -970,7 +957,7 @@ private:
     /**
      * @brief Поворотные коэффициенты для действительного БПФ
      */
-    DataType TwiddleRfft[RFFT_LEN];
+    DataType rfft_twiddle[RFFT_LEN];
 };
 
 } // namespace mf
