@@ -145,7 +145,7 @@ class Test(object):
         data_f = rfft(data_t)
         # cutdown Nyquist frequency
         self.rfft_forward_test(data_t, data_f[:-1])
-        self.rfft_inverse_test(data_t, data_f)
+        self.rfft_inverse_test(data_t, data_f[:-1])
 
     def rfft_forward_test(self, data_t, data_f):
         # print('data:')

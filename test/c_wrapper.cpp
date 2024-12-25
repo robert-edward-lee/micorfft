@@ -9,6 +9,192 @@
 using namespace mf;
 
 ////////////////////////////////////////////////////////////////////////////////
+//                                FLOAT16 CFFT                                //
+////////////////////////////////////////////////////////////////////////////////
+EXPORT_DLL_C void cfft_forward_16_f16(float16_t *p) {
+    Cfft<float16_t, 16> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_32_f16(float16_t *p) {
+    Cfft<float16_t, 32> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_64_f16(float16_t *p) {
+    Cfft<float16_t, 64> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_128_f16(float16_t *p) {
+    Cfft<float16_t, 128> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_256_f16(float16_t *p) {
+    Cfft<float16_t, 256> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_512_f16(float16_t *p) {
+    Cfft<float16_t, 512> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_1024_f16(float16_t *p) {
+    Cfft<float16_t, 1024> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_2048_f16(float16_t *p) {
+    Cfft<float16_t, 2048> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_forward_4096_f16(float16_t *p) {
+    Cfft<float16_t, 4096> cfft;
+    cfft.forward(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_16_f16(float16_t *p) {
+    Cfft<float16_t, 16> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_32_f16(float16_t *p) {
+    Cfft<float16_t, 32> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_64_f16(float16_t *p) {
+    Cfft<float16_t, 64> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_128_f16(float16_t *p) {
+    Cfft<float16_t, 128> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_256_f16(float16_t *p) {
+    Cfft<float16_t, 256> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_512_f16(float16_t *p) {
+    Cfft<float16_t, 512> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_1024_f16(float16_t *p) {
+    Cfft<float16_t, 1024> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_2048_f16(float16_t *p) {
+    Cfft<float16_t, 2048> cfft;
+    cfft.inverse(p);
+}
+
+EXPORT_DLL_C void cfft_inverse_4096_f16(float16_t *p) {
+    Cfft<float16_t, 4096> cfft;
+    cfft.inverse(p);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                FLOAT16 RFFT                                //
+////////////////////////////////////////////////////////////////////////////////
+EXPORT_DLL_C void rfft_forward_32_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 32> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_64_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 64> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_128_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 128> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_256_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 256> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_512_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 512> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_1024_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 1024> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_2048_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 2048> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_4096_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 4096> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_forward_8192_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 8192> rfft;
+    rfft.forward(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_32_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 32> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_64_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 64> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_128_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 128> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_256_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 256> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_512_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 512> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_1024_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 1024> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_2048_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 2048> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_4096_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 4096> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+EXPORT_DLL_C void rfft_inverse_8192_f16(float16_t *pIn, float16_t *pOut) {
+    Rfft<float16_t, 8192> rfft;
+    rfft.inverse(pIn, pOut);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 //                                FLOAT32 CFFT                                //
 ////////////////////////////////////////////////////////////////////////////////
 EXPORT_DLL_C void cfft_forward_16_f32(float32_t *p) {
@@ -195,7 +381,7 @@ EXPORT_DLL_C void rfft_inverse_8192_f32(float32_t *pIn, float32_t *pOut) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//                                FLOAT32 CFFT                                //
+//                                FLOAT64 CFFT                                //
 ////////////////////////////////////////////////////////////////////////////////
 EXPORT_DLL_C void cfft_forward_16_f64(float64_t *p) {
     Cfft<float64_t, 16> cfft;

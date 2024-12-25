@@ -10,6 +10,13 @@
 #include <cstdint>
 #endif
 
+#if MF_CXX_VER >= 202302
+#include <cfloat>
+#else
+#define __STDC_WANT_IEC_60559_TYPES_EXT__
+#include <float.h>
+#endif
+
 namespace mf {
 
 template<int Size> struct UIntTypeWidth {
@@ -67,6 +74,34 @@ template<size_t Size> struct idx_type_chooser {
             type;
 };
 
+#if MF_CXX_VER >= 202302
+#define MF_HAS_FLOAT16
+using std::float16_t;
+#define MF_HAS_FLOAT32
+using std::float32_t;
+#define MF_HAS_FLOAT64
+using std::float64_t;
+#define UN_HAS_FLOAT128
+using std::float128_t;
+#else
+#if defined(FLT16_MAX)
+#define MF_HAS_FLOAT16
+typedef _Float16 float16_t;
+#endif
+#if defined(FLT32_MAX)
+#define MF_HAS_FLOAT32
+typedef _Float32 float32_t;
+#endif
+#if defined(FLT64_MAX)
+#define MF_HAS_FLOAT64
+typedef _Float64 float64_t;
+#endif
+#if defined(FLT128_MAX)
+#define MF_HAS_FLOAT128
+typedef _Float128 float128_t;
+#endif
+#endif
+
 template<int Size> struct FloatTypeWidth {
     typedef typename conditional<
         Size == sizeof(float) * CHAR_BIT,
@@ -77,13 +112,37 @@ template<int Size> struct FloatTypeWidth {
             typename conditional<Size == sizeof(long double) * CHAR_BIT, long double, void>::type>::type>::type type;
 };
 
+#if !defined(MF_HAS_FLOAT16) && (defined(__ARM_FP16_FORMAT_IEEE) || defined(__ARM_FP16_FORMAT_ALTERNATIVE))
+#define MF_HAS_FLOAT16
+typedef __fp16 float16_t;
+#endif
+#if !defined(MF_HAS_FLOAT32)
+#define MF_HAS_FLOAT32
 typedef FloatTypeWidth<32>::type float32_t;
+#endif
+#if !defined(MF_HAS_FLOAT64)
+#define MF_HAS_FLOAT64
 typedef FloatTypeWidth<64>::type float64_t;
-typedef float64_t float_max_t;
+#endif
 
 template<typename IdxType> struct is_valid_fft_type: false_type {};
+#if defined(MF_HAS_FLOAT16)
+template<> struct is_valid_fft_type<float16_t>: true_type {};
+#endif
 template<> struct is_valid_fft_type<float32_t>: true_type {};
 template<> struct is_valid_fft_type<float64_t>: true_type {};
+#if defined(MF_HAS_FLOAT128)
+template<> struct is_valid_fft_type<float128_t>: true_type {};
+#endif
+
+// typedef float128_t float_max_t;
+typedef float64_t float_max_t;
+
+#if defined(MF_HAS_FLOAT128)
+#define MF_FLOAT_CONST(x) ((float_max_t)MF_CONCAT(x, f128))
+#else
+#define MF_FLOAT_CONST(x) ((float_max_t)MF_CONCAT(x, l))
+#endif
 
 } // namespace mf
 
