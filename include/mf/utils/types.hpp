@@ -1,7 +1,7 @@
 #ifndef HPP_MF_UTILS_TYPES
 #define HPP_MF_UTILS_TYPES
 
-#include <limits>
+#include <climits>
 
 #include "mf/utils/config.hpp"
 #include "mf/utils/traits.hpp"
