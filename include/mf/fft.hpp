@@ -27,14 +27,14 @@ public:
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте
      */
-    MF_CONSTEXPR_14 void forward(DataType *p) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType *p) const MF_NOEXCEPT {
         cfft<false, true>(p);
     }
     /**
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте
      */
-    MF_CONSTEXPR_14 void inverse(DataType *p) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType *p) const MF_NOEXCEPT {
         cfft<true, true>(p);
     }
 
@@ -57,7 +57,7 @@ protected:
      * @param[in,out] p Указатель на данные
      * @brief БПФ с прореживанием по частоте на месте
      */
-    template<bool Inverse, bool BitReverse> MF_CONSTEXPR_14 void cfft(DataType *p) const MF_NOEXCEPT {
+    template<bool Inverse, bool BitReverse> MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(DataType *p) const MF_NOEXCEPT {
         MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение для обратного БПФ */
             for(idx_fast_t l = 0; l != Size; ++l) {
                 p[2 * l + 1] = -p[2 * l + 1];
@@ -140,7 +140,8 @@ private:
      * @param[in,out] p Указатель на данные
      * @brief БПФ по основанию 8 на месте
      */
-    template<idx_t L, idx_t TwidCoefModifier> MF_CONSTEXPR_14 void radix8(DataType *p) const MF_NOEXCEPT {
+    template<idx_t L, idx_t TwidCoefModifier>
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void radix8(DataType *p) const MF_NOEXCEPT {
         idx_fast_t ia1, ia2, ia3, ia4, ia5, ia6, ia7;
         idx_fast_t i1, i2, i3, i4, i5, i6, i7, i8;
         idx_fast_t id;
@@ -378,7 +379,7 @@ private:
      * @param[in,out] p1 Указатель на данные
      * @brief БПФ 8х2 на месте
      */
-    MF_CONSTEXPR_14 void radix8by2(DataType *p1) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void radix8by2(DataType *p1) const MF_NOEXCEPT {
         /* Define new length */
         MF_CONST_OR_CONSTEXPR idx_fast_t L = Size >> 1;
 
@@ -491,7 +492,7 @@ private:
      * @param[in,out] p1 Указатель на данные
      * @brief БПФ 8х4 на месте
      */
-    MF_CONSTEXPR_14 void radix8by4(DataType *p1) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void radix8by4(DataType *p1) const MF_NOEXCEPT {
         DataType *p2 = p1 + CFFT_LEN / 2;
         DataType *p3 = p2 + CFFT_LEN / 2;
         DataType *p4 = p3 + CFFT_LEN / 2;
@@ -772,7 +773,7 @@ public:
      *
      * @note входные данные модифицируются!
      */
-    MF_CONSTEXPR_14 void forward(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         /* Calculation of RFFT of input */
         ParentCfft::template cfft<false, true>(pIn);
         /* Real FFT extraction */
@@ -786,7 +787,7 @@ public:
      *
      * @note входные данные модифицируются!
      */
-    MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         /*  Real FFT compression */
         merge(pIn, pOut);
         /* Complex radix-4 IFFT process */
@@ -796,14 +797,14 @@ public:
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте размером вдвое меньше rfft
      */
-    MF_CONSTEXPR_14 void cfft_forward(DataType *p) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<false, true>(p);
     }
     /**
      * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте размером вдвое меньше rfft
      */
-    MF_CONSTEXPR_14 void cfft_inverse(DataType *p) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(DataType *p) const MF_NOEXCEPT {
         ParentCfft::template cfft<true, true>(p);
     }
 
@@ -820,7 +821,7 @@ private:
      * @param[out] pOut
      * @brief
      */
-    MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */
@@ -902,7 +903,7 @@ private:
      * @param[out] pOut
      * @brief
      */
-    MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
         const DataType *pA = pIn; /* increasing pointer */

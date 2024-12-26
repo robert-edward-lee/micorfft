@@ -35,4 +35,5 @@ SpaceInEmptyBlock: false
 # sort
 SortUsingDeclarations: Never
 # macros
+AttributeMacros: [MF_NODISCARD, MF_NODISCARD_MSG, MF_OPTIMIZE]
 IfMacros: [MF_IF_CONSTEXPR]
