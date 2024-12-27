@@ -137,7 +137,7 @@
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif // nodiscard
 
-#if defined(__GNUC__) || MF_HAS_ATTRIBUTE(optimize) // optimize
+#if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
 #else
 #define MF_OPTIMIZE(lvl)
@@ -150,7 +150,7 @@
 #define MF_HAS_BUILTIN_CLZ
 #endif // clz
 
-#if MF_GCC_VERSION_VALUE(2, 96, 0) || MF_HAS_BUILTIN(__builtin_expect) // likely
+#if MF_GCC_VERSION_CHECK(2, 96, 0) || MF_HAS_BUILTIN(__builtin_expect) // likely
 #define MF_LIKELY(a) __builtin_expect(!!(a), 1)
 #define MF_UNLIKELY(a) __builtin_expect(!!(a), 0)
 #elif MF_HAS_CXX_ATTRIBUTE(likely)
