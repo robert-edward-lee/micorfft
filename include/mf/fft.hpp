@@ -1,10 +1,10 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
 
+#include "mf/types.hpp"
 #include "mf/utils/math.hpp"
 #include "mf/utils/transposition.hpp"
 #include "mf/utils/twiddle.hpp"
-#include "mf/utils/types.hpp"
 
 namespace mf {
 /**

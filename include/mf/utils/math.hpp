@@ -3,8 +3,8 @@
 
 #include <cmath>
 
-#include "mf/utils/traits.hpp"
-#include "mf/utils/types.hpp"
+#include "mf/traits.hpp"
+#include "mf/types.hpp"
 
 namespace mf {
 static MF_CONST_OR_CONSTEXPR float_max_t PI = 3.141592653589793238462643383279502884l;
@@ -13,16 +13,6 @@ static MF_CONST_OR_CONSTEXPR float_max_t SQRT1_2 = 1.0l / SQRT2;
 
 using std::sin;
 using std::cos;
-
-/**
- * @tparam T Тип числа
- * @tparam x Само число
- * @brief Признак того, что число является степенью двойки
- */
-template<typename T, T x> struct is_pow_of_2: false_type {};
-template<uint8_t x> struct is_pow_of_2<uint8_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
-template<uint16_t x> struct is_pow_of_2<uint16_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
-template<uint32_t x> struct is_pow_of_2<uint32_t, x>: integral_constant<bool, x && !(x & (x - 1))> {};
 
 /**
  * @tparam T Тип числа

@@ -3,8 +3,8 @@
 
 #include <iostream>
 
+#include "mf/types.hpp"
 #include "mf/utils/math.hpp"
-#include "mf/utils/types.hpp"
 
 namespace mf {
 

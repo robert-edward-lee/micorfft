@@ -3,8 +3,8 @@
 
 #include <complex>
 
+#include "mf/types/integral.hpp"
 #include "mf/utils/config.hpp"
-#include "mf/utils/types.hpp"
 
 namespace mf {
 
