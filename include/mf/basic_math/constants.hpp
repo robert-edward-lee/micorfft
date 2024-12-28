@@ -1,0 +1,15 @@
+#ifndef HPP_MF_BASIC_MATH_CONSTANTS
+#define HPP_MF_BASIC_MATH_CONSTANTS
+
+#include "mf/types.hpp"
+#include "mf/utils/config.hpp"
+
+// #define
+
+namespace mf {
+static MF_CONST_OR_CONSTEXPR float_max_t PI = 3.141592653589793238462643383279502884e+00l;
+static MF_CONST_OR_CONSTEXPR float_max_t SQRT2 = 1.414213562373095048801688724209698079e+00l;
+static MF_CONST_OR_CONSTEXPR float_max_t SQRT1_2 = 7.071067811865475244008443621048490392e-01l;
+} // namespace mf
+
+#endif // HPP_MF_BASIC_MATH_CONSTANTS

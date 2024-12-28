@@ -5,9 +5,9 @@
 #include <cstring>
 #include <iostream>
 
+#include "mf/basic_math/log2.hpp"
 #include "mf/traits.hpp"
 #include "mf/types.hpp"
-#include "mf/utils/math.hpp"
 
 namespace mf {
 /**
