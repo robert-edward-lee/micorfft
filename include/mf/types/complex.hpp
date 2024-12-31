@@ -4,13 +4,10 @@
 #include <complex>
 
 #include "mf/types/integral.hpp"
-#include "mf/utils/config.hpp"
+#include "mf/config.hpp"
 
 namespace mf {
-
 template<typename T> struct Complex: public std::complex<T> {};
-#define CREAL(c) ((c).real())
-#define CIMAG(c) ((c).imag())
 
 template<typename DataType, typename IdxType, IdxType Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR void cmplx_mag_squared(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
@@ -56,7 +53,6 @@ MF_OPTIMIZE(3) MF_CONSTEXPR void cmplx_mag_squared(const Complex<DataType> (&csr
         }
     }
 }
-
 } // namespace mf
 
 #endif // HPP_MF_COMPLEX

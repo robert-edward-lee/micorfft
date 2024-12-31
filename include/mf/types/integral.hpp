@@ -3,10 +3,10 @@
 
 #include <climits>
 
+#include "mf/config.hpp"
 #include "mf/traits/conditional.hpp"
 #include "mf/traits/integral_constant.hpp"
 #include "mf/traits/remove_cv.hpp"
-#include "mf/utils/config.hpp"
 
 #if MF_CXX_VER > 199711L
 #include <cstdint>

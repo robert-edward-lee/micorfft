@@ -3,7 +3,7 @@
 
 #include <cfloat>
 
-#include "mf/utils/config.hpp"
+#include "mf/utils.hpp"
 
 #define MF_FLOAT_MAX_WIDTH 0
 #define MF_HAS_FLOAT16_TYPE 0

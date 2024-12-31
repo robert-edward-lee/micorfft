@@ -2,7 +2,7 @@
 #define HPP_MF_BASIC_MATH_CONSTANTS
 
 #include "mf/types/floating.hpp"
-#include "mf/utils/config.hpp"
+#include "mf/config.hpp"
 
 #if defined(__cpp_constexpr)
 #define MF_SPECIALIZE_CONST(n, v, t, s) \

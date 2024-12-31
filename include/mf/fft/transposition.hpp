@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "mf/basic_math/log2.hpp"
+#include "mf/config.hpp"
 #include "mf/traits.hpp"
 #include "mf/types.hpp"
 

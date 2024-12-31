@@ -1,8 +1,8 @@
 #ifndef HPP_MF_INTEGRAL_CONSTANT
 #define HPP_MF_INTEGRAL_CONSTANT
 
+#include "mf/config.hpp"
 #include "mf/traits/remove_cv.hpp"
-#include "mf/utils/config.hpp"
 
 namespace mf {
 template<typename T, T v> struct integral_constant {

@@ -1,8 +1,8 @@
 #ifndef HPP_MF_BASIC_MATH_LOG2
 #define HPP_MF_BASIC_MATH_LOG2
 
+#include "mf/config.hpp"
 #include "mf/traits/enable_if.hpp"
-#include "mf/utils/config.hpp"
 
 #define MF_LOG2_SPECIALIZATION_ONE(type) \
     template<> struct log2<type, 1> { \
