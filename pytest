@@ -221,12 +221,12 @@ using namespace mf;
             for size in VALID_FFT_SIZES:
                 f.write(f"""EXPORT_DLL void cfft_forward_{size}_{t.value}({t.value} *p) {{
     Cfft<{t.value}, {size}> cfft;
-    cfft.forward(p);
+    cfft.forward(*({t.value}(*)[{size * 2}])p);
 }}
 
 EXPORT_DLL void cfft_inverse_{size}_{t.value}({t.value} *p) {{
     Cfft<{t.value}, {size}> cfft;
-    cfft.inverse(p);
+    cfft.inverse(*({t.value}(*)[{size * 2}])p);
 }}
 
 """)
@@ -234,12 +234,12 @@ EXPORT_DLL void cfft_inverse_{size}_{t.value}({t.value} *p) {{
             for size in VALID_FFT_SIZES:
                 f.write(f"""EXPORT_DLL void rfft_forward_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
-    rfft.forward(p1, p2);
+    rfft.forward(*({t.value}(*)[{size * 2}])p1, *({t.value}(*)[{size * 2}])p2);
 }}
 
 EXPORT_DLL void rfft_inverse_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
-    rfft.inverse(p1, p2);
+    rfft.inverse(*({t.value}(*)[{size * 2}])p1, *({t.value}(*)[{size * 2}])p2);
 }}
 
 """)
