@@ -106,11 +106,9 @@ class Test(object):
 
         self._c_ifft(self._complex_data)
         if self._data_type == DataTypes.FLOAT32:
-            testing_data = np.array(
-                self._complex_data, dtype=np.float32).view(np.complex64)
+            testing_data = np.array(self._complex_data, dtype=np.float32).view(np.complex64)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(
-                self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
@@ -145,8 +143,7 @@ class Test(object):
             testing_data = np.array(
                 self._complex_data, dtype=np.float32).view(np.complex64)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(
-                self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
         # print('mf:')
         # print(testing_data)
 
@@ -199,10 +196,15 @@ def generate_source():
         f.write("""#include "mf/fft.hpp"
 
 #if defined(_MSC_VER)
-#define EXPORT_DLL_C extern "C" __declspec(dllexport)
+#define EXPORT_DLL __declspec(dllexport)
 #else
-#define EXPORT_DLL_C extern "C"
+#define EXPORT_DLL
 #endif
+
+extern "C" {
+
+EXPORT_DLL int mf_has_float32 = MF_HAS_FLOAT32_TYPE;
+EXPORT_DLL int mf_has_float64 = MF_HAS_FLOAT64_TYPE;
 
 using namespace mf;
 
@@ -212,32 +214,41 @@ using namespace mf;
             f.write(f"""////////////////////////////////////////////////////////////////////////////////
 //                                {t.name} CFFT                                //
 ////////////////////////////////////////////////////////////////////////////////
+#if MF_HAS_{t.name}_TYPE
+
 """)
             # cfft
             for size in VALID_FFT_SIZES:
-                f.write(f"""EXPORT_DLL_C void cfft_forward_{size}_{t.value}({t.value} *p) {{
+                f.write(f"""EXPORT_DLL void cfft_forward_{size}_{t.value}({t.value} *p) {{
     Cfft<{t.value}, {size}> cfft;
     cfft.forward(p);
 }}
 
-EXPORT_DLL_C void cfft_inverse_{size}_{t.value}({t.value} *p) {{
+EXPORT_DLL void cfft_inverse_{size}_{t.value}({t.value} *p) {{
     Cfft<{t.value}, {size}> cfft;
     cfft.inverse(p);
 }}
 
 """)
-        # rfft
+            # rfft
             for size in VALID_FFT_SIZES:
-                f.write(f"""EXPORT_DLL_C void rfft_forward_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+                f.write(f"""EXPORT_DLL void rfft_forward_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
     rfft.forward(p1, p2);
 }}
 
-EXPORT_DLL_C void rfft_inverse_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+EXPORT_DLL void rfft_inverse_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
     rfft.inverse(p1, p2);
 }}
 
+""")
+
+            f.write("""#endif
+
+""")
+
+        f.write("""}
 """)
 
 
@@ -259,25 +270,28 @@ def test():
 
     dll = CDLL(f'./{FILE_NAME}.dll')
     # 32 bit floating
-    for size in VALID_FFT_SIZES:
-        test = Test(dll, size, DataTypes.FLOAT32)
+    if cast(getattr(dll, "mf_has_float32"), POINTER(c_int)).contents.value == 1:
+        for size in VALID_FFT_SIZES:
+            test = Test(dll, size, DataTypes.FLOAT32)
 
-        x = np.random.rand(size * 2).astype(np.float32).view(np.complex64)
-        test.fft_test(x)
-        print('')
-        x = np.random.rand(size * 2).astype(np.float32)
-        test.rfft_test(x)
-
+            x = np.random.rand(size * 2).astype(np.float32).view(np.complex64)
+            test.fft_test(x)
+            print('')
+            x = np.random.rand(size * 2).astype(np.float32)
+            test.rfft_test(x)
     print('')
-    # 64 bit floating
-    for size in VALID_FFT_SIZES:
-        test = Test(dll, size, DataTypes.FLOAT64)
 
-        x = np.random.rand(size * 2).astype(np.float64).view(np.complex128)
-        test.fft_test(x)
-        print('')
-        x = np.random.rand(size * 2).astype(np.float64)
-        test.rfft_test(x)
+    # 64 bit floating
+    if cast(getattr(dll, "mf_has_float64"), POINTER(c_int)).contents.value:
+        for size in VALID_FFT_SIZES:
+            test = Test(dll, size, DataTypes.FLOAT64)
+
+            x = np.random.rand(size * 2).astype(np.float64).view(np.complex128)
+            test.fft_test(x)
+            print('')
+            x = np.random.rand(size * 2).astype(np.float64)
+            test.rfft_test(x)
+    print('')
 
 
 parser = argparse.ArgumentParser()
