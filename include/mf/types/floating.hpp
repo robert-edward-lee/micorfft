@@ -206,8 +206,8 @@ typedef MF_FLOAT80_TYPE float80_t;
 typedef MF_FLOAT128_TYPE float128_t;
 #endif
 
-typedef MF_TRICAT(float, MF_FLOAT_MAX_WIDTH, _t) float_max_t;
-#define MF_FLOAT_MAX_C(x) (MF_TRICAT(MF_FLOAT, MF_FLOAT_MAX_WIDTH, _C)(x))
+typedef long double float_max_t;
+#define MF_FLOAT_MAX_C(x) MF_CONCAT(x, l)
 } // namespace mf
 
 #endif // HPP_MF_TYPES_FLOATING
