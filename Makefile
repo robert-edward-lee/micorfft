@@ -54,7 +54,7 @@ else
 $(error Unknown compiler!)
 endif
 
-WORK_DIRS = . test include include/mf include/mf/utils
+WORK_DIRS = . test include include/mf/* include/mf/*/*
 
 format:
 	@clang-format -style=file:./.clang-format -i \
