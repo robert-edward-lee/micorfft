@@ -64,24 +64,13 @@ protected:
             conjugate<DataType, Size>(data);
         }
 
-        switch(Size) {
-            case 16:
-            case 128:
-            case 1024:
-                radix8by2(data);
-                break;
-            case 32:
-            case 256:
-            case 2048:
-                radix8by4(data);
-                break;
-            case 64:
-            case 512:
-            case 4096:
-                radix8<Size, 1>(data);
-                break;
-            default:
-                break;
+        MF_CONST_OR_CONSTEXPR idx_fast_t rem = log2<idx_fast_t, Size>::value % 3;
+        MF_IF_CONSTEXPR(rem == 1) {
+            radix8by2(data);
+        } else MF_IF_CONSTEXPR(rem == 2) {
+            radix8by4(data);
+        } else {
+            radix8<Size, 1>(data);
         }
 
         MF_IF_CONSTEXPR(BitReverse) {

@@ -10,7 +10,7 @@ namespace mf {
 template<typename T> struct Complex: public std::complex<T> {};
 
 template<typename DataType, size_t Size>
-MF_OPTIMIZE(3) MF_CONSTEXPR void magnitude_sqr(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -32,7 +32,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR void magnitude_sqr(const DataType (&src)[Size * 2], 
 }
 
 template<typename DataType, size_t Size>
-MF_OPTIMIZE(3) MF_CONSTEXPR void magnitude_sqr(const Complex<DataType> (&csrc)[Size], DataType (&dst)[Size]) {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const Complex<DataType> (&csrc)[Size], DataType (&dst)[Size]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -54,7 +54,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR void magnitude_sqr(const Complex<DataType> (&csrc)[S
     }
 }
 
-template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR void conjugate(DataType (&data)[Size * 2]) {
+template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(DataType (&data)[Size * 2]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -75,7 +75,8 @@ template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR void conjug
     }
 }
 
-template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR void conjugate(Complex<DataType> (&cdata)[Size]) {
+template<typename DataType, size_t Size>
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(Complex<DataType> (&cdata)[Size]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -98,7 +99,7 @@ template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR void conjug
 }
 
 template<typename DataType, size_t Size, bool Inverse>
-MF_OPTIMIZE(3) MF_CONSTEXPR void scale(DataType (&data)[Size * 2], DataType factor) {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(DataType (&data)[Size * 2], DataType factor) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -147,7 +148,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR void scale(DataType (&data)[Size * 2], DataType fact
 }
 
 template<typename DataType, size_t Size, bool Inverse>
-MF_OPTIMIZE(3) MF_CONSTEXPR void scale(Complex<DataType> (&cdata)[Size], DataType factor) {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(Complex<DataType> (&cdata)[Size], DataType factor) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
