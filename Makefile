@@ -78,9 +78,9 @@ clean:
 		2> /dev/null ||:
 
 gen_test:
-	@echo '  GEN ' c_wrapper
+	$(info $() $()  GEN  c_wrapper)
 	@python pytest -g
 
 test: build_test
-	@echo '  PY  ' pytest
+	$(info $() $()  PY   pytest)
 	@python pytest -t

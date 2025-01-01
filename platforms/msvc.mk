@@ -18,9 +18,9 @@ LDLIBS = $(addprefix /l,$(LIBS))
 .PHONY: test mf_test cmsis_test
 
 build_test: gen_test
-	@echo '  CXX ' c_wrapper
+	$(info $() $()  CXX  c_wrapper)
 	@$(CXX) /c $(CXXFLAGS) c_wrapper.cpp
-	@echo '  LD  ' c_wrapper
+	$(info $() $()  LD   c_wrapper)
 	@$(LD) $(LDFLAGS) /out:$(SHARED_LIB) c_wrapper.obj $(LDLIBS)
 
 mf_test:
