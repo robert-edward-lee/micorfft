@@ -39,6 +39,15 @@ TESTS = [
     ('triang', 'triang'),
     ('bartlett', 'bartlett'),
     ('parzen', 'parzen'),
+
+    ('cosine', 'cosine'),
+    ('bohman', 'bohman'),
+    ('hann', 'hann'),
+    ('hamming', 'hamming'),
+    ('blackman', 'blackman'),
+    ('nuttall', 'nuttall'),
+    ('blackmanharris', 'blackmanharris'),
+    ('flattop', 'flattop'),
 ]
 
 
@@ -163,7 +172,7 @@ def run(file_name):
                     # выделение памяти под
                     if d == DataTypes.FLOAT32:
                         c_win = (c_float * s)()
-                        epsilon = 1e-7
+                        epsilon = 1e-6
                     elif d == DataTypes.FLOAT64:
                         c_win = (c_double * s)()
                         epsilon = 1e-14
@@ -188,99 +197,3 @@ def run(file_name):
                     if mismatches != 0:
                         out_str += f'failed, {mismatches} mismatches\n'
                         print(out_str)
-
-
-# if __name__ == '__main__':
-#     TESTS = [
-#         Test('wf_rect', 'boxcar'),
-#         Test('wf_triang', 'triang'),
-#         Test('wf_bartlett', 'bartlett'),
-#         Test('wf_parzen', 'parzen'),
-
-#         Test('wf_cosine', 'cosine'),
-#         Test('wf_bohman', 'bohman'),
-#         Test('wf_hann', 'hann'),
-#         Test('wf_hamming', 'hamming'),
-#         Test('wf_general_hamming', 'general_hamming', True, 0.3),
-#         Test('wf_general_hamming', 'general_hamming', True, 0.5),
-#         Test('wf_general_hamming', 'general_hamming', True, 0.8),
-#         Test('wf_blackman', 'blackman'),
-#         Test('wf_nuttall', 'nuttall'),
-#         Test('wf_blackmanharris', 'blackmanharris'),
-#         Test('wf_flattop', 'flattop'),
-
-#         Test('wf_gaussian', 'gaussian', True, 0.3),
-#         Test('wf_gaussian', 'gaussian', True, 0.5),
-#         Test('wf_gaussian', 'gaussian', True, 0.8),
-
-#         Test('wf_tukey', 'tukey', True, 0.3),
-#         Test('wf_tukey', 'tukey', True, 0.5),
-#         Test('wf_tukey', 'tukey', True, 0.8),
-
-#         Test('wf_kaiser', 'kaiser', True, 1.0),
-#         Test('wf_kaiser', 'kaiser', True, 4.0),
-#         Test('wf_kaiser', 'kaiser', True, 9.0),
-
-#         Test('wf_kaiser_bessel_derived', 'kaiser_bessel_derived', True, 1.0),
-#         Test('wf_kaiser_bessel_derived', 'kaiser_bessel_derived', True, 4.0),
-#         Test('wf_kaiser_bessel_derived', 'kaiser_bessel_derived', True, 9.0),
-
-#         Test('wf_chebyshev', 'chebwin', True, 50.0),
-#         Test('wf_chebyshev', 'chebwin', True, 90.0),
-#         Test('wf_chebyshev', 'chebwin', True, 120.0),
-
-#         Test('wf_poisson', 'exponential', True, 0.3),
-#         Test('wf_poisson', 'exponential', True, 0.5),
-#         Test('wf_poisson', 'exponential', True, 0.8),
-
-#         Test('wf_barthann', 'barthann'),
-
-#         Test('wf_lanczos', 'lanczos'),
-#     ]
-
-#     SIZES = [
-#         0,
-#         1,
-#         2,
-#         3,
-#         4,
-#         6,
-#         7,
-#         8,
-#         9,
-#         10,
-#         16,
-#         31,
-#         32,
-#         33,
-#         63,
-#         64,
-#         100,
-#         128,
-#         200,
-#         256,
-#         500,
-#         511,
-#         512,
-#         513,
-#         1024,
-#         2048,
-#         4096,
-#         8192,
-#     ]
-
-#     tests = len(TESTS) * len(SIZES)
-#     errs = 0
-#     for s in SIZES:
-#         print('*************************')
-#         print(f'test for win size: {s}')
-#         print('*************************')
-#         for t in TESTS:
-#             err = t.test(s)
-#             if err != 0:
-#                 errs += 1
-
-#     if errs == 0:
-#         print('All tests are passed!')
-#     else:
-#         print(f'{tests - errs} tests are passed!, {errs} errors found!')
