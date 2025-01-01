@@ -49,6 +49,10 @@ TESTS = [
     ('blackmanharris', 'blackmanharris'),
     ('flattop', 'flattop'),
 
+    ('gaussian', 'gaussian', 0.3, 0.5, 0.8),
+    ('tukey', 'tukey', 0.3, 0.5, 0.8),
+    ('poisson', 'exponential', 0.3, 0.5, 0.8),
+
     ('barthann', 'barthann'),
 
     ('lanczos', 'lanczos'),
@@ -58,53 +62,6 @@ TESTS = [
 class DataTypes(Enum):
     FLOAT32 = 'float32_t'
     FLOAT64 = 'float64_t'
-
-
-"""
-class Test(object):
-    EPSILON = 1e-14
-    dll = CDLL('./libwf.dll')
-
-    def __init__(self, dll_wf_name: str, scipy_wf_name: str, has_alpha=False, alpha=0.0):
-        self._dll_wf_name = dll_wf_name
-        self._scipy_wf_name = scipy_wf_name
-        self._has_alpha = has_alpha
-        self._alpha = alpha
-
-    def test(self, win_size: int) -> None:
-        print(f'test for "{self._dll_wf_name}({
-              self._alpha if self._has_alpha else ''})" ... ', end='')
-        test_arr = (c_double * win_size)()
-        # функции для получения массивов
-        wf = getattr(self.dll, self._dll_wf_name)
-        scipy_wf = getattr(windows, self._scipy_wf_name)
-        # создание массивов
-        if not self._has_alpha:
-            wf(pointer(test_arr), c_size_t(win_size))
-            test_win = scipy_wf(win_size)
-        else:
-            wf(pointer(test_arr), c_size_t(win_size), c_double(self._alpha))
-            if self._scipy_wf_name == 'exponential':
-                test_win = scipy_wf(win_size, None, self._alpha)
-            elif self._scipy_wf_name == 'kaiser_bessel_derived' and win_size % 2:
-                print('passed')
-                return 0
-            else:
-                test_win = scipy_wf(win_size, self._alpha)
-        # сравнение массивов
-        mismatches = 0
-        for i in range(win_size):
-            xn = float(test_arr[i])
-            ref = float(test_win[i])
-
-            if abs(xn - ref) > self.EPSILON:
-                # print(f'[{i:03}]: {xn} != {ref}')
-                mismatches += 1
-
-        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
-
-        return mismatches
-"""
 
 
 def gen(file_name):
@@ -131,15 +88,24 @@ using namespace mf;
             f.write(f"""#if MF_HAS_{d.name}_TYPE""")
 
             for t in TESTS:
+                has_alpha = False
+                if len(t) > 2:
+                    has_alpha = True
                 f.write(f"""
 ////////////////////////////////////////////////////////////////////////////////
 //                                   {t[0]}                                   //
 ////////////////////////////////////////////////////////////////////////////////""")
 
                 for s in SIZES:
-                    f.write(f"""
+                    if not has_alpha:
+                        f.write(f"""
 EXPORT_DLL void {t[0]}_{s}_{d.value}({d.value} *p) {{
     Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p);
+}}""")
+                    else:
+                        f.write(f"""
+EXPORT_DLL void {t[0]}_{s}_{d.value}({d.value} *p, double alpha) {{
+    Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p, alpha);
 }}""")
 
             f.write("""
@@ -172,6 +138,9 @@ def run(file_name):
         # проверка макроса MF_HAS_{xxxx}_TYPE
         if cast(getattr(dll, f'mf_has_{d.value}'), POINTER(c_int)).contents.value == 1:
             for t in TESTS:
+                has_alpha = False
+                if len(t) > 2:
+                    has_alpha = True
                 for s in SIZES:
                     # выделение памяти под
                     if d == DataTypes.FLOAT32:
@@ -180,24 +149,48 @@ def run(file_name):
                     elif d == DataTypes.FLOAT64:
                         c_win = (c_double * s)()
                         epsilon = 1e-14
-                    out_str = f'test for Windows<{d.value}, {s}>::{t[0]} with {epsilon:.0e} accuracy...\n'
                     # функция из dll
                     c_fn_name = f'{t[0]}_{s}_{d.value}'
                     c_wf = getattr(dll, c_fn_name)
                     # функция из scipy
                     scipy_wf = getattr(windows, t[1])
                     # сравнение окон
-                    c_wf(c_win)
-                    scipy_win = scipy_wf(s)
-                    mismatches = 0
-                    for i in range(s):
-                        xn = c_win[i]
-                        ref = scipy_win[i]
+                    if not has_alpha:
+                        out_str = f'test for Windows<{d.value}, {s}>::{t[0]} with {epsilon:.0e} accuracy...\n'
+                        c_wf(c_win)
+                        scipy_win = scipy_wf(s)
 
-                        if abs(xn - ref) > epsilon:
-                            out_str += f'[{i:03}]: {xn} != {ref}\n'
-                            mismatches += 1
+                        mismatches = 0
+                        for i in range(s):
+                            xn = c_win[i]
+                            ref = scipy_win[i]
 
-                    if mismatches != 0:
-                        out_str += f'failed, {mismatches} mismatches\n'
-                        print(out_str)
+                            if abs(xn - ref) > epsilon:
+                                out_str += f'[{i:03}]: {xn} != {ref}\n'
+                                mismatches += 1
+
+                        if mismatches != 0:
+                            out_str += f'failed, {mismatches} mismatches\n'
+                            print(out_str)
+                    else:
+                        for alpha in t[2:]:
+                            out_str = f'test for Windows<{d.value}, {s}>::{
+                                t[0]}({alpha}) with {epsilon:.0e} accuracy...\n'
+                            c_wf(c_win, c_double(alpha))
+                            if t[1] == 'exponential':
+                                scipy_win = scipy_wf(s, None, alpha)
+                            else:
+                                scipy_win = scipy_wf(s, alpha)
+
+                            mismatches = 0
+                            for i in range(s):
+                                xn = c_win[i]
+                                ref = scipy_win[i]
+
+                                if abs(xn - ref) > epsilon:
+                                    out_str += f'[{i:03}]: {xn} != {ref}\n'
+                                    mismatches += 1
+
+                            if mismatches != 0:
+                                out_str += f'failed, {mismatches} mismatches\n'
+                                print(out_str)

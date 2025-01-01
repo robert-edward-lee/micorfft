@@ -116,6 +116,45 @@ public:
     }
 
     ////////////////////////////////////////////////////////////////////////////
+    //                           Adjustable windows                           //
+    ////////////////////////////////////////////////////////////////////////////
+    static void gaussian(DataType (&win)[N], float_t sigma) {
+        static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - float_t(1)) / float_t(2);
+        for(size_t n = 0; n != N; ++n) {
+            const float_t x = float_t(n) - subtractor;
+            win[n] = exp(-(float_t(1) / float_t(2)) * x * x / (sigma * sigma));
+        }
+    }
+    static void tukey(DataType (&win)[N], float_t alpha) {
+        using wf::detail::TWO_PI;
+
+        if(alpha <= 0.0) {
+            rect(win);
+            return;
+        } else if(alpha >= 1.0) {
+            hann(win);
+            return;
+        }
+
+        size_t n;
+        for(n = 0; n != (size_t)(alpha * (N - 1.0) / 2.0 + 1.0); ++n) {
+            win[n] = (float_t(1) - cos(TWO_PI * n / (alpha * (float_t(N) - float_t(1))))) / float_t(2);
+        }
+        for(; n != (size_t)((N - 1.0) / 2.0 + 1.0); ++n) {
+            win[n] = float_t(1);
+        }
+        for(; n != N; ++n) {
+            win[n] = win[N - n - 1];
+        }
+    }
+    static void poisson(DataType (&win)[N], float_t tau) {
+        static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - float_t(1)) / float_t(2);
+        for(size_t n = 0; n != N; ++n) {
+            win[n] = exp(-abs(float_t(n) - subtractor) / tau);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
     //                              Hybrid windows                             //
     ////////////////////////////////////////////////////////////////////////////
     static void barthann(DataType (&win)[N]) {
