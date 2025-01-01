@@ -60,10 +60,8 @@ protected:
      */
     template<bool Inverse, bool BitReverse>
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
-        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение для обратного БПФ */
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                data[2 * l + 1] = -data[2 * l + 1];
-            }
+        MF_IF_CONSTEXPR(Inverse) {
+            conjugate<DataType, Size>(data);
         }
 
         switch(Size) {
@@ -86,21 +84,17 @@ protected:
                 break;
         }
 
-        MF_IF_CONSTEXPR(BitReverse) { /* перестановка выходной последовательности */
-            for(idx_fast_t l = 0; l != BIT_REV_LEN / 2; ++l) {
-                const idx_fast_t a = bit_rev_table[2 * l];
-                const idx_fast_t b = bit_rev_table[2 * l + 1];
-                std::swap(data[a], data[b]); // real
-                std::swap(data[a + 1], data[b + 1]); // imag
+        MF_IF_CONSTEXPR(BitReverse) {
+            for(idx_fast_t i = 0; i != BIT_REV_LEN / 2; ++i) {
+                const idx_fast_t a = bit_rev_table[2 * i];
+                const idx_fast_t b = bit_rev_table[2 * i + 1];
+                std::swap(data[a], data[b]);
+                std::swap(data[a + 1], data[b + 1]);
             }
         }
 
-        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение и нормализация для обратного БПФ */
-            MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                data[2 * l] = factor * data[2 * l];
-                data[2 * l + 1] = -factor * data[2 * l + 1];
-            }
+        MF_IF_CONSTEXPR(Inverse) {
+            scale<DataType, Size, true>(data, DataType(1) / DataType(Size));
         }
     }
 
