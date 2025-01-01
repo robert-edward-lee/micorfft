@@ -1,11 +1,7 @@
 #ifndef HPP_MF_UTILS_CONFIG
 #define HPP_MF_UTILS_CONFIG
 
-#define MF_DO_CONCAT(x, y) x##y
-#define MF_CONCAT(x, y) MF_DO_CONCAT(x, y)
-
-#define MF_DO_STR(x) #x
-#define MF_STR(x) MF_DO_STR(x)
+#include "mf/utils.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //                            Compiler Detect Test                            //
@@ -120,7 +116,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                           Attribute Feature-Test                           //
 ////////////////////////////////////////////////////////////////////////////////
-#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907)
+#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907) // nodiscard
 #define MF_NODISCARD [[nodiscard]]
 #define MF_NODISCARD_MSG(msg) [[nodiscard(msg)]]
 #elif MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201603)
@@ -135,20 +131,46 @@
 #else
 #define MF_NODISCARD
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
-#endif
+#endif // nodiscard
 
-#if defined(__GNUC__) || MF_HAS_ATTRIBUTE(optimize) /* optimize */
+#if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
 #else
 #define MF_OPTIMIZE(lvl)
-#endif /* optimize */
-
+#endif // optimize
 
 ////////////////////////////////////////////////////////////////////////////////
 //                            Compiler Intrinsics                             //
 ////////////////////////////////////////////////////////////////////////////////
-#if MF_HAS_BUILTIN(__builtin_clz) || MF_GCC_VERSION_CHECK(3, 4, 0)
+#if MF_HAS_BUILTIN(__builtin_clz) || MF_GCC_VERSION_CHECK(3, 4, 0) // clz
 #define MF_HAS_BUILTIN_CLZ
-#endif
+#endif // clz
+
+#if MF_GCC_VERSION_CHECK(2, 96, 0) || MF_HAS_BUILTIN(__builtin_expect) // likely
+#define MF_LIKELY(a) __builtin_expect(!!(a), 1)
+#define MF_UNLIKELY(a) __builtin_expect(!!(a), 0)
+#elif MF_HAS_CXX_ATTRIBUTE(likely)
+#define MF_LIKELY(a) \
+    (([](bool value) { \
+        switch(value) { \
+            [[likely]] case true: \
+                return true; \
+            [[unlikely]] case false: \
+                return false; \
+        } \
+    })(!!(a)))
+#define MF_UNLIKELY(a) \
+    (([](bool value) { \
+        switch(value) { \
+            [[unlikely]] case true: \
+                return true; \
+            [[likely]] case false: \
+                return false; \
+        } \
+    })(!!(a)))
+#else
+#define MF_LIKELY(a) (a)
+#define MF_UNLIKELY(a) (a)
+#endif // likely
 
 #endif // HPP_MF_UTILS_CONFIG

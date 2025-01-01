@@ -5,9 +5,10 @@
 #include <cstring>
 #include <iostream>
 
-#include "mf/utils/math.hpp"
-#include "mf/utils/traits.hpp"
-#include "mf/utils/types.hpp"
+#include "mf/basic_math/log2.hpp"
+#include "mf/config.hpp"
+#include "mf/traits.hpp"
+#include "mf/types.hpp"
 
 namespace mf {
 /**

@@ -1,10 +1,11 @@
 #ifndef HPP_MF_FFT
 #define HPP_MF_FFT
 
-#include "mf/utils/math.hpp"
-#include "mf/utils/transposition.hpp"
-#include "mf/utils/twiddle.hpp"
-#include "mf/utils/types.hpp"
+#include "mf/basic_math/constants.hpp"
+#include "mf/fft/transposition.hpp"
+#include "mf/fft/twiddle.hpp"
+#include "mf/traits/enable_if.hpp"
+#include "mf/types.hpp"
 
 namespace mf {
 /**
@@ -24,18 +25,18 @@ public:
         fill_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(cfft_twiddle);
     }
     /**
-     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType *p) const MF_NOEXCEPT {
-        cfft<false, true>(p);
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
+        cfft<false, true>(data);
     }
     /**
-     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType *p) const MF_NOEXCEPT {
-        cfft<true, true>(p);
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
+        cfft<true, true>(data);
     }
 
 protected:
@@ -54,56 +55,40 @@ protected:
     /**
      * @tparam Inverse Флаг обратного БПФ
      * @tparam BitReverse Флаг перестановки индексов
-     * @param[in,out] p Указатель на данные
+     * @param[in,out] data Ссылка на данные
      * @brief БПФ с прореживанием по частоте на месте
      */
-    template<bool Inverse, bool BitReverse> MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(DataType *p) const MF_NOEXCEPT {
-        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение для обратного БПФ */
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                p[2 * l + 1] = -p[2 * l + 1];
+    template<bool Inverse, bool BitReverse>
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
+        MF_IF_CONSTEXPR(Inverse) {
+            conjugate<DataType, Size>(data);
+        }
+
+        MF_CONST_OR_CONSTEXPR idx_fast_t rem = log2<idx_fast_t, Size>::value % 3;
+        MF_IF_CONSTEXPR(rem == 1) {
+            radix8by2(data);
+        } else MF_IF_CONSTEXPR(rem == 2) {
+            radix8by4(data);
+        } else {
+            radix8<Size, 1>(data);
+        }
+
+        MF_IF_CONSTEXPR(BitReverse) {
+            for(idx_fast_t i = 0; i != BIT_REV_LEN / 2; ++i) {
+                const idx_fast_t a = bit_rev_table[2 * i];
+                const idx_fast_t b = bit_rev_table[2 * i + 1];
+                std::swap(data[a], data[b]);
+                std::swap(data[a + 1], data[b + 1]);
             }
         }
 
-        switch(Size) {
-            case 16:
-            case 128:
-            case 1024:
-                radix8by2(p);
-                break;
-            case 32:
-            case 256:
-            case 2048:
-                radix8by4(p);
-                break;
-            case 64:
-            case 512:
-            case 4096:
-                radix8<Size, 1>(p);
-                break;
-            default:
-                break;
-        }
-
-        MF_IF_CONSTEXPR(BitReverse) { /* перестановка выходной последовательности */
-            for(idx_fast_t l = 0; l != BIT_REV_LEN / 2; ++l) {
-                const idx_fast_t a = bit_rev_table[2 * l];
-                const idx_fast_t b = bit_rev_table[2 * l + 1];
-                std::swap(p[a], p[b]); // real
-                std::swap(p[a + 1], p[b + 1]); // imag
-            }
-        }
-
-        MF_IF_CONSTEXPR(Inverse) { /* комплексное сопряжение и нормализация для обратного БПФ */
-            MF_CONST_OR_CONSTEXPR DataType factor = DataType(1) / DataType(Size);
-            for(idx_fast_t l = 0; l != Size; ++l) {
-                p[2 * l] = factor * p[2 * l];
-                p[2 * l + 1] = -factor * p[2 * l + 1];
-            }
+        MF_IF_CONSTEXPR(Inverse) {
+            scale<DataType, Size, true>(data, DataType(1) / DataType(Size));
         }
     }
 
 private:
-    /* конструкторы копирования и перемещения не подразумевается */
+    /* конструкторы копирования и перемещения не подразумеваются */
     Cfft(const Cfft &) MF_DELETED;
     void operator=(const Cfft &) MF_DELETED;
 #if MF_CXX_VER >= 201103
@@ -203,10 +188,10 @@ private:
                 p[2 * i7] = t1 - s3;
                 p[2 * i3 + 1] = t2 - r3;
                 p[2 * i7 + 1] = t2 + r3;
-                r1 = (r6 - r8) * DataType(SQRT1_2);
-                r6 = (r6 + r8) * DataType(SQRT1_2);
-                r2 = (s6 - s8) * DataType(SQRT1_2);
-                s6 = (s6 + s8) * DataType(SQRT1_2);
+                r1 = (r6 - r8) * sqrt1_2<DataType>::value;
+                r6 = (r6 + r8) * sqrt1_2<DataType>::value;
+                r2 = (s6 - s8) * sqrt1_2<DataType>::value;
+                s6 = (s6 + s8) * sqrt1_2<DataType>::value;
                 t1 = r5 - r1;
                 r5 = r5 + r1;
                 r8 = r7 - r6;
@@ -321,10 +306,10 @@ private:
                     p4 = si7 * t1;
                     p[2 * i7] = p1 + p2;
                     p[2 * i7 + 1] = p3 - p4;
-                    r1 = (r6 - r8) * DataType(SQRT1_2);
-                    r6 = (r6 + r8) * DataType(SQRT1_2);
-                    s1 = (s6 - s8) * DataType(SQRT1_2);
-                    s6 = (s6 + s8) * DataType(SQRT1_2);
+                    r1 = (r6 - r8) * sqrt1_2<DataType>::value;
+                    r6 = (r6 + r8) * sqrt1_2<DataType>::value;
+                    s1 = (s6 - s8) * sqrt1_2<DataType>::value;
+                    s6 = (s6 + s8) * sqrt1_2<DataType>::value;
                     t1 = r5 - r1;
                     r5 = r5 + r1;
                     r8 = r7 - r6;
@@ -767,49 +752,49 @@ public:
         fill_rfft_twiddle_coeff<DataType, idx_t, RFFT_LEN>(rfft_twiddle);
     }
     /**
-     * @param[in] pIn Входные данные во временном представлении
-     * @param[out] pOut Выходные данные в частотном представлении в положительной области частот
+     * @param[in] in Входные данные во временном представлении
+     * @param[out] out Выходные данные в частотном представлении в положительной области частот
      * @brief Прямое действительное БПФ
      *
      * @note входные данные модифицируются!
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         /* Calculation of RFFT of input */
-        ParentCfft::template cfft<false, true>(pIn);
+        ParentCfft::template cfft<false, true>(in);
         /* Real FFT extraction */
-        stage(pIn, pOut);
-        pOut[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
+        stage(in, out);
+        out[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
     /**
-     * @param[in] pIn Выходные данные во временном представлении
-     * @param[out] pOut Входные данные в частотном представлении в положительной области частот
+     * @param[in] in Выходные данные во временном представлении
+     * @param[out] out Входные данные в частотном представлении в положительной области частот
      * @brief Обратное действительное БПФ
      *
      * @note входные данные модифицируются!
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         /*  Real FFT compression */
-        merge(pIn, pOut);
+        merge(in, out);
         /* Complex radix-4 IFFT process */
-        ParentCfft::template cfft<true, true>(pOut);
+        ParentCfft::template cfft<true, true>(out);
     }
     /**
-     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте размером вдвое меньше rfft
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(DataType *p) const MF_NOEXCEPT {
-        ParentCfft::template cfft<false, true>(p);
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(DataType (&data)[Size]) const MF_NOEXCEPT {
+        ParentCfft::template cfft<false, true>(data);
     }
     /**
-     * @param[in,out] p Указатель на действительные данные в комплексной интерпретации
+     * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте размером вдвое меньше rfft
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(DataType *p) const MF_NOEXCEPT {
-        ParentCfft::template cfft<true, true>(p);
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(DataType (&data)[Size]) const MF_NOEXCEPT {
+        ParentCfft::template cfft<true, true>(data);
     }
 
 private:
-    /* конструкторы копирования и перемещения не подразумевается */
+    /* конструкторы копирования и перемещения не подразумеваются */
     Rfft(const Rfft &) MF_DELETED;
     void operator=(const Rfft &) MF_DELETED;
 #if MF_CXX_VER >= 201103
@@ -817,15 +802,16 @@ private:
     void operator=(Rfft &&) MF_DELETED;
 #endif
     /**
-     * @param[in] pIn
-     * @param[out] pOut
+     * @param[in] in
+     * @param[out] out
      * @brief
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void stage(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void stage(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
-        const DataType *pA = pIn; /* increasing pointer */
-        const DataType *pB = pIn; /* decreasing pointer */
+        const DataType *pA = in; /* increasing pointer */
+        const DataType *pB = in; /* decreasing pointer */
+        DataType *pOut = out;
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
         DataType t1a, t1b; /* temporary variables */
         DataType p0, p1, p2, p3; /* temporary variables */
@@ -853,7 +839,7 @@ private:
         *pOut++ = (DataType(1) / DataType(2)) * (t1a - t1b);
 
         // XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) ));
-        pB = pIn + 2 * k;
+        pB = in + 2 * k;
         pA += 2;
 
         do {
@@ -899,15 +885,16 @@ private:
         } while(k);
     }
     /**
-     * @param[in] pIn
-     * @param[out] pOut
+     * @param[in] in
+     * @param[out] out
      * @brief
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR void merge(const DataType *pIn, DataType *pOut) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR void merge(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
-        const DataType *pA = pIn; /* increasing pointer */
-        const DataType *pB = pIn; /* decreasing pointer */
+        const DataType *pA = in; /* increasing pointer */
+        const DataType *pB = in; /* decreasing pointer */
+        DataType *pOut = out;
         DataType xAR, xAI, xBR, xBI; /* temporary variables */
         DataType t1a, t1b, r, s, t, u; /* temporary variables */
 
@@ -921,7 +908,7 @@ private:
         *pOut++ = (DataType(1) / DataType(2)) * (xAR + xAI);
         *pOut++ = (DataType(1) / DataType(2)) * (xAR - xAI);
 
-        pB = pIn + 2 * k;
+        pB = in + 2 * k;
         pA += 2;
 
         while(k > 0) {

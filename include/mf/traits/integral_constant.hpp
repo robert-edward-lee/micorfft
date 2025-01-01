@@ -1,30 +1,10 @@
-#ifndef HPP_MF_UTILS_TRAITS
-#define HPP_MF_UTILS_TRAITS
+#ifndef HPP_MF_INTEGRAL_CONSTANT
+#define HPP_MF_INTEGRAL_CONSTANT
 
-#include "mf/utils/config.hpp"
+#include "mf/config.hpp"
+#include "mf/traits/remove_cv.hpp"
 
 namespace mf {
-
-template<bool Cond, class T1, class T2> struct conditional {
-    typedef T1 type;
-};
-template<class T1, class T2> struct conditional<false, T1, T2> {
-    typedef T2 type;
-};
-
-template<typename T> struct remove_cv {
-    typedef T type;
-};
-template<typename T> struct remove_cv<const T> {
-    typedef T type;
-};
-template<typename T> struct remove_cv<volatile T> {
-    typedef T type;
-};
-template<typename T> struct remove_cv<const volatile T> {
-    typedef T type;
-};
-
 template<typename T, T v> struct integral_constant {
     static MF_CONST_OR_CONSTEXPR T value = v;
     typedef T value_type;
@@ -58,12 +38,6 @@ template<> struct is_integral_helper<signed long long>: true_type {};
 #endif
 } // namespace detail
 template<typename T> struct is_integral: detail::is_integral_helper<typename remove_cv<T>::type>::type {};
-
-template<bool Cond, typename T = void> struct enable_if {};
-template<typename T> struct enable_if<true, T> {
-    typedef T type;
-};
-
 } // namespace mf
 
-#endif // HPP_MF_UTILS_TRAITS
+#endif // HPP_MF_INTEGRAL_CONSTANT
