@@ -15,13 +15,16 @@ EXTRA_FLAGS =
 
 LDLIBS = $(addprefix -l,$(LIBS))
 
-.PHONY: test mf_test cmsis_test
+%.dll: %.cpp.o
+	$(info $() $()  LD   $@)
+	@$(LD) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 
-build_test: gen_test
-	$(info $() $()  CXX  c_wrapper)
-	@$(CXX) -c $(CXXFLAGS) c_wrapper.cpp -o c_wrapper.cpp.o
-	$(info $() $()  LD   c_wrapper)
-	@$(LD) $(LDFLAGS) -o $(SHARED_LIB) c_wrapper.cpp.o $(LDLIBS)
+%.cpp.o: %.cpp
+	$(info $() $()  CXX  $@)
+	@$(CXX) -c $(CXXFLAGS) $^ -o $@
+
+
+.PHONY: mf_test cmsis_test
 
 mf_test:
 	@$(CXX) $(CXXFLAGS) test/$@.cpp $(TEST_SRC) /Fe:$@
