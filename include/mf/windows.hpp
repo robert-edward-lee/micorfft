@@ -114,6 +114,26 @@ public:
         static const float_t a[] = {0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368};
         cosine_sum(win, a);
     }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                              Hybrid windows                             //
+    ////////////////////////////////////////////////////////////////////////////
+    static void barthann(DataType (&win)[N]) {
+        using wf::detail::TWO_PI;
+        for(size_t n = 0; n != N; ++n) {
+            float_t factor = abs(float_t(n) / (float_t(N) - float_t(1)) - float_t(1) / float_t(2));
+            win[n] = MF_FLOAT_MAX_C(0.62) - MF_FLOAT_MAX_C(0.48) * factor + MF_FLOAT_MAX_C(0.38) * cos(TWO_PI * factor);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                              Other windows                             //
+    ////////////////////////////////////////////////////////////////////////////
+    static void lanczos(DataType (&win)[N]) {
+        for(size_t n = 0; n != N; ++n) {
+            win[n] = sinc(float_t(2) * float_t(n) / (float_t(N) - float_t(1)) - float_t(1));
+        }
+    }
 };
 } // namespace mf
 

@@ -48,6 +48,10 @@ TESTS = [
     ('nuttall', 'nuttall'),
     ('blackmanharris', 'blackmanharris'),
     ('flattop', 'flattop'),
+
+    ('barthann', 'barthann'),
+
+    ('lanczos', 'lanczos'),
 ]
 
 
