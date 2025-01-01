@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-import argparse
 import os
 from ctypes import *
 from enum import Enum
@@ -81,17 +79,18 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for cfft<{self._data_type.value}, {
-              self._size}>::forward with {self._epsilon:.0e} accuracy ... ', end='')
+        out = f'test for cfft<{self._data_type.value}, {self._size}>::forward with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size):
             xn = testing_data[i]
             ref = data_f[i]
 
             if abs(xn - ref) > self._epsilon:
-                print(f'[{i:03}]: {xn} != {ref}')
+                out += f'[{i:03}]: {xn} != {ref}\n'
                 mismatches += 1
-        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
+        if mismatches != 0:
+            out += f'failed, {mismatches} mismatches\n'
+            print(out)
         return mismatches
 
     def fft_inverse_test(self, data_t, data_f):
@@ -110,17 +109,18 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for cfft<{self._data_type.value}, {
-              self._size}>::inverse with {self._epsilon:.0e} accuracy ... ', end='')
+        out = f'test for cfft<{self._data_type.value}, {self._size}>::inverse with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size):
             xn = testing_data[i]
             ref = data_t[i]
 
             if abs(xn - ref) > self._epsilon:
-                print(f'[{i:03}]: {xn} != {ref}')
+                out += f'[{i:03}]: {xn} != {ref}\n'
                 mismatches += 1
-        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
+        if mismatches != 0:
+            out += f'failed, {mismatches} mismatches\n'
+            print(out)
         return mismatches
 
     def rfft_test(self, data_t):
@@ -145,17 +145,18 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for rfft<{self._data_type.value}, {self._size *
-              2}>::forward with {self._epsilon:.0e} accuracy ... ', end='')
+        out = f'test for rfft<{self._data_type.value}, {self._size *2}>::forward with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size):
             xn = testing_data[i]
             ref = data_f[i]
 
             if abs(xn - ref) > self._epsilon:
-                print(f'[{i:03}]: {xn} != {ref}')
+                out += f'[{i:03}]: {xn} != {ref}\n'
                 mismatches += 1
-        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
+        if mismatches != 0:
+            out += f'failed, {mismatches} mismatches\n'
+            print(out)
         return mismatches
 
     def rfft_inverse_test(self, data_t, data_f):
@@ -174,17 +175,18 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        print(f'test for rfft<{self._data_type.value}, {self._size *
-              2}>::inverse with {self._epsilon:.0e} accuracy ... ', end='')
+        out = f'test for rfft<{self._data_type.value}, {self._size *2}>::inverse with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size // 2):
             xn = testing_data[i]
             ref = data_f[i]
 
             if abs(xn - ref) > self._epsilon:
-                print(f'[{i:03}]: {xn} != {ref}')
+                out += f'[{i:03}]: {xn} != {ref}\n'
                 mismatches += 1
-        print(f'{'passed' if not mismatches else f'failed, {mismatches} mismatches'}')
+        if mismatches != 0:
+            out += f'failed, {mismatches} mismatches\n'
+            print(out)
         return mismatches
 
 
@@ -274,10 +276,9 @@ def run(file_name):
 
             x = np.random.rand(size * 2).astype(np.float32).view(np.complex64)
             test.fft_test(x)
-            print('')
+
             x = np.random.rand(size * 2).astype(np.float32)
             test.rfft_test(x)
-    print('')
 
     # 64 bit floating
     if cast(getattr(dll, "mf_has_float64"), POINTER(c_int)).contents.value:
@@ -286,18 +287,6 @@ def run(file_name):
 
             x = np.random.rand(size * 2).astype(np.float64).view(np.complex128)
             test.fft_test(x)
-            print('')
+
             x = np.random.rand(size * 2).astype(np.float64)
             test.rfft_test(x)
-    print('')
-
-
-if __name__ == '__main':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--generate', help='generate c wrapper', action='store_true')
-    parser.add_argument('-t', '--test', help='test c wrapper', action='store_true')
-    args = parser.parse_args()
-    if args.generate:
-        gen()
-    elif args.test:
-        run()
