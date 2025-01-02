@@ -13,6 +13,7 @@ using std::abs;
 using std::min;
 using std::max;
 using std::exp;
+using std::sqrt;
 } // namespace mf
 
 #endif // HPP_MF_UTILS_MATH

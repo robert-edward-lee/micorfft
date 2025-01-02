@@ -3,6 +3,7 @@
 
 #include "mf/basic_math.hpp"
 #include "mf/config.hpp"
+#include "mf/special_math.hpp"
 #include "mf/types.hpp"
 
 namespace mf {
@@ -145,6 +146,25 @@ public:
         }
         for(; n != N; ++n) {
             win[n] = win[N - n - 1];
+        }
+    }
+    static void kaiser(DataType (&win)[N], float_t beta) {
+        for(size_t n = 0; n != N; ++n) {
+            const float_t factor = float_t(2) * float_t(n) / (float_t(N) - float_t(1)) - float_t(1);
+            win[n] = bessel::i0(beta * sqrt(float_t(1) - factor * factor)) / bessel::i0(beta);
+        }
+    }
+    static void kaiser_bessel_derived(DataType (&win)[N], float_t beta) {
+        Windows<DataType, N / 2 + 1>::kaiser((DataType(&)[N / 2 + 1]) win, beta);
+
+        for(size_t n = 1; n != N / 2 + 1; ++n) {
+            win[n] = win[n - 1] + win[n];
+        }
+        for(size_t n = 0; n != N / 2 + 1; ++n) {
+            win[n] = sqrt(win[n] / win[N / 2]);
+        }
+        for(size_t n = 0; n != N / 2 + 1; ++n) {
+            win[N - 1 - n] = win[n];
         }
     }
     static void poisson(DataType (&win)[N], float_t tau) {

@@ -51,6 +51,8 @@ TESTS = [
 
     ('gaussian', 'gaussian', 0.3, 0.5, 0.8),
     ('tukey', 'tukey', 0.3, 0.5, 0.8),
+    ('kaiser', 'kaiser', 1.0, 4.0, 9.0),
+    ('kaiser_bessel_derived', 'kaiser_bessel_derived', 1.0, 4.0, 9.0),
     ('poisson', 'exponential', 0.3, 0.5, 0.8),
 
     ('barthann', 'barthann'),
@@ -179,6 +181,8 @@ def run(file_name):
                             c_wf(c_win, c_double(alpha))
                             if t[1] == 'exponential':
                                 scipy_win = scipy_wf(s, None, alpha)
+                            elif t[1] == 'kaiser_bessel_derived' and s % 2:
+                                continue
                             else:
                                 scipy_win = scipy_wf(s, alpha)
 
