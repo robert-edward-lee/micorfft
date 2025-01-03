@@ -1,4 +1,5 @@
 .vscode/
+__pycache__/
 
 *.a
 *.d
@@ -13,4 +14,4 @@
 *.out
 *.tds
 *.tmp
-c_wrapper.cpp
+c_wrapper*

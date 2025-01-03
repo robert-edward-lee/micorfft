@@ -83,7 +83,7 @@ private:
     IdxType perm_idx[N];
 };
 
-template<typename IdxType, IdxType N> MF_CONSTEXPR void print_bit_rev_index_table(const IdxType (&table)[N]) {
+template<typename IdxType, IdxType N> MF_CONSTEXPR_14 void print_bit_rev_index_table(const IdxType (&table)[N]) {
     typedef typename uint_fast<IdxType>::type idx_fast_t;
     printf("const uint16_t armBitRevIndexTable[%d] ARM_DSP_TABLE_ATTRIBUTE = {\n", N);
     printf("/* , size %d*/\n", N);

@@ -889,7 +889,7 @@ private:
      * @param[out] out
      * @brief
      */
-    MF_OPTIMIZE(3) MF_CONSTEXPR void merge(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void merge(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         DataType twR, twI; /* RFFT Twiddle coefficients */
         const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
         const DataType *pA = in; /* increasing pointer */

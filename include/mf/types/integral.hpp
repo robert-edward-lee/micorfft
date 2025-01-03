@@ -2,6 +2,7 @@
 #define HPP_MF_TYPES_INTEGRAL
 
 #include <climits>
+#include <cstddef>
 
 #include "mf/config.hpp"
 #include "mf/traits/conditional.hpp"
@@ -13,6 +14,7 @@
 #endif
 
 namespace mf {
+using std::size_t;
 template<int Size> struct UIntTypeWidth {
     typedef typename conditional<
         Size == sizeof(unsigned char) * CHAR_BIT,

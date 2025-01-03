@@ -2,7 +2,13 @@
 #                              НАСТРОЙКА ПРОЕКТА                               #
 ################################################################################
 PROJECT_NAME = mf
-SHARED_LIB = c_wrapper.dll
+
+PYTEST_DIR = pytest_modules
+PYTESTS = $(basename $(notdir $(wildcard $(PYTEST_DIR)/*.py)))
+TESTS = $(addprefix c_wrapper_,$(PYTESTS))
+TEST_SRCS = $(addsuffix .cpp,$(TESTS))
+TEST_OBJS = $(addsuffix .o,$(TEST_SRCS))
+TEST_LIBS = $(addsuffix .dll,$(TESTS))
 
 ################################################################################
 #                              НАСТРОЙКА ТУЛЧЕЙНА                              #
@@ -75,12 +81,16 @@ clean:
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.o,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.obj,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.tds,$(dir))) \
-		2> /dev/null ||:
+		c_wrapper* 2> /dev/null ||:
+
+test: gen_test run_test
+
+run_test: build_test
+	$(info $() $()  PY   pytest)
+	@python pytest -r
+
+build_test: gen_test $(TEST_LIBS)
 
 gen_test:
-	$(info $() $()  GEN  c_wrapper)
+	$(info $() $()  GEN  c_wrappers)
 	@python pytest -g
-
-test: build_test
-	$(info $() $()  PY   pytest)
-	@python pytest -t
