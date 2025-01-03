@@ -4,7 +4,7 @@
 #include "mf/config.hpp"
 #include "mf/types/integral.hpp"
 
-#define CUSTOM_COMPLEX 0
+#define CUSTOM_COMPLEX 1
 #if CUSTOM_COMPLEX
 #include <sstream>
 namespace mf {
@@ -12,12 +12,7 @@ template<typename T> class Complex {
 public:
     /* ctors */
     MF_CONSTEXPR Complex(T x = T(0), T y = T(0)) MF_NOEXCEPT: re(x), im(y) {}
-    MF_CONSTEXPR Complex &operator=(const Complex &rhs) MF_NOEXCEPT {
-        re = rhs.re;
-        im = rhs.im;
-        return *this;
-    }
-    MF_CONSTEXPR Complex &operator=(const T &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator=(const T &rhs) MF_NOEXCEPT {
         re = rhs;
         im = 0;
         return *this;
@@ -25,11 +20,17 @@ public:
     static MF_CONSTEXPR Complex polar(const T &mag, const T &phase) MF_NOEXCEPT {
         return Complex(mag * cos(phase), mag * sin(phase));
     }
-    /* getters */
-    MF_CONSTEXPR T real() const MF_NOEXCEPT {
+    /* getters/setters */
+    MF_CONSTEXPR_14 T real() const MF_NOEXCEPT {
         return re;
     }
-    MF_CONSTEXPR T imag() const MF_NOEXCEPT {
+    MF_CONSTEXPR_14 T &real() MF_NOEXCEPT {
+        return re;
+    }
+    MF_CONSTEXPR_14 T imag() const MF_NOEXCEPT {
+        return im;
+    }
+    MF_CONSTEXPR_14 T &imag() MF_NOEXCEPT {
         return im;
     }
     MF_CONSTEXPR Complex conj() const MF_NOEXCEPT {
@@ -58,12 +59,12 @@ public:
         return re != rhs || im != 0;
     }
     /* arithmetic */
-    MF_CONSTEXPR Complex &operator+=(const Complex &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator+=(const Complex &rhs) MF_NOEXCEPT {
         re += rhs.re;
         im += rhs.im;
         return *this;
     }
-    MF_CONSTEXPR Complex &operator+=(const T &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator+=(const T &rhs) MF_NOEXCEPT {
         re += rhs;
         return *this;
     }
@@ -77,12 +78,12 @@ public:
         return *this;
     }
 
-    MF_CONSTEXPR Complex &operator-=(const Complex &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator-=(const Complex &rhs) MF_NOEXCEPT {
         re -= rhs.re;
         im -= rhs.im;
         return *this;
     }
-    MF_CONSTEXPR Complex &operator-=(const T &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator-=(const T &rhs) MF_NOEXCEPT {
         re -= rhs;
         return *this;
     }
@@ -96,18 +97,18 @@ public:
         return Complex(-re, -im);
     }
 
-    MF_CONSTEXPR Complex &operator*=(const Complex &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator*=(const Complex &rhs) MF_NOEXCEPT {
         const T tmp = re * rhs.im + im * rhs.re;
         re = re * rhs.re - im * rhs.im;
         im = tmp;
         return *this;
     }
-    MF_CONSTEXPR Complex &operator*=(const T &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator*=(const T &rhs) MF_NOEXCEPT {
         re *= rhs;
         im *= rhs;
         return *this;
     }
-    MF_CONSTEXPR Complex operator*(const Complex &rhs) const MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex operator*(const Complex &rhs) const MF_NOEXCEPT {
         const T tmp = re * rhs.im + im * rhs.re;
         return Complex(re * rhs.re - im * rhs.im, tmp);
     }
@@ -115,17 +116,17 @@ public:
         return Complex(re * rhs, im * rhs);
     }
 
-    MF_CONSTEXPR Complex &operator/=(const T &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator/=(const T &rhs) MF_NOEXCEPT {
         re /= rhs;
         im /= rhs;
         return *this;
     }
-    MF_CONSTEXPR Complex &operator/=(const Complex &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex &operator/=(const Complex &rhs) MF_NOEXCEPT {
         *this *= rhs.conj();
         *this /= rhs.mag_sqr();
         return *this;
     }
-    MF_CONSTEXPR Complex operator/(const Complex &rhs) MF_NOEXCEPT {
+    MF_CONSTEXPR_14 Complex operator/(const Complex &rhs) MF_NOEXCEPT {
         Complex tmp(*this);
         tmp /= rhs;
         return tmp;
@@ -145,7 +146,7 @@ std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> 
     s.flags(o.flags());
     s.imbue(o.getloc());
     s.precision(o.precision());
-    s << "(" << x.real() << (x.imag() < 0 ? " - j" : " + j") << std::abs(x.imag()) << ")";
+    s << "(" << x.real() << (x.imag() < 0 ? " - j" : " + j") << abs(x.imag()) << ")";
     return o << s.str();
 }
 } // namespace mf

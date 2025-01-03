@@ -29,20 +29,20 @@ public:
      * @brief Прямое комплексное БПФ на месте
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
-        cfft<false, true>(data);
+        cfft<false, true>((Complex<DataType(&)[Size]>)data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
-        cfft<false, true>((DataType(&)[Size * 2]) data);
+        cfft<false, true>(data);
     }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
-        cfft<true, true>(data);
+        cfft<true, true>((Complex<DataType(&)[Size]>)data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
-        cfft<true, true>((DataType(&)[Size * 2]) data);
+        cfft<true, true>(data);
     }
 
 protected:
@@ -65,18 +65,18 @@ protected:
      * @brief БПФ с прореживанием по частоте на месте
      */
     template<bool Inverse, bool BitReverse>
-    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
         MF_IF_CONSTEXPR(Inverse) {
             conjugate<DataType, Size>(data);
         }
 
         MF_CONST_OR_CONSTEXPR idx_fast_t rem = log2<idx_fast_t, Size>::value % 3;
         MF_IF_CONSTEXPR(rem == 1) {
-            radix8by2(data);
+            radix8by2((DataType *)&data);
         } else MF_IF_CONSTEXPR(rem == 2) {
-            radix8by4(data);
+            radix8by4((DataType *)&data);
         } else {
-            radix8<Size, 1>(data);
+            radix8<Size, 1>((DataType *)&data);
         }
 
         MF_IF_CONSTEXPR(BitReverse) {
@@ -84,7 +84,6 @@ protected:
                 const idx_fast_t a = bit_rev_table[2 * i];
                 const idx_fast_t b = bit_rev_table[2 * i + 1];
                 std::swap(data[a], data[b]);
-                std::swap(data[a + 1], data[b + 1]);
             }
         }
 
@@ -766,7 +765,7 @@ public:
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         /* Calculation of RFFT of input */
-        ParentCfft::template cfft<false, true>(in);
+        ParentCfft::template cfft<false, true>((Complex<DataType>(&)[Size / 2]) in);
         /* Real FFT extraction */
         stage(in, out);
         out[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
@@ -774,10 +773,10 @@ public:
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&in)[Size],
                                                 Complex<DataType> (&out)[Size / 2]) const MF_NOEXCEPT {
         /* Calculation of RFFT of input */
-        ParentCfft::template cfft<false, true>(in);
+        ParentCfft::template cfft<false, true>((Complex<DataType>(&)[Size / 2]) in);
         /* Real FFT extraction */
         stage(in, (DataType(&)[Size])out);
-        ((DataType *)&out[0])[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
+        out[0].imag() = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
     /**
      * @param[in] in Выходные данные во временном представлении
@@ -790,34 +789,34 @@ public:
         /*  Real FFT compression */
         merge(in, out);
         /* Complex radix-4 IFFT process */
-        ParentCfft::template cfft<true, true>(out);
+        ParentCfft::template cfft<true, true>((Complex<DataType>(&)[Size / 2]) out);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&in)[Size / 2],
                                                 DataType (&out)[Size]) const MF_NOEXCEPT {
         /*  Real FFT compression */
         merge((DataType(&)[Size])in, out);
         /* Complex radix-4 IFFT process */
-        ParentCfft::template cfft<true, true>(out);
+        ParentCfft::template cfft<true, true>((Complex<DataType>(&)[Size / 2]) out);
     }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте размером вдвое меньше rfft
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(DataType (&data)[Size]) const MF_NOEXCEPT {
-        ParentCfft::template cfft<false, true>(data);
+        ParentCfft::template cfft<false, true>((Complex<DataType>(&)[Size / 2]) data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(Complex<DataType> (&data)[Size / 2]) const MF_NOEXCEPT {
-        ParentCfft::template cfft<false, true>((DataType(&)[Size])data);
+        ParentCfft::template cfft<false, true>(data);
     }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте размером вдвое меньше rfft
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(DataType (&data)[Size]) const MF_NOEXCEPT {
-        ParentCfft::template cfft<true, true>(data);
+        ParentCfft::template cfft<true, true>((Complex<DataType>(&)[Size / 2]) data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(Complex<DataType> (&data)[Size / 2]) const MF_NOEXCEPT {
-        ParentCfft::template cfft<true, true>((DataType(&)[Size])data);
+        ParentCfft::template cfft<true, true>(data);
     }
 
 private:
