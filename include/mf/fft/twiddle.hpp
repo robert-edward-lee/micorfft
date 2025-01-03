@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "mf/basic_math/constants.hpp"
+#include "mf/basic_math/trigonometry.hpp"
 #include "mf/config.hpp"
 #include "mf/types.hpp"
 

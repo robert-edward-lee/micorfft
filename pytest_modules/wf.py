@@ -101,12 +101,12 @@ using namespace mf;
                 for s in SIZES:
                     if not has_alpha:
                         f.write(f"""
-EXPORT_DLL void {t[0]}_{s}_{d.value}({d.value} *p) {{
+EXPORT_DLL void {t[0]}_{s}_{d.value}(void *p) {{
     Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p);
 }}""")
                     else:
                         f.write(f"""
-EXPORT_DLL void {t[0]}_{s}_{d.value}({d.value} *p, double alpha) {{
+EXPORT_DLL void {t[0]}_{s}_{d.value}(void *p, double alpha) {{
     Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p, alpha);
 }}""")
 
@@ -138,7 +138,7 @@ def run(file_name):
     dll = CDLL(f'./{file_name}.dll')
     for d in DataTypes:
         # проверка макроса MF_HAS_{xxxx}_TYPE
-        if cast(getattr(dll, f'mf_has_{d.value}'), POINTER(c_int)).contents.value == 1:
+        if c_int.in_dll(dll, f'mf_has_{d.value}'):
             for t in TESTS:
                 has_alpha = False
                 if len(t) > 2:

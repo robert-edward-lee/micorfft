@@ -67,18 +67,18 @@
 #define MF_CONST_OR_CONSTEXPR constexpr
 #define MF_CONSTEXPR constexpr
 #define MF_CONSTEXPR_14 constexpr
-#define MF_CONSTEXPR_20
+#define MF_CONSTEXPR_20 inline
 #else
 #define MF_CONST_OR_CONSTEXPR constexpr
 #define MF_CONSTEXPR constexpr
-#define MF_CONSTEXPR_14
-#define MF_CONSTEXPR_20
+#define MF_CONSTEXPR_14 inline
+#define MF_CONSTEXPR_20 inline
 #endif
 #else
 #define MF_CONST_OR_CONSTEXPR const
-#define MF_CONSTEXPR
-#define MF_CONSTEXPR_14
-#define MF_CONSTEXPR_20
+#define MF_CONSTEXPR inline
+#define MF_CONSTEXPR_14 inline
+#define MF_CONSTEXPR_20 inline
 #endif
 
 #if MF_CXX_VER >= 201103

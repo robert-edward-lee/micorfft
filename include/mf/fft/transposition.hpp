@@ -68,9 +68,9 @@ public:
                 if(cnt) {
                     tmp = j;
                     while(!checked[perm_idx[j]]) {
-                        p[pi++] = tmp * 2;
+                        p[pi++] = tmp;
                         j = perm_idx[j];
-                        p[pi++] = j * 2;
+                        p[pi++] = j;
                         checked[j] = true;
                     }
                 }
