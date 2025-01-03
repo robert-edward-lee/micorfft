@@ -973,7 +973,6 @@ private:
      */
     DataType rfft_twiddle[RFFT_LEN];
 };
-
 } // namespace mf
 
 #endif // HPP_MF_FFT
