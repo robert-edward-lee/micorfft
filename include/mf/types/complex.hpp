@@ -6,6 +6,7 @@
 
 #define CUSTOM_COMPLEX 0
 #if CUSTOM_COMPLEX
+#include <sstream>
 namespace mf {
 template<typename T> class Complex {
 public:
@@ -137,13 +138,23 @@ private:
     T re;
     T im;
 };
+
+template<class T, class CharT, class Traits>
+std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> &o, const Complex<T> &x) {
+    std::basic_ostringstream<CharT, Traits> s;
+    s.flags(o.flags());
+    s.imbue(o.getloc());
+    s.precision(o.precision());
+    s << "(" << x.real() << (x.imag() < 0 ? " - j" : " + j") << std::abs(x.imag()) << ")";
+    return o << s.str();
+}
 } // namespace mf
 #else
 #include <complex>
 namespace mf {
 template<typename T> class Complex: public std::complex<T> {
 public:
-    MF_CONSTEXPR_14 Complex(T x, T y) MF_NOEXCEPT: std::complex<T>(x, y) {}
+    MF_CONSTEXPR_14 Complex(const T &x, const T &y) MF_NOEXCEPT: std::complex<T>(x, y) {}
     MF_CONSTEXPR_14 Complex(const std::complex<T> &other) MF_NOEXCEPT: std::complex<T>(other) {}
     static MF_CONSTEXPR Complex polar(const T &mag, const T &phase) MF_NOEXCEPT {
         return std::polar(mag, phase);

@@ -31,12 +31,18 @@ public:
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
         cfft<false, true>(data);
     }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
+        cfft<false, true>((DataType(&)[Size * 2]) data);
+    }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
         cfft<true, true>(data);
+    }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
+        cfft<true, true>((DataType(&)[Size * 2]) data);
     }
 
 protected:
@@ -765,6 +771,14 @@ public:
         stage(in, out);
         out[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&in)[Size],
+                                                Complex<DataType> (&out)[Size / 2]) const MF_NOEXCEPT {
+        /* Calculation of RFFT of input */
+        ParentCfft::template cfft<false, true>(in);
+        /* Real FFT extraction */
+        stage(in, (DataType(&)[Size])out);
+        ((DataType *)&out[0])[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
+    }
     /**
      * @param[in] in Выходные данные во временном представлении
      * @param[out] out Входные данные в частотном представлении в положительной области частот
@@ -778,6 +792,13 @@ public:
         /* Complex radix-4 IFFT process */
         ParentCfft::template cfft<true, true>(out);
     }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&in)[Size / 2],
+                                                DataType (&out)[Size]) const MF_NOEXCEPT {
+        /*  Real FFT compression */
+        merge((DataType(&)[Size])in, out);
+        /* Complex radix-4 IFFT process */
+        ParentCfft::template cfft<true, true>(out);
+    }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Прямое комплексное БПФ на месте размером вдвое меньше rfft
@@ -785,12 +806,18 @@ public:
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(DataType (&data)[Size]) const MF_NOEXCEPT {
         ParentCfft::template cfft<false, true>(data);
     }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_forward(Complex<DataType> (&data)[Size / 2]) const MF_NOEXCEPT {
+        ParentCfft::template cfft<false, true>((DataType(&)[Size])data);
+    }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
      * @brief Обратное комплексное БПФ на месте размером вдвое меньше rfft
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(DataType (&data)[Size]) const MF_NOEXCEPT {
         ParentCfft::template cfft<true, true>(data);
+    }
+    MF_OPTIMIZE(3) MF_CONSTEXPR_14 void cfft_inverse(Complex<DataType> (&data)[Size / 2]) const MF_NOEXCEPT {
+        ParentCfft::template cfft<true, true>((DataType(&)[Size])data);
     }
 
 private:

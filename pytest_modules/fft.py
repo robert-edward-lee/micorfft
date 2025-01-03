@@ -145,7 +145,7 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        out = f'test for rfft<{self._data_type.value}, {self._size *2}>::forward with {self._epsilon:.0e} accuracy...\n'
+        out = f'test for rfft<{self._data_type.value}, {self._size * 2}>::forward with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size):
             xn = testing_data[i]
@@ -175,7 +175,7 @@ class Test(object):
         # print('mf:')
         # print(testing_data)
 
-        out = f'test for rfft<{self._data_type.value}, {self._size *2}>::inverse with {self._epsilon:.0e} accuracy...\n'
+        out = f'test for rfft<{self._data_type.value}, {self._size * 2}>::inverse with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
         for i in range(testing_data.size // 2):
             xn = testing_data[i]
@@ -219,27 +219,27 @@ using namespace mf;
 """)
             # cfft
             for size in VALID_FFT_SIZES:
-                f.write(f"""EXPORT_DLL void cfft_forward_{size}_{t.value}({t.value} *p) {{
+                f.write(f"""EXPORT_DLL void cfft_forward_{size}_{t.value}(void *p) {{
     Cfft<{t.value}, {size}> cfft;
-    cfft.forward(*({t.value}(*)[{size * 2}])p);
+    cfft.forward(*(Complex<{t.value}>(*)[{size}])p);
 }}
 
-EXPORT_DLL void cfft_inverse_{size}_{t.value}({t.value} *p) {{
+EXPORT_DLL void cfft_inverse_{size}_{t.value}(void *p) {{
     Cfft<{t.value}, {size}> cfft;
-    cfft.inverse(*({t.value}(*)[{size * 2}])p);
+    cfft.inverse(*(Complex<{t.value}>(*)[{size}])p);
 }}
 
 """)
             # rfft
             for size in VALID_FFT_SIZES:
-                f.write(f"""EXPORT_DLL void rfft_forward_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+                f.write(f"""EXPORT_DLL void rfft_forward_{size * 2}_{t.value}(void *p1, void *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
-    rfft.forward(*({t.value}(*)[{size * 2}])p1, *({t.value}(*)[{size * 2}])p2);
+    rfft.forward(*({t.value}(*)[{size * 2}])p1, *(Complex<{t.value}>(*)[{size}])p2);
 }}
 
-EXPORT_DLL void rfft_inverse_{size * 2}_{t.value}({t.value} *p1, {t.value} *p2) {{
+EXPORT_DLL void rfft_inverse_{size * 2}_{t.value}(void *p1, void *p2) {{
     Rfft<{t.value}, {size * 2}> rfft;
-    rfft.inverse(*({t.value}(*)[{size * 2}])p1, *({t.value}(*)[{size * 2}])p2);
+    rfft.inverse(*(Complex<{t.value}>(*)[{size}])p1, *({t.value}(*)[{size * 2}])p2);
 }}
 
 """)
@@ -270,7 +270,7 @@ def run(file_name):
 
     dll = CDLL(f'./{file_name}.dll')
     # 32 bit floating
-    if cast(getattr(dll, "mf_has_float32"), POINTER(c_int)).contents.value == 1:
+    if c_int.in_dll(dll, 'mf_has_float32'):
         for size in VALID_FFT_SIZES:
             test = Test(dll, size, DataTypes.FLOAT32)
 
@@ -281,7 +281,7 @@ def run(file_name):
             test.rfft_test(x)
 
     # 64 bit floating
-    if cast(getattr(dll, "mf_has_float64"), POINTER(c_int)).contents.value:
+    if c_int.in_dll(dll, 'mf_has_float64'):
         for size in VALID_FFT_SIZES:
             test = Test(dll, size, DataTypes.FLOAT64)
 
