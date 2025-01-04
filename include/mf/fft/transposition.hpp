@@ -5,7 +5,6 @@
 #include <cstring>
 #include <iostream>
 
-#include "mf/basic_math/log2.hpp"
 #include "mf/config.hpp"
 #include "mf/traits.hpp"
 #include "mf/types.hpp"
@@ -19,12 +18,12 @@ namespace mf {
  */
 template<typename IdxType, IdxType N, IdxType Radix> class Transposition {
     MF_STATIC_ASSERT(is_valid_idx_type<IdxType>::value);
-    MF_STATIC_ASSERT((is_pow_of_2<IdxType, N>::value) && N > Radix);
+    MF_STATIC_ASSERT((trait::is_pow_of_2<N>::value) && N > Radix);
     typedef typename uint_fast<IdxType>::type idx_fast_t;
 
 public:
-    static MF_CONST_OR_CONSTEXPR IdxType log2N = log2<IdxType, N>::value;
-    static MF_CONST_OR_CONSTEXPR IdxType log2Radix = log2<IdxType, Radix>::value;
+    static MF_CONST_OR_CONSTEXPR IdxType log2N = trait::log2<N>::value;
+    static MF_CONST_OR_CONSTEXPR IdxType log2Radix = trait::log2<Radix>::value;
     static MF_CONST_OR_CONSTEXPR IdxType bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
 
     MF_CONSTEXPR_14 Transposition() MF_NOEXCEPT {

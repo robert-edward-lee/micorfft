@@ -4,7 +4,7 @@
 #include "mf/traits/conditional.hpp"
 #include "mf/traits/enable_if.hpp"
 #include "mf/traits/integral_constant.hpp"
-#include "mf/traits/is_pow_of_2.hpp"
+#include "mf/traits/math.hpp"
 #include "mf/traits/is_valid_fft_type.hpp"
 #include "mf/traits/is_valid_idx_type.hpp"
 #include "mf/traits/remove_cv.hpp"

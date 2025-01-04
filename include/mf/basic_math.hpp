@@ -5,7 +5,6 @@
 #include <cmath>
 
 #include "mf/basic_math/constants.hpp"
-#include "mf/basic_math/log2.hpp"
 #include "mf/basic_math/trigonometry.hpp"
 
 namespace mf {

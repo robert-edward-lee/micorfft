@@ -1,6 +1,7 @@
 #ifndef HPP_MF_COMPLEX
 #define HPP_MF_COMPLEX
 
+#include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/types/integral.hpp"
 
@@ -12,6 +13,9 @@ template<typename T> class Complex {
 public:
     /* ctors */
     MF_CONSTEXPR Complex(T x = T(0), T y = T(0)) MF_NOEXCEPT: re(x), im(y) {}
+    template<typename U>
+    MF_CONSTEXPR Complex(const Complex<U> &other) MF_NOEXCEPT: re(other.real()), im(other.imag()) {}
+
     MF_CONSTEXPR_14 Complex &operator=(const T &rhs) MF_NOEXCEPT {
         re = rhs;
         im = 0;
@@ -59,6 +63,10 @@ public:
         return re != rhs || im != 0;
     }
     /* arithmetic */
+    MF_CONSTEXPR Complex operator~() const MF_NOEXCEPT {
+        return Complex(re, -im);
+    }
+
     MF_CONSTEXPR_14 Complex &operator+=(const Complex &rhs) MF_NOEXCEPT {
         re += rhs.re;
         im += rhs.im;

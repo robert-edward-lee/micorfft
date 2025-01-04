@@ -70,7 +70,7 @@ protected:
             conjugate<DataType, Size>(data);
         }
 
-        MF_CONST_OR_CONSTEXPR idx_fast_t rem = log2<idx_fast_t, Size>::value % 3;
+        MF_CONST_OR_CONSTEXPR idx_fast_t rem = trait::log2<Size>::value % 3;
         MF_IF_CONSTEXPR(rem == 1) {
             radix8by2((DataType *)&data);
         } else MF_IF_CONSTEXPR(rem == 2) {
