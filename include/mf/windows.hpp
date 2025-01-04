@@ -55,13 +55,13 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     //                           Cosine-sum windows                           //
     ////////////////////////////////////////////////////////////////////////////
-    static void cosine(DataType (&win)[N]) {
+    static void cosine(DataType (&win)[N]) MF_NOEXCEPT {
         using wf::detail::PI;
         for(size_t n = 0; n != N; ++n) {
             win[n] = sin((PI * (float_t(n) + float_t(1) / float_t(2))) / float_t(N));
         }
     }
-    static void bohman(DataType (&win)[N]) {
+    static void bohman(DataType (&win)[N]) MF_NOEXCEPT {
         using wf::detail::PI;
         using wf::detail::INV_PI;
         for(size_t n = 0; n != N; ++n) {
@@ -69,7 +69,7 @@ public:
             win[n] = (float_t(1) - factor) * cos(PI * factor) + INV_PI * sin(PI * factor);
         }
     }
-    template<size_t K> static void cosine_sum(DataType (&win)[N], const float_t (&a)[K]) {
+    template<size_t K> static void cosine_sum(DataType (&win)[N], const float_t (&a)[K]) MF_NOEXCEPT {
         using wf::detail::TWO_PI;
         for(size_t n = 0; n != N; ++n) {
             win[n] = a[0];
@@ -86,32 +86,32 @@ public:
         a[1] = float_t(1) - alpha;
         cosine_sum(win, a);
     }
-    static void hamming(DataType (&win)[N]) {
+    static void hamming(DataType (&win)[N]) MF_NOEXCEPT {
         general_hamming(win, MF_FLOAT_MAX_C(0.54));
     }
-    static void hann(DataType (&win)[N]) {
+    static void hann(DataType (&win)[N]) MF_NOEXCEPT {
         static const float_t a[] = {0.5, 0.5};
         cosine_sum(win, a);
     }
-    static void blackman_generic(DataType (&win)[N], float_t alpha) {
+    static void blackman_generic(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
         static float_t a[3];
         a[0] = (float_t(1) - alpha) / float_t(2);
         a[1] = float_t(1) / float_t(2);
         a[2] = alpha / float_t(2);
         cosine_sum(win, a);
     }
-    static void blackman(DataType (&win)[N]) {
+    static void blackman(DataType (&win)[N]) MF_NOEXCEPT {
         blackman_generic(win, 0.16);
     }
-    static void nuttall(DataType (&win)[N]) {
+    static void nuttall(DataType (&win)[N]) MF_NOEXCEPT {
         static const float_t a[] = {0.3635819, 0.4891775, 0.1365995, 0.0106411};
         cosine_sum(win, a);
     }
-    static void blackmanharris(DataType (&win)[N]) {
+    static void blackmanharris(DataType (&win)[N]) MF_NOEXCEPT {
         static const float_t a[] = {0.35875, 0.48829, 0.14128, 0.01168};
         cosine_sum(win, a);
     }
-    static void flattop(DataType (&win)[N]) {
+    static void flattop(DataType (&win)[N]) MF_NOEXCEPT {
         static const float_t a[] = {0.21557895, 0.41663158, 0.277263158, 0.083578947, 0.006947368};
         cosine_sum(win, a);
     }
@@ -119,14 +119,14 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     //                           Adjustable windows                           //
     ////////////////////////////////////////////////////////////////////////////
-    static void gaussian(DataType (&win)[N], float_t sigma) {
+    static void gaussian(DataType (&win)[N], float_t sigma) MF_NOEXCEPT {
         static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - float_t(1)) / float_t(2);
         for(size_t n = 0; n != N; ++n) {
             const float_t x = float_t(n) - subtractor;
             win[n] = exp(-(float_t(1) / float_t(2)) * x * x / (sigma * sigma));
         }
     }
-    static void tukey(DataType (&win)[N], float_t alpha) {
+    static void tukey(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
         using wf::detail::TWO_PI;
 
         if(alpha <= 0.0) {
@@ -148,13 +148,13 @@ public:
             win[n] = win[N - n - 1];
         }
     }
-    static void kaiser(DataType (&win)[N], float_t beta) {
+    static void kaiser(DataType (&win)[N], float_t beta) MF_NOEXCEPT {
         for(size_t n = 0; n != N; ++n) {
             const float_t factor = float_t(2) * float_t(n) / (float_t(N) - float_t(1)) - float_t(1);
             win[n] = bessel::i0(beta * sqrt(float_t(1) - factor * factor)) / bessel::i0(beta);
         }
     }
-    static void kaiser_bessel_derived(DataType (&win)[N], float_t beta) {
+    static void kaiser_bessel_derived(DataType (&win)[N], float_t beta) MF_NOEXCEPT {
         Windows<DataType, N / 2 + 1>::kaiser((DataType(&)[N / 2 + 1]) win, beta);
 
         for(size_t n = 1; n != N / 2 + 1; ++n) {
@@ -167,7 +167,7 @@ public:
             win[N - 1 - n] = win[n];
         }
     }
-    static void poisson(DataType (&win)[N], float_t tau) {
+    static void poisson(DataType (&win)[N], float_t tau) MF_NOEXCEPT {
         static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - float_t(1)) / float_t(2);
         for(size_t n = 0; n != N; ++n) {
             win[n] = exp(-abs(float_t(n) - subtractor) / tau);
@@ -177,7 +177,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     //                              Hybrid windows                             //
     ////////////////////////////////////////////////////////////////////////////
-    static void barthann(DataType (&win)[N]) {
+    static void barthann(DataType (&win)[N]) MF_NOEXCEPT {
         using wf::detail::TWO_PI;
         for(size_t n = 0; n != N; ++n) {
             float_t factor = abs(float_t(n) / (float_t(N) - float_t(1)) - float_t(1) / float_t(2));
@@ -188,7 +188,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     //                              Other windows                             //
     ////////////////////////////////////////////////////////////////////////////
-    static void lanczos(DataType (&win)[N]) {
+    static void lanczos(DataType (&win)[N]) MF_NOEXCEPT {
         for(size_t n = 0; n != N; ++n) {
             win[n] = sinc(float_t(2) * float_t(n) / (float_t(N) - float_t(1)) - float_t(1));
         }

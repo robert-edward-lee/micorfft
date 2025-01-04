@@ -6,8 +6,8 @@
 
 namespace mf {
 template<typename DataType, size_t Size>
-MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
-max_element(const DataType (&data)[Size]) {
+MF_NODISCARD MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+max_element(const DataType (&data)[Size]) MF_NOEXCEPT {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
@@ -51,8 +51,8 @@ max_element(const DataType (&data)[Size]) {
     return max_idx;
 }
 template<typename DataType, size_t Size>
-MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
-min_element(const DataType (&data)[Size]) {
+MF_NODISCARD MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+min_element(const DataType (&data)[Size]) MF_NOEXCEPT {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;

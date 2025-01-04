@@ -21,28 +21,28 @@ public:
         return Complex(mag * cos(phase), mag * sin(phase));
     }
     /* getters/setters */
-    MF_CONSTEXPR_14 T real() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR_14 T real() const MF_NOEXCEPT {
         return re;
     }
-    MF_CONSTEXPR_14 T &real() MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR_14 T &real() MF_NOEXCEPT {
         return re;
     }
-    MF_CONSTEXPR_14 T imag() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR_14 T imag() const MF_NOEXCEPT {
         return im;
     }
-    MF_CONSTEXPR_14 T &imag() MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR_14 T &imag() MF_NOEXCEPT {
         return im;
     }
-    MF_CONSTEXPR Complex conj() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR Complex conj() const MF_NOEXCEPT {
         return Complex(re, -im);
     }
-    MF_CONSTEXPR T mag_sqr() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR T mag_sqr() const MF_NOEXCEPT {
         return re * re + im * im;
     }
-    MF_CONSTEXPR T mag() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR T mag() const MF_NOEXCEPT {
         return sqrt(mag_sqr());
     }
-    MF_CONSTEXPR T phase() const MF_NOEXCEPT {
+    MF_NODISCARD MF_CONSTEXPR T phase() const MF_NOEXCEPT {
         return atan2(im, re);
     }
     /*  */

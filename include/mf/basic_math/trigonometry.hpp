@@ -10,11 +10,11 @@ namespace mf {
 using std::sin;
 using std::cos;
 
-template<typename T, bool Norm> MF_CONSTEXPR_14 T sinc(T x) {
+template<typename T, bool Norm> MF_CONSTEXPR_14 T sinc(T x) MF_NOEXCEPT {
     const T arg = Norm ? (pi<T>::value * x) : x;
     return x != T(0) ? sin(arg) / arg : T(1);
 }
-template<typename T> MF_CONSTEXPR T sinc(T x) {
+template<typename T> MF_CONSTEXPR T sinc(T x) MF_NOEXCEPT {
     return sinc<T, true>(x);
 }
 } // namespace mf

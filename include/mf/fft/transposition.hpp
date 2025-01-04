@@ -50,7 +50,7 @@ public:
         }
     }
 
-    MF_CONSTEXPR_14 IdxType fill_table(IdxType *p) const MF_NOEXCEPT {
+    MF_CONSTEXPR_14 void fill_table(IdxType *p) const MF_NOEXCEPT {
         std::bitset<N> checked;
         IdxType pi = 0, tmp;
         for(idx_fast_t i = 0; i != N; ++i) {
@@ -76,7 +76,6 @@ public:
                 }
             }
         }
-        return pi;
     }
 
 private:

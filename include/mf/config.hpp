@@ -40,7 +40,10 @@
 #define MF_HAS_ATTRIBUTE(a) 0
 #endif
 
-#if defined(__has_cpp_attribute)
+#if defined(__STRICT_ANSI__)
+#define MF_HAS_CXX_ATTRIBUTE(a) 0
+#define MF_HAS_CXX_ATTRIBUTE_VER(a, v) 0
+#elif defined(__has_cpp_attribute)
 #define MF_HAS_CXX_ATTRIBUTE(a) __has_cpp_attribute(a)
 #define MF_HAS_CXX_ATTRIBUTE_VER(a, v) (__has_cpp_attribute(a) >= (v))
 #else

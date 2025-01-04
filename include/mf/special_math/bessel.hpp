@@ -5,7 +5,7 @@
 #include "mf/config.hpp"
 
 namespace mf { namespace bessel {
-template<typename T, size_t N> MF_CONSTEXPR_14 T chbevl(T x, const T (&coeff)[N]) {
+template<typename T, size_t N> MF_NODISCARD MF_CONSTEXPR_14 T chbevl(T x, const T (&coeff)[N]) MF_NOEXCEPT {
     T b0 = coeff[0];
     T b1 = 0;
     T b2;
@@ -17,7 +17,7 @@ template<typename T, size_t N> MF_CONSTEXPR_14 T chbevl(T x, const T (&coeff)[N]
     return (b0 - b2) / T(2);
 }
 
-template<typename T> MF_CONSTEXPR_14 T i0(T x) {
+template<typename T> MF_NODISCARD MF_CONSTEXPR_14 T i0(T x) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR T A[] = {
         -4.41534164647933937950e-18, 3.33079451882223809783e-17,  -2.43127984654795469359e-16,
         1.71539128555513303061e-15,  -1.16853328779934516808e-14, 7.67618549860493561688e-14,

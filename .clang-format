@@ -11,8 +11,7 @@ AlignEscapedNewlines: DontAlign
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: Never
 QualifierAlignment: Custom
-QualifierOrder:
-    ["static", "inline", "constexpr", "const", "volatile", "type", "restrict"]
+QualifierOrder: [static, inline, constexpr, const, volatile, type, restrict]
 # break lines settings
 AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false

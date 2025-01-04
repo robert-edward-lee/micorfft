@@ -11,7 +11,8 @@ DEF_FLAGS = $(addprefix -D,$(DEFINES))
 OPT_FLAGS = $(addprefix -O,$(OPT_LEVEL))
 WARN_FLAGS = -Wall -Wextra -pedantic
 DEPEND_FLAGS =
-EXTRA_FLAGS =
+# quad float literal
+EXTRA_FLAGS += -fext-numeric-literals
 
 LDLIBS = $(addprefix -l,$(LIBS))
 
