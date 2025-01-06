@@ -53,6 +53,7 @@ TESTS = [
     ('tukey', 'tukey', 0.3, 0.5, 0.8),
     ('kaiser', 'kaiser', 1.0, 4.0, 9.0),
     ('kaiser_bessel_derived', 'kaiser_bessel_derived', 1.0, 4.0, 9.0),
+    # ('chebyshev', 'chebwin', 50.0, 90.0, 120.0),
     ('poisson', 'exponential', 0.3, 0.5, 0.8),
 
     ('barthann', 'barthann'),
@@ -176,7 +177,7 @@ def run(file_name):
                             print(out_str)
                     else:
                         for alpha in t[2:]:
-                            out_str = f'test for Windows<{d.value}, {s}>::{
+                            out_str = f'test for Windows<{d.value}, {s}>::{\
                                 t[0]}({alpha}) with {epsilon:.0e} accuracy...\n'
                             c_wf(c_win, c_double(alpha))
                             if t[1] == 'exponential':

@@ -24,6 +24,25 @@ public:
     static MF_CONSTEXPR Complex polar(const T &mag, const T &phase) MF_NOEXCEPT {
         return Complex(mag * cos(phase), mag * sin(phase));
     }
+    static MF_CONSTEXPR Complex pow(const Complex &a, const Complex &z) MF_NOEXCEPT {
+        T absa = a.mag();
+        if(absa == T(0)) {
+            return Complex();
+        }
+
+        T x = z.real();
+        T y = z.imag();
+        T arga = a.phase();
+        T r = std::pow<T>(absa, x);
+        T theta = x * arga;
+        if(y != T(0)) {
+            r = r * exp(-y * arga);
+            theta = theta + y * log(absa);
+        }
+
+        return Complex(r * cos(theta), r * sin(theta));
+    }
+
     /* getters/setters */
     MF_NODISCARD MF_CONSTEXPR_14 T real() const MF_NOEXCEPT {
         return re;

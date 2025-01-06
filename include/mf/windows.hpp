@@ -4,13 +4,109 @@
 #include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/special_math.hpp"
+#include "mf/traits.hpp"
 #include "mf/types.hpp"
+
+#define WF_INCR_REV(ri, i, size) ((ri) = (ri) ^ ((size) - (((size) / 2) / (~(i) & ((i) + 1)))))
 
 namespace mf {
 namespace wf { namespace detail {
 static MF_CONST_OR_CONSTEXPR float_max_t PI = pi<float_max_t>::value;
 static MF_CONST_OR_CONSTEXPR float_max_t TWO_PI = two_pi<float_max_t>::value;
 static MF_CONST_OR_CONSTEXPR float_max_t INV_PI = inv_pi<float_max_t>::value;
+
+template<typename DataType, size_t Size> void fft_radix2(Complex<DataType> (&z)[Size]) {
+    Complex<DataType> ww[Size / 2];
+    for(size_t i = 0; i < Size / 2; ++i) {
+        ww[i] = Complex<DataType>::polar(1, -TWO_PI * i / Size);
+    }
+
+    /* Permute the input elements (bit-reversal of indices). */
+    for(size_t i = 0, ri = 0; i < Size; WF_INCR_REV(ri, i, Size), ++i) {
+        if(i < ri) {
+            std::swap(z[i], z[ri]);
+        }
+    }
+
+    /* Perform FFTs */
+    /* we start with (size / 2) FFTs of 2 base elements. */
+    size_t num_subffts = Size / 2;
+    size_t size_subfft = 2;
+    while(num_subffts != 0) {
+        for(size_t i = 0; i < num_subffts; ++i) {
+            size_t subfft_offset = size_subfft * i;
+
+            for(size_t j = 0; j < size_subfft / 2; ++j) {
+                size_t target1 = subfft_offset + j;
+                size_t target2 = subfft_offset + j + size_subfft / 2;
+
+                size_t left = target1;
+                size_t right = target2;
+
+                const size_t ww_index = (j * num_subffts);
+
+                const Complex<DataType> w = ww[ww_index];
+
+                const Complex<DataType> zleft = z[left];
+                const Complex<DataType> w_zright = w * z[right];
+
+                z[target1] = zleft + w_zright;
+                z[target2] = zleft - w_zright;
+            }
+        }
+
+        num_subffts /= 2;
+        size_subfft *= 2;
+    }
+}
+
+template<typename DataType, size_t N, size_t M>
+void czt(Complex<DataType> (&z)[N], Complex<DataType> (&ztrans)[M], Complex<DataType> w, Complex<DataType> a) {
+    MF_CONST_OR_CONSTEXPR size_t FFT_SIZE = trait::clp2<N + M - 1>::value;
+
+    Complex<DataType> zz[FFT_SIZE];
+    for(size_t k = 0; k < FFT_SIZE; ++k) {
+        if(k < N) {
+            zz[k] = Complex<float_t>::pow(w, 0.5 * k * k) / Complex<float_t>::pow(a, k) * z[k];
+        } else {
+            zz[k] = 0;
+        }
+    }
+    fft_radix2(zz);
+
+    Complex<DataType> w2[FFT_SIZE];
+    for(size_t k = 0; k < FFT_SIZE; ++k) {
+        if(k < N + M - 1) {
+            const size_t kshift = k - (N - 1);
+            w2[k] = Complex<float_t>::pow(w, -0.5 * kshift * kshift);
+        } else {
+            w2[k] = 0;
+        }
+    }
+    fft_radix2(w2);
+
+    for(size_t k = 0; k < FFT_SIZE; ++k) {
+        zz[k] *= w2[k];
+    }
+    fft_radix2(zz);
+
+    /* Make an inverse FFT from the forward FFT.
+        - scale all elements by 1 / fft_size;
+        - reverse elements 1 .. (fft_size - 1).
+    */
+    for(size_t k = 0; k < FFT_SIZE; ++k) {
+        zz[k] /= FFT_SIZE;
+    }
+    for(size_t k = 1; k < FFT_SIZE - k; ++k) {
+        const size_t kswap = FFT_SIZE - k;
+        std::swap(zz[k], zz[kswap]);
+    }
+
+    for(size_t k = 0; k < M; ++k) {
+        const Complex<DataType> w3 = Complex<float_t>::pow(w, (0.5 * k * k));
+        ztrans[k] = w3 * zz[N - 1 + k];
+    }
+}
 }} // namespace wf::detail
 template<typename DataType, size_t N> class Windows {
     typedef float_max_t float_t;
@@ -165,6 +261,78 @@ public:
         }
         for(size_t n = 0; n != N / 2 + 1; ++n) {
             win[N - 1 - n] = win[n];
+        }
+    }
+    static void chebyshev(DataType (&win)[N], float_t alpha) {
+        using wf::detail::PI;
+        using wf::detail::TWO_PI;
+
+        size_t order = N - 1;
+        float_t amp = pow(10.0, abs(alpha) / 20.0);
+        float_t beta = cosh(acosh(amp) / order);
+        Complex<float_t> W[N];
+        MF_IF_CONSTEXPR(N % 2) {
+            for(size_t n = 0; n < N; ++n) {
+                float_t x = beta * cos(PI * n / N);
+                if(x > 1.0) {
+                    W[n] = (cosh(order * acosh(x)));
+                } else if(x < -1.0) {
+                    W[n] = (cosh(order * acosh(-x)));
+                } else {
+                    W[n] = (cos(order * acos(x)));
+                }
+            }
+            wf::detail::czt<float_t, N, N>(W, W, Complex<float_t>::polar(1, -TWO_PI / N), 1.0);
+
+            /*
+            Example: n = 11
+                w[0] w[1] w[2] w[3] w[4] w[5] w[6] w[7] w[8] w[9] w[10]
+                                        =
+                p[5] p[4] p[3] p[2] p[1] p[0] p[1] p[2] p[3] p[4] p[5]
+            */
+            size_t h = (N - 1) / 2;
+            for(size_t n = 0; n < N; ++n) {
+                size_t k = (n <= h) ? (h - n) : (n - h);
+                win[n] = W[k].real();
+            }
+        } else {
+            for(size_t n = 0; n < N; ++n) {
+                const float_t x = beta * cos(PI * n / N);
+                const Complex<float_t> z = Complex<float_t>::polar(1, PI * n / N);
+                if(x > 1) {
+                    W[n] = z * cosh(order * acosh(x));
+                } else if(x < -1) {
+                    W[n] = -z * cosh(order * acosh(-x));
+                } else {
+                    W[n] = z * cos(order * acos(x));
+                }
+            }
+
+            MF_IF_CONSTEXPR(trait::is_pow_of_2<N>::value) {
+                wf::detail::fft_radix2(W);
+            } else {
+                wf::detail::czt<float_t, N, N>(W, W, Complex<float_t>::polar(1, -TWO_PI / N), float_t(1));
+            }
+
+            /*
+            Example: n = 10
+                w[0] w[1] w[2] w[3] w[4] w[5] w[6] w[7] w[8] w[9]
+                                        =
+                p[5] p[4] p[3] p[2] p[1] p[1] p[2] p[3] p[4] p[5]
+            */
+            size_t h = N / 2;
+            for(size_t n = 0; n < N; ++n) {
+                size_t k = (n < h) ? (h - n) : (n - h + 1);
+                win[n] = W[k].real();
+            }
+        }
+
+        float_t maxw = win[0];
+        for(size_t n = 1; n < N; ++n) {
+            maxw = max<float_t>(maxw, win[n]);
+        }
+        for(size_t n = 0; n < N; ++n) {
+            win[n] /= maxw;
         }
     }
     static void poisson(DataType (&win)[N], float_t tau) MF_NOEXCEPT {

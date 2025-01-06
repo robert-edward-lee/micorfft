@@ -9,6 +9,7 @@
 namespace mf {
 using std::sin;
 using std::cos;
+using std::acos;
 
 template<typename T, bool Norm> MF_CONSTEXPR_14 T sinc(T x) MF_NOEXCEPT {
     const T arg = Norm ? (pi<T>::value * x) : x;
