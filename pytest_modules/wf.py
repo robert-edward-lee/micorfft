@@ -102,12 +102,12 @@ using namespace mf;
                     if not has_alpha:
                         f.write(f"""
 EXPORT_DLL void {t[0]}_{s}_{d.value}(void *p) {{
-    Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p);
+    windows::{t[0]}(*({d.value} (*)[{s}])p);
 }}""")
                     else:
                         f.write(f"""
 EXPORT_DLL void {t[0]}_{s}_{d.value}(void *p, double alpha) {{
-    Windows<{d.value}, {s}>::{t[0]}(*({d.value} (*)[{s}])p, alpha);
+    windows::{t[0]}(*({d.value} (*)[{s}])p, alpha);
 }}""")
 
             f.write("""
