@@ -39,26 +39,39 @@ template<int Size> struct UIntTypeWidth {
 typedef UIntTypeWidth<8>::type uint8_t;
 typedef UIntTypeWidth<16>::type uint16_t;
 typedef UIntTypeWidth<32>::type uint32_t;
+typedef UIntTypeWidth<64>::type uint64_t;
 
 namespace detail {
+template<size_t Size> struct uint_fast_helper {};
 #if MF_CXX_VER > 199711L
-template<typename IdxType> struct uint_fast_helper {};
-template<> struct uint_fast_helper<uint8_t> {
+template<> struct uint_fast_helper<1> {
     typedef std::uint_fast8_t type;
 };
-template<> struct uint_fast_helper<uint16_t> {
+template<> struct uint_fast_helper<2> {
     typedef std::uint_fast16_t type;
 };
-template<> struct uint_fast_helper<uint32_t> {
+template<> struct uint_fast_helper<4> {
     typedef std::uint_fast32_t type;
 };
+template<> struct uint_fast_helper<8> {
+    typedef std::uint_fast64_t type;
+};
 #else
-template<typename IdxType> struct uint_fast_helper {
+template<> struct uint_fast_helper<1> {
     typedef unsigned type;
+};
+template<> struct uint_fast_helper<2> {
+    typedef unsigned type;
+};
+template<> struct uint_fast_helper<4> {
+    typedef unsigned type;
+};
+template<> struct uint_fast_helper<8> {
+    typedef uint64_t type;
 };
 #endif
 } // namespace detail
-template<typename IdxType> struct uint_fast: detail::uint_fast_helper<typename remove_cv<IdxType>::type> {};
+template<typename IdxType> struct uint_fast: detail::uint_fast_helper<sizeof(IdxType)> {};
 
 template<size_t Size> struct idx_type_chooser {
     typedef
