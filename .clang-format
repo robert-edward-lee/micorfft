@@ -1,12 +1,16 @@
 ---
 # base settings
 Language: Cpp
+Standard: Cpp03
 ColumnLimit: 120
+ReflowComments: true
+LineEnding: LF
 # indent settings
 IndentWidth: 4
 AccessModifierOffset: -4
 IndentCaseLabels: true
 # alignment settings
+AlignArrayOfStructures: Right
 AlignEscapedNewlines: DontAlign
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: Never
@@ -21,8 +25,8 @@ AllowShortBlocksOnASingleLine: Empty
 AllowShortFunctionsOnASingleLine: Empty
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
-InsertBraces: true
 CompactNamespaces: true
+InsertBraces: true
 # insert/remove spaces settings
 BitFieldColonSpacing: After
 SpaceAfterTemplateKeyword: false
