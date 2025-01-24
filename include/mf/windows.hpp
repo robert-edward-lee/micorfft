@@ -1,15 +1,11 @@
 #ifndef HPP_MF_WINDOWS
 #define HPP_MF_WINDOWS
 
-#include <cstdlib>
-
 #include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/special_math.hpp"
 #include "mf/traits/math.hpp"
 #include "mf/types.hpp"
-
-#define MF_INCR_REV(ri, i, size) ((ri) ^= (size) - (((size) / 2) / (~(i) & ((i) + 1))))
 
 namespace mf { namespace windows {
 typedef float_max_t float_t;
@@ -20,6 +16,123 @@ static MF_CONST_OR_CONSTEXPR float_t HALF = ONE / TWO;
 static MF_CONST_OR_CONSTEXPR float_t PI = pi<float_t>::value;
 static MF_CONST_OR_CONSTEXPR float_t TWO_PI = two_pi<float_t>::value;
 static MF_CONST_OR_CONSTEXPR float_t INV_PI = inv_pi<float_t>::value;
+
+namespace detail {
+template<typename T, T N> class FftIdx {
+public:
+    MF_CONSTEXPR FftIdx() MF_NOEXCEPT: forward(T(0)), reverse(T(0)) {}
+
+    MF_CONSTEXPR_14 FftIdx &operator++() MF_NOEXCEPT {
+        reverse ^= N - ((N / 2) / (~forward & (forward + 1)));
+        ++forward;
+        return *this;
+    }
+    MF_CONSTEXPR bool operator!=(const T &other) const MF_NOEXCEPT {
+        return forward != other;
+    }
+
+    MF_CONSTEXPR const T &i() const MF_NOEXCEPT {
+        return forward;
+    }
+    MF_CONSTEXPR const T &r() const MF_NOEXCEPT {
+        return reverse;
+    }
+
+private:
+    T forward;
+    T reverse;
+};
+
+template<size_t N> void fft_radix2(Complex<float_t> (&z)[N]) MF_NOEXCEPT {
+    /* поворотные коэффициенты */
+    Complex<float_t> ww[N / 2 ? N / 2 : 1];
+    for(size_t i = 0; i < N / 2; ++i) {
+        ww[i] = Complex<float_t>::polar(ONE, -TWO_PI * float_t(i) / float_t(N));
+    }
+
+    /* перестановка элементов */
+    for(FftIdx<size_t, N> fft_idx; fft_idx != N; ++fft_idx) {
+        if(fft_idx.i() < fft_idx.r()) {
+            std::swap(z[fft_idx.i()], z[fft_idx.r()]);
+        }
+    }
+
+    /* преобразование */
+    size_t num_subffts = N / 2;
+    size_t size_subfft = 2;
+    while(num_subffts) {
+        for(size_t i = 0; i < num_subffts; ++i) {
+            const size_t subfft_offset = size_subfft * i;
+
+            for(size_t j = 0; j < size_subfft / 2; ++j) {
+                const size_t target1 = subfft_offset + j;
+                const size_t target2 = subfft_offset + j + size_subfft / 2;
+
+                const size_t left = target1;
+                const size_t right = target2;
+
+                const size_t ww_index = (j * num_subffts);
+
+                const Complex<float_t> w = ww[ww_index];
+
+                const Complex<float_t> zleft = z[left];
+                const Complex<float_t> w_zright = w * z[right];
+
+                z[target1] = zleft + w_zright;
+                z[target2] = zleft - w_zright;
+            }
+        }
+
+        num_subffts /= 2;
+        size_subfft *= 2;
+    }
+}
+template<size_t N, size_t M>
+void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_t> w, Complex<float_t> a) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<N + M - 1>::value;
+
+    Complex<float_t> zz[fft_size];
+    for(size_t k = 0; k < fft_size; ++k) {
+        if(k < N) {
+            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * z[k];
+        } else {
+            zz[k] = 0;
+        }
+    }
+    fft_radix2(zz);
+
+    Complex<float_t> w2[fft_size];
+    for(size_t k = 0; k < fft_size; ++k) {
+        if(k < N + M - 1) {
+            const int kshift = k - (N - 1);
+
+            w2[k] = w.pow(-HALF * float_t(kshift) * float_t(kshift));
+        } else {
+            w2[k] = 0;
+        }
+    }
+    fft_radix2(w2);
+
+    for(size_t k = 0; k < fft_size; ++k) {
+        zz[k] *= w2[k];
+    }
+    fft_radix2(zz);
+
+    /* обратное БПФ из прямого */
+    for(size_t k = 0; k < fft_size; ++k) {
+        zz[k] /= fft_size;
+    }
+    for(size_t k = 1; k < fft_size - k; ++k) {
+        const size_t kswap = fft_size - k;
+        std::swap(zz[k], zz[kswap]);
+    }
+
+    for(size_t k = 0; k < M; ++k) {
+        const Complex<float_t> w3 = w.pow(HALF * float_t(k) * float_t(k));
+        ztrans[k] = w3 * zz[N - 1 + k];
+    }
+}
+} // namespace detail
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                  B-spline windows                                                  //
@@ -181,98 +294,6 @@ template<typename DataType, size_t N> void kaiser_bessel_derived(DataType (&win)
         win[N - 1 - n] = win[n];
     }
 }
-
-namespace detail {
-template<size_t N> void fft_radix2(Complex<float_t> (&z)[N]) MF_NOEXCEPT {
-    /* поворотные коэффициенты */
-    Complex<float_t> ww[N / 2 ? N / 2 : 1];
-    for(size_t i = 0; i < N / 2; ++i) {
-        ww[i] = Complex<float_t>::polar(ONE, -TWO_PI * float_t(i) / float_t(N));
-    }
-
-    /* перестановка элементов */
-    for(size_t i = 0, ri = 0; i < N; MF_INCR_REV(ri, i, N), ++i) {
-        if(i < ri) {
-            std::swap(z[i], z[ri]);
-        }
-    }
-
-    /* преобразование */
-    size_t num_subffts = N / 2;
-    size_t size_subfft = 2;
-    while(num_subffts) {
-        for(size_t i = 0; i < num_subffts; ++i) {
-            const size_t subfft_offset = size_subfft * i;
-
-            for(size_t j = 0; j < size_subfft / 2; ++j) {
-                const size_t target1 = subfft_offset + j;
-                const size_t target2 = subfft_offset + j + size_subfft / 2;
-
-                const size_t left = target1;
-                const size_t right = target2;
-
-                const size_t ww_index = (j * num_subffts);
-
-                const Complex<float_t> w = ww[ww_index];
-
-                const Complex<float_t> zleft = z[left];
-                const Complex<float_t> w_zright = w * z[right];
-
-                z[target1] = zleft + w_zright;
-                z[target2] = zleft - w_zright;
-            }
-        }
-
-        num_subffts /= 2;
-        size_subfft *= 2;
-    }
-}
-template<size_t N, size_t M>
-void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_t> w, Complex<float_t> a) MF_NOEXCEPT {
-    MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<N + M - 1>::value;
-
-    Complex<float_t> zz[fft_size];
-    for(size_t k = 0; k < fft_size; ++k) {
-        if(k < N) {
-            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * z[k];
-        } else {
-            zz[k] = 0;
-        }
-    }
-    fft_radix2(zz);
-
-    Complex<float_t> w2[fft_size];
-    for(size_t k = 0; k < fft_size; ++k) {
-        if(k < N + M - 1) {
-            const int kshift = k - (N - 1);
-
-            w2[k] = w.pow(-HALF * float_t(kshift) * float_t(kshift));
-        } else {
-            w2[k] = 0;
-        }
-    }
-    fft_radix2(w2);
-
-    for(size_t k = 0; k < fft_size; ++k) {
-        zz[k] *= w2[k];
-    }
-    fft_radix2(zz);
-
-    /* обратное БПФ из прямого */
-    for(size_t k = 0; k < fft_size; ++k) {
-        zz[k] /= fft_size;
-    }
-    for(size_t k = 1; k < fft_size - k; ++k) {
-        const size_t kswap = fft_size - k;
-        std::swap(zz[k], zz[kswap]);
-    }
-
-    for(size_t k = 0; k < M; ++k) {
-        const Complex<float_t> w3 = w.pow(HALF * float_t(k) * float_t(k));
-        ztrans[k] = w3 * zz[N - 1 + k];
-    }
-}
-} // namespace detail
 template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR size_t order = N - 1;
     const float_t amp = pow(float_t(10), abs(alpha) / float_t(20));
