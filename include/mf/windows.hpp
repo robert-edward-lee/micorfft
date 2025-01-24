@@ -202,8 +202,7 @@ template<typename DataType, size_t N> void hamming(DataType (&win)[N]) MF_NOEXCE
     general_hamming(win, MF_FLOAT_MAX_C(0.54));
 }
 template<typename DataType, size_t N> void hann(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {HALF, HALF};
-    cosine_sum(win, a);
+    general_hamming(win, HALF);
 }
 template<typename DataType, size_t N> void blackman_generic(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
     static float_t a[3];

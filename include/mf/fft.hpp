@@ -29,7 +29,7 @@ public:
      * @brief Прямое комплексное БПФ на месте
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
-        cfft<false, true>((Complex<DataType(&)[Size]>)data);
+        cfft<false, true>((Complex<DataType>(&)[Size])data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
         cfft<false, true>(data);
@@ -39,7 +39,7 @@ public:
      * @brief Обратное комплексное БПФ на месте
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&data)[Size * 2]) const MF_NOEXCEPT {
-        cfft<true, true>((Complex<DataType(&)[Size]>)data);
+        cfft<true, true>((Complex<DataType>(&)[Size])data);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&data)[Size]) const MF_NOEXCEPT {
         cfft<true, true>(data);
@@ -101,23 +101,23 @@ private:
     void operator=(Cfft &&) MF_DELETED;
 #endif
     /**
-     * @tparam x Размер БПФ
+     * @tparam X Размер БПФ
      * @brief Пока такой вот костыль для статического выделения памяти под таблицу индексов перестановок
      */
-    template<idx_t x> struct bit_rev_len_helper {
+    template<idx_t X> struct bit_rev_len_helper {
         /**
          * @brief Размер таблицы индексов перестановок в зависимости от размера БПФ
          */
-        static MF_CONST_OR_CONSTEXPR idx_t value = x == 16   ? 20
-                                                 : x == 32   ? 48
-                                                 : x == 64   ? 56
-                                                 : x == 128  ? 208
-                                                 : x == 256  ? 440
-                                                 : x == 512  ? 448
-                                                 : x == 1024 ? 1800
-                                                 : x == 2048 ? 3808
-                                                 : x == 4096 ? 4032
-                                                 : x == 8192 ? 14576
+        static MF_CONST_OR_CONSTEXPR idx_t value = X == 16   ? 20
+                                                 : X == 32   ? 48
+                                                 : X == 64   ? 56
+                                                 : X == 128  ? 208
+                                                 : X == 256  ? 440
+                                                 : X == 512  ? 448
+                                                 : X == 1024 ? 1800
+                                                 : X == 2048 ? 3808
+                                                 : X == 4096 ? 4032
+                                                 : X == 8192 ? 14576
                                                              : 0;
     };
     /**
