@@ -53,6 +53,7 @@ TESTS = [
     ('tukey', 'tukey', 0.3, 0.5, 0.8),
     ('kaiser', 'kaiser', 1.0, 4.0, 9.0),
     ('kaiser_bessel_derived', 'kaiser_bessel_derived', 1.0, 4.0, 9.0),
+    ('chebyshev', 'chebwin', 50.0, 90.0, 120.0),
     ('poisson', 'exponential', 0.3, 0.5, 0.8),
 
     ('barthann', 'barthann'),
@@ -150,7 +151,11 @@ def run(file_name):
                         epsilon = 1e-6
                     elif d == DataTypes.FLOAT64:
                         c_win = (c_double * s)()
-                        epsilon = 1e-14
+                        if t[0] == 'chebyshev':
+                            epsilon = 1e-10
+                        else:
+                            epsilon = 1e-14
+
                     # функция из dll
                     c_fn_name = f'{t[0]}_{s}_{d.value}'
                     c_wf = getattr(dll, c_fn_name)

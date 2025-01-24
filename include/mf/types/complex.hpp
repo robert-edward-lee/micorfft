@@ -1,13 +1,12 @@
 #ifndef HPP_MF_COMPLEX
 #define HPP_MF_COMPLEX
 
+#include <sstream>
+
 #include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/types/integral.hpp"
 
-#define CUSTOM_COMPLEX 1
-#if CUSTOM_COMPLEX
-#include <sstream>
 namespace mf {
 template<typename T> class Complex {
 public:
@@ -48,6 +47,22 @@ public:
     }
     MF_NODISCARD MF_CONSTEXPR T phase() const MF_NOEXCEPT {
         return atan2(im, re);
+    }
+    MF_NODISCARD MF_CONSTEXPR_14 Complex pow(const Complex &z) const MF_NOEXCEPT {
+        if(re == T(0) && im == T(0)) {
+            return Complex();
+        }
+
+        T abs = mag();
+        T arg = phase();
+        T r = ::pow(abs, z.re);
+        T theta = z.re * arg;
+        if(im != T(0)) {
+            r = r * exp(-z.im * arg);
+            theta = theta + z.im * log(abs);
+        }
+
+        return Complex(r * cos(theta), r * sin(theta));
     }
     /*  */
     MF_CONSTEXPR bool operator==(const Complex &rhs) const MF_NOEXCEPT {
@@ -157,22 +172,7 @@ std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> 
     s << "(" << x.real() << (x.imag() < 0 ? " - j" : " + j") << abs(x.imag()) << ")";
     return o << s.str();
 }
-} // namespace mf
-#else
-#include <complex>
-namespace mf {
-template<typename T> class Complex: public std::complex<T> {
-public:
-    MF_CONSTEXPR_14 Complex(const T &x, const T &y) MF_NOEXCEPT: std::complex<T>(x, y) {}
-    MF_CONSTEXPR_14 Complex(const std::complex<T> &other) MF_NOEXCEPT: std::complex<T>(other) {}
-    static MF_CONSTEXPR Complex polar(const T &mag, const T &phase) MF_NOEXCEPT {
-        return std::polar(mag, phase);
-    }
-};
-} // namespace mf
-#endif
 
-namespace mf {
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;

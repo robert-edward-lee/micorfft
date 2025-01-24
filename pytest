@@ -23,8 +23,8 @@ if args.generate:
 
             try:
                 module.gen(f'c_wrapper_{module_name}')
-            except AttributeError:
-                print(f'{full_module_name} gen')
+            except AttributeError as e:
+                print(f'Error({full_module_name}) gen: {e}')
 elif args.run:
     for filename in os.listdir(PYTEST_DIR):
         if filename.endswith('.py') and not filename.startswith('__'):
@@ -39,5 +39,5 @@ elif args.run:
 
             try:
                 module.run(f'c_wrapper_{module_name}')
-            except AttributeError:
-                print(f'{full_module_name} run')
+            except AttributeError as e:
+                print(f'Error({full_module_name}) run: {e}')
