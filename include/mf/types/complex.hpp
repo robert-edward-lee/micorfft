@@ -49,6 +49,22 @@ public:
     MF_NODISCARD MF_CONSTEXPR T phase() const MF_NOEXCEPT {
         return atan2(im, re);
     }
+    MF_NODISCARD MF_CONSTEXPR Complex pow(const Complex &z) const MF_NOEXCEPT {
+        if(re == T(0) && im == T(0)) {
+            return Complex();
+        }
+
+        T abs = mag();
+        T arg = phase();
+        T r = ::pow(abs, z.re);
+        T theta = z.re * arg;
+        if(im != T(0)) {
+            r = r * exp(-z.im * arg);
+            theta = theta + z.im * log(abs);
+        }
+
+        return Complex(r * cos(theta), r * sin(theta));
+    }
     /*  */
     MF_CONSTEXPR bool operator==(const Complex &rhs) const MF_NOEXCEPT {
         return re == rhs.re && im == rhs.im;

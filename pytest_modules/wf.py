@@ -53,6 +53,7 @@ TESTS = [
     ('tukey', 'tukey', 0.3, 0.5, 0.8),
     ('kaiser', 'kaiser', 1.0, 4.0, 9.0),
     ('kaiser_bessel_derived', 'kaiser_bessel_derived', 1.0, 4.0, 9.0),
+    ('chebyshev', 'chebwin', 50.0, 90.0, 120.0),
     ('poisson', 'exponential', 0.3, 0.5, 0.8),
 
     ('barthann', 'barthann'),
