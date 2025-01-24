@@ -9,7 +9,7 @@
 #include "mf/traits/math.hpp"
 #include "mf/types.hpp"
 
-#define MF_INCR_REV(ri, i, size) ((ri) = (ri) ^ ((size) - (((size) / 2) / (~(i) & ((i) + 1)))))
+#define MF_INCR_REV(ri, i, size) ((ri) ^= (size) - (((size) / 2) / (~(i) & ((i) + 1))))
 
 namespace mf { namespace windows {
 typedef float_max_t float_t;
@@ -183,50 +183,33 @@ template<typename DataType, size_t N> void kaiser_bessel_derived(DataType (&win)
 }
 
 namespace detail {
-size_t clp2(size_t x) MF_NOEXCEPT {
-    x -= 1;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    x |= x >> 32;
-    return x + 1;
-}
-void fft_radix2(Complex<float_t> *z, size_t size) MF_NOEXCEPT {
-    size_t i, j, ri;
-    size_t num_subffts, size_subfft;
-    Complex<float_t> *ww;
-
-    /* we start with (size / 2) FFTs of 2 base elements. */
-    num_subffts = size / 2;
-    size_subfft = 2;
-
-    ww = (Complex<float_t> *)malloc(size / 2 * sizeof(*ww));
-    if(!ww) {
-        return;
+template<size_t N> void fft_radix2(Complex<float_t> (&z)[N]) MF_NOEXCEPT {
+    /* поворотные коэффициенты */
+    Complex<float_t> ww[N / 2 ? N / 2 : 1];
+    for(size_t i = 0; i < N / 2; ++i) {
+        ww[i] = Complex<float_t>::polar(ONE, -TWO_PI * float_t(i) / float_t(N));
     }
 
-    for(i = 0; i < size / 2; ++i) {
-        ww[i] = Complex<float_t>::polar(1, -TWO_PI * i / size);
-    }
-    /* Permute the input elements (bit-reversal of indices). */
-    for(i = 0, ri = 0; i < size; MF_INCR_REV(ri, i, size), ++i) {
+    /* перестановка элементов */
+    for(size_t i = 0, ri = 0; i < N; MF_INCR_REV(ri, i, N), ++i) {
         if(i < ri) {
             std::swap(z[i], z[ri]);
         }
     }
-    /* Perform FFTs */
-    while(num_subffts != 0) {
-        for(i = 0; i < num_subffts; ++i) {
-            size_t subfft_offset = size_subfft * i;
 
-            for(j = 0; j < size_subfft / 2; ++j) {
-                size_t target1 = subfft_offset + j;
-                size_t target2 = subfft_offset + j + size_subfft / 2;
+    /* преобразование */
+    size_t num_subffts = N / 2;
+    size_t size_subfft = 2;
+    while(num_subffts) {
+        for(size_t i = 0; i < num_subffts; ++i) {
+            const size_t subfft_offset = size_subfft * i;
 
-                size_t left = target1;
-                size_t right = target2;
+            for(size_t j = 0; j < size_subfft / 2; ++j) {
+                const size_t target1 = subfft_offset + j;
+                const size_t target2 = subfft_offset + j + size_subfft / 2;
+
+                const size_t left = target1;
+                const size_t right = target2;
 
                 const size_t ww_index = (j * num_subffts);
 
@@ -244,66 +227,49 @@ void fft_radix2(Complex<float_t> *z, size_t size) MF_NOEXCEPT {
         size_subfft *= 2;
     }
 }
-void czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, Complex<float_t> w, Complex<float_t> a)
-    MF_NOEXCEPT {
-    size_t k, fft_size;
-    Complex<float_t> *zz, *w2;
+template<size_t N, size_t M>
+void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_t> w, Complex<float_t> a) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<N + M - 1>::value;
 
-    fft_size = clp2(n + m - 1);
-    zz = (Complex<float_t> *)malloc(fft_size * sizeof(*zz));
-    if(!zz) {
-        return;
-    }
-    w2 = (Complex<float_t> *)malloc(fft_size * sizeof(*w2));
-    if(!w2) {
-        free(zz);
-        return;
-    }
-
-    /* Initialize zz */
-    for(k = 0; k < fft_size; ++k) {
-        if(k < n) {
-            zz[k] = w.pow(0.5 * k * k) / a.pow(k) * z[k];
+    Complex<float_t> zz[fft_size];
+    for(size_t k = 0; k < fft_size; ++k) {
+        if(k < N) {
+            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * z[k];
         } else {
             zz[k] = 0;
         }
     }
-    fft_radix2(zz, fft_size);
+    fft_radix2(zz);
 
-    for(k = 0; k < fft_size; ++k) {
-        if(k < n + m - 1) {
-            const int kshift = k - (n - 1);
+    Complex<float_t> w2[fft_size];
+    for(size_t k = 0; k < fft_size; ++k) {
+        if(k < N + M - 1) {
+            const int kshift = k - (N - 1);
 
-            w2[k] = w.pow(-0.5 * kshift * kshift);
+            w2[k] = w.pow(-HALF * float_t(kshift) * float_t(kshift));
         } else {
             w2[k] = 0;
         }
     }
-    fft_radix2(w2, fft_size);
+    fft_radix2(w2);
 
-    for(k = 0; k < fft_size; ++k) {
+    for(size_t k = 0; k < fft_size; ++k) {
         zz[k] *= w2[k];
     }
-    fft_radix2(zz, fft_size);
+    fft_radix2(zz);
 
-    /* Make an inverse FFT from the forward FFT.
-        - scale all elements by 1 / fft_size;
-        - reverse elements 1 .. (fft_size - 1).
-    */
-    for(k = 0; k < fft_size; ++k) {
+    /* обратное БПФ из прямого */
+    for(size_t k = 0; k < fft_size; ++k) {
         zz[k] /= fft_size;
     }
-    for(k = 1; k < fft_size - k; ++k) {
+    for(size_t k = 1; k < fft_size - k; ++k) {
         const size_t kswap = fft_size - k;
-
-        const Complex<float_t> temp = zz[k];
-        zz[k] = zz[kswap];
-        zz[kswap] = temp;
+        std::swap(zz[k], zz[kswap]);
     }
 
-    for(k = 0; k < m; ++k) {
-        const Complex<float_t> w3 = w.pow(0.5 * k * k);
-        ztrans[k] = w3 * zz[n - 1 + k];
+    for(size_t k = 0; k < M; ++k) {
+        const Complex<float_t> w3 = w.pow(HALF * float_t(k) * float_t(k));
+        ztrans[k] = w3 * zz[N - 1 + k];
     }
 }
 } // namespace detail
@@ -325,7 +291,7 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
             }
         }
 
-        detail::czt(W, N, W, N, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
+        detail::czt(W, W, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
 
         /*
         Example: n = 11
@@ -352,9 +318,9 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
         }
 
         MF_IF_CONSTEXPR(trait::is_pow_of_2<N>::value) {
-            detail::fft_radix2(W, N);
+            detail::fft_radix2(W);
         } else {
-            detail::czt(W, N, W, N, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
+            detail::czt(W, W, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
         }
 
         /*

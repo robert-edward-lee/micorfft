@@ -24,7 +24,13 @@ template<> struct log2<1> {
 MF_TRAITS_MATH_DECLARE_VARIABLE_TEMPLATES(size_t, log2)
 
 template<size_t X> struct clp2 {
-    static MF_CONST_OR_CONSTEXPR size_t value = 1 << log2<X>::value;
+    static MF_CONST_OR_CONSTEXPR size_t value = 1 << (log2<X - 1>::value + 1);
+};
+template<> struct clp2<1> {
+    static MF_CONST_OR_CONSTEXPR size_t value = 1;
+};
+template<> struct clp2<0> {
+    static MF_CONST_OR_CONSTEXPR size_t value = 0;
 };
 MF_TRAITS_MATH_DECLARE_VARIABLE_TEMPLATES(size_t, clp2)
 }} // namespace mf::trait
