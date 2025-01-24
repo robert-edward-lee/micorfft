@@ -6,13 +6,16 @@
 #include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/special_math.hpp"
+#include "mf/traits/math.hpp"
 #include "mf/types.hpp"
+
+#define MF_INCR_REV(ri, i, size) ((ri) = (ri) ^ ((size) - (((size) / 2) / (~(i) & ((i) + 1)))))
 
 namespace mf { namespace windows {
 typedef float_max_t float_t;
 
-static MF_CONST_OR_CONSTEXPR float_t ONE = MF_FLOAT_MAX_C(1);
-static MF_CONST_OR_CONSTEXPR float_t TWO = MF_FLOAT_MAX_C(2);
+static MF_CONST_OR_CONSTEXPR float_t ONE = MF_FLOAT_MAX_C(1.0);
+static MF_CONST_OR_CONSTEXPR float_t TWO = MF_FLOAT_MAX_C(2.0);
 static MF_CONST_OR_CONSTEXPR float_t HALF = ONE / TWO;
 static MF_CONST_OR_CONSTEXPR float_t PI = pi<float_t>::value;
 static MF_CONST_OR_CONSTEXPR float_t TWO_PI = two_pi<float_t>::value;
@@ -178,34 +181,19 @@ template<typename DataType, size_t N> void kaiser_bessel_derived(DataType (&win)
         win[N - 1 - n] = win[n];
     }
 }
-#define WF_PI 3.14159265358979323846264338327950288
-#define WF_2PI 6.28318530717958647692528676655900576
-#define WF_COS cos
-#define WF_ACOS acos
-#define WF_COSH cosh
-#if defined(__STRICT_ANSI__)
-extern "C" double acosh(double);
-#endif
-#define WF_ACOSH acosh
-#define WF_POW pow
-#define WF_INCR_REV(ri, i, size) ((ri) = (ri) ^ ((size) - (((size) / 2) / (~(i) & ((i) + 1)))))
-#define WF_SWAP(a, b) std::swap(a, b)
-#define WF_ABS abs
-#define WF_IS_POW_OF2(x) ((x) && !((x) & ((x) - 1)))
-#define WF_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 namespace detail {
-unsigned wf_clp2(unsigned x) {
+size_t clp2(size_t x) MF_NOEXCEPT {
     x -= 1;
     x |= x >> 1;
     x |= x >> 2;
     x |= x >> 4;
     x |= x >> 8;
     x |= x >> 16;
+    x |= x >> 32;
     return x + 1;
 }
-#define WF_CLP2(x) wf_clp2(x)
-void wf_fft_radix2(Complex<float_t> *z, size_t size) {
+void fft_radix2(Complex<float_t> *z, size_t size) MF_NOEXCEPT {
     size_t i, j, ri;
     size_t num_subffts, size_subfft;
     Complex<float_t> *ww;
@@ -220,12 +208,12 @@ void wf_fft_radix2(Complex<float_t> *z, size_t size) {
     }
 
     for(i = 0; i < size / 2; ++i) {
-        ww[i] = Complex<float_t>::polar(1, -WF_2PI * i / size);
+        ww[i] = Complex<float_t>::polar(1, -TWO_PI * i / size);
     }
     /* Permute the input elements (bit-reversal of indices). */
-    for(i = 0, ri = 0; i < size; WF_INCR_REV(ri, i, size), ++i) {
+    for(i = 0, ri = 0; i < size; MF_INCR_REV(ri, i, size), ++i) {
         if(i < ri) {
-            WF_SWAP(z[i], z[ri]);
+            std::swap(z[i], z[ri]);
         }
     }
     /* Perform FFTs */
@@ -256,11 +244,12 @@ void wf_fft_radix2(Complex<float_t> *z, size_t size) {
         size_subfft *= 2;
     }
 }
-void wf_czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, Complex<float_t> w, Complex<float_t> a) {
+void czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, Complex<float_t> w, Complex<float_t> a)
+    MF_NOEXCEPT {
     size_t k, fft_size;
     Complex<float_t> *zz, *w2;
 
-    fft_size = wf_clp2(n + m - 1);
+    fft_size = clp2(n + m - 1);
     zz = (Complex<float_t> *)malloc(fft_size * sizeof(*zz));
     if(!zz) {
         return;
@@ -279,7 +268,7 @@ void wf_czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, C
             zz[k] = 0;
         }
     }
-    wf_fft_radix2(zz, fft_size);
+    fft_radix2(zz, fft_size);
 
     for(k = 0; k < fft_size; ++k) {
         if(k < n + m - 1) {
@@ -290,12 +279,12 @@ void wf_czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, C
             w2[k] = 0;
         }
     }
-    wf_fft_radix2(w2, fft_size);
+    fft_radix2(w2, fft_size);
 
     for(k = 0; k < fft_size; ++k) {
         zz[k] *= w2[k];
     }
-    wf_fft_radix2(zz, fft_size);
+    fft_radix2(zz, fft_size);
 
     /* Make an inverse FFT from the forward FFT.
         - scale all elements by 1 / fft_size;
@@ -319,32 +308,24 @@ void wf_czt(Complex<float_t> *z, size_t n, Complex<float_t> *ztrans, size_t m, C
 }
 } // namespace detail
 template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
-    size_t n, k, h, order;
-    float_t amp, beta, x, maxw;
-    Complex<float_t> *W, z;
+    MF_CONST_OR_CONSTEXPR size_t order = N - 1;
+    const float_t amp = pow(float_t(10), abs(alpha) / float_t(20));
+    const float_t beta = cosh(acosh(amp) / order);
 
-    W = (Complex<float_t> *)malloc(N * sizeof(*W));
-    if(!W) {
-        return;
-    }
-
-    order = N - 1;
-    amp = WF_POW(10.0, WF_ABS(alpha) / 20.0);
-    beta = WF_COSH(WF_ACOSH(amp) / order);
-
-    if(N % 2) {
-        for(n = 0; n < N; ++n) {
-            x = beta * WF_COS(WF_PI * n / N);
-            if(x > 1.0) {
-                W[n] = WF_COSH(order * WF_ACOSH(x));
-            } else if(x < -1.0) {
-                W[n] = WF_COSH(order * WF_ACOSH(-x));
+    Complex<float_t> W[N];
+    MF_IF_CONSTEXPR(N % 2) {
+        for(size_t n = 0; n < N; ++n) {
+            const float_t x = beta * cos(PI * float_t(n) / float_t(N));
+            if(x > ONE) {
+                W[n] = cosh(order * acosh(x));
+            } else if(x < -ONE) {
+                W[n] = cosh(order * acosh(-x));
             } else {
-                W[n] = WF_COS(order * WF_ACOS(x));
+                W[n] = cos(order * acos(x));
             }
         }
 
-        detail::wf_czt(W, N, W, N, Complex<float_t>::polar(1, -WF_2PI / N), 1.0);
+        detail::czt(W, N, W, N, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
 
         /*
         Example: n = 11
@@ -352,28 +333,28 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
                                     =
             p[5] p[4] p[3] p[2] p[1] p[0] p[1] p[2] p[3] p[4] p[5]
         */
-        h = (N - 1) / 2;
-        for(n = 0; n < N; ++n) {
-            k = (n <= h) ? (h - n) : (n - h);
+        const size_t h = (N - 1) / 2;
+        for(size_t n = 0; n < N; ++n) {
+            const size_t k = (n <= h) ? (h - n) : (n - h);
             win[n] = W[k].real();
         }
     } else {
-        for(n = 0; n < N; ++n) {
-            x = beta * WF_COS(WF_PI * n / N);
-            z = Complex<float_t>::polar(1, WF_PI * n / N);
-            if(x > 1) {
-                W[n] = z * WF_COSH(order * WF_ACOSH(x));
-            } else if(x < -1) {
-                W[n] = -z * WF_COSH(order * WF_ACOSH(-x));
+        for(size_t n = 0; n < N; ++n) {
+            const float_t x = beta * cos(PI * float_t(n) / float_t(N));
+            const Complex<float_t> z = Complex<float_t>::polar(ONE, PI * float_t(n) / float_t(N));
+            if(x > ONE) {
+                W[n] = z * cosh(order * acosh(x));
+            } else if(x < -ONE) {
+                W[n] = -z * cosh(order * acosh(-x));
             } else {
-                W[n] = z * WF_COS(order * WF_ACOS(x));
+                W[n] = z * cos(order * acos(x));
             }
         }
 
-        if(WF_IS_POW_OF2(N)) {
-            detail::wf_fft_radix2(W, N);
+        MF_IF_CONSTEXPR(trait::is_pow_of_2<N>::value) {
+            detail::fft_radix2(W, N);
         } else {
-            detail::wf_czt(W, N, W, N, Complex<float_t>::polar(1, -WF_2PI / N), 1.0);
+            detail::czt(W, N, W, N, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
         }
 
         /*
@@ -382,18 +363,18 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
                                     =
             p[5] p[4] p[3] p[2] p[1] p[1] p[2] p[3] p[4] p[5]
         */
-        h = N / 2;
-        for(n = 0; n < N; ++n) {
-            k = (n < h) ? (h - n) : (n - h + 1);
+        const size_t h = N / 2;
+        for(size_t n = 0; n < N; ++n) {
+            const size_t k = (n < h) ? (h - n) : (n - h + 1);
             win[n] = W[k].real();
         }
     }
 
-    maxw = win[0];
-    for(n = 1; n < N; ++n) {
-        maxw = WF_MAX(maxw, win[n]);
+    DataType maxw = win[0];
+    for(size_t n = 1; n < N; ++n) {
+        maxw = max(maxw, win[n]);
     }
-    for(n = 0; n < N; ++n) {
+    for(size_t n = 0; n < N; ++n) {
         win[n] /= maxw;
     }
 }

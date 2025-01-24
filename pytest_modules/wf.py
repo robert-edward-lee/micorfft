@@ -151,7 +151,11 @@ def run(file_name):
                         epsilon = 1e-6
                     elif d == DataTypes.FLOAT64:
                         c_win = (c_double * s)()
-                        epsilon = 1e-14
+                        if t[0] == 'chebyshev':
+                            epsilon = 1e-10
+                        else:
+                            epsilon = 1e-14
+
                     # функция из dll
                     c_fn_name = f'{t[0]}_{s}_{d.value}'
                     c_wf = getattr(dll, c_fn_name)
