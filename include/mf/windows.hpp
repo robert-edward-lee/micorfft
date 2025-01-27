@@ -244,6 +244,116 @@ template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCE
     };
     cosine_sum(win, a);
 }
+template<typename DataType, size_t N> void hft70(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.90796),
+        MF_FLOAT_MAX_C(1.07349),
+        MF_FLOAT_MAX_C(0.18199),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft95(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.9383379),
+        MF_FLOAT_MAX_C(1.3045202),
+        MF_FLOAT_MAX_C(0.4028270),
+        MF_FLOAT_MAX_C(0.0350665),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft90d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.942604),
+        MF_FLOAT_MAX_C(1.340318),
+        MF_FLOAT_MAX_C(0.440811),
+        MF_FLOAT_MAX_C(0.043097),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft116d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.9575375),
+        MF_FLOAT_MAX_C(1.4780705),
+        MF_FLOAT_MAX_C(0.6367431),
+        MF_FLOAT_MAX_C(0.1228389),
+        MF_FLOAT_MAX_C(0.0066288),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft144d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.96760033),
+        MF_FLOAT_MAX_C(1.57983607),
+        MF_FLOAT_MAX_C(0.81123644),
+        MF_FLOAT_MAX_C(0.22583558),
+        MF_FLOAT_MAX_C(0.02773848),
+        MF_FLOAT_MAX_C(0.00090360),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft169d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.97441843),
+        MF_FLOAT_MAX_C(1.65409889),
+        MF_FLOAT_MAX_C(0.95788187),
+        MF_FLOAT_MAX_C(0.33673420),
+        MF_FLOAT_MAX_C(0.06364622),
+        MF_FLOAT_MAX_C(0.00521942),
+        MF_FLOAT_MAX_C(0.00010599),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft196d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.979280420),
+        MF_FLOAT_MAX_C(1.710288951),
+        MF_FLOAT_MAX_C(1.081629853),
+        MF_FLOAT_MAX_C(0.448734314),
+        MF_FLOAT_MAX_C(0.112376628),
+        MF_FLOAT_MAX_C(0.015122992),
+        MF_FLOAT_MAX_C(0.000871252),
+        MF_FLOAT_MAX_C(0.000011896),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft223d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.98298997309),
+        MF_FLOAT_MAX_C(1.75556083063),
+        MF_FLOAT_MAX_C(1.19037717712),
+        MF_FLOAT_MAX_C(0.56155440797),
+        MF_FLOAT_MAX_C(0.17296769663),
+        MF_FLOAT_MAX_C(0.03233247087),
+        MF_FLOAT_MAX_C(0.00324954578),
+        MF_FLOAT_MAX_C(0.00013801040),
+        MF_FLOAT_MAX_C(0.00000132725),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void hft248d(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.985844164102),
+        MF_FLOAT_MAX_C(1.791176438506),
+        MF_FLOAT_MAX_C(1.282075284005),
+        MF_FLOAT_MAX_C(0.667777530266),
+        MF_FLOAT_MAX_C(0.240160796576),
+        MF_FLOAT_MAX_C(0.056656381764),
+        MF_FLOAT_MAX_C(0.008134974479),
+        MF_FLOAT_MAX_C(0.000624544650),
+        MF_FLOAT_MAX_C(0.000019808998),
+        MF_FLOAT_MAX_C(0.000000132974),
+    };
+    cosine_sum(win, a);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                 Adjustable windows                                                 //
