@@ -172,8 +172,9 @@ template<typename DataType, size_t N> void parzen(DataType (&win)[N]) MF_NOEXCEP
 //                                                 Cosine-sum windows                                                 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename DataType, size_t N> void cosine(DataType (&win)[N]) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR float_t factor = PI / float_t(N);
     for(size_t n = 0; n != N; ++n) {
-        win[n] = sin((PI * (float_t(n) + HALF)) / float_t(N));
+        win[n] = sin(factor * (float_t(n) + HALF));
     }
 }
 template<typename DataType, size_t N> void bohman(DataType (&win)[N]) MF_NOEXCEPT {
@@ -183,12 +184,13 @@ template<typename DataType, size_t N> void bohman(DataType (&win)[N]) MF_NOEXCEP
     }
 }
 template<typename DataType, size_t N, size_t K> void cosine_sum(DataType (&win)[N], const float_t (&a)[K]) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR float_t factor = TWO_PI / (float_t(N) - ONE);
     for(size_t n = 0; n != N; ++n) {
         win[n] = a[0];
         int sgn = 1;
         for(size_t k = 1; k != K; ++k) {
             sgn *= -1;
-            win[n] += float_t(sgn) * a[k] * cos((TWO_PI * float_t(k) * float_t(n)) / (float_t(N) - ONE));
+            win[n] += float_t(sgn) * a[k] * cos(factor * float_t(k) * float_t(n));
         }
     }
 }
@@ -247,14 +249,13 @@ template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCE
 //                                                 Adjustable windows                                                 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename DataType, size_t N> void gaussian(DataType (&win)[N], float_t sigma) MF_NOEXCEPT {
-    static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
+    MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
     for(size_t n = 0; n != N; ++n) {
         const float_t x = float_t(n) - subtractor;
         win[n] = exp(-HALF * x * x / (sigma * sigma));
     }
 }
 template<typename DataType, size_t N> void tukey(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
-
     if(alpha <= 0.0) {
         rect(win);
         return;
@@ -263,9 +264,10 @@ template<typename DataType, size_t N> void tukey(DataType (&win)[N], float_t alp
         return;
     }
 
+    const float_t factor = TWO_PI / (alpha * (float_t(N) - ONE));
     size_t n;
     for(n = 0; n != (size_t)(alpha * (float_t(N) - ONE) / TWO + ONE); ++n) {
-        win[n] = (ONE - cos(TWO_PI * n / (alpha * (float_t(N) - ONE)))) / TWO;
+        win[n] = (ONE - cos(factor * n)) / TWO;
     }
     for(; n != (size_t)((float_t(N) - ONE) / TWO + ONE); ++n) {
         win[n] = ONE;
@@ -376,7 +378,7 @@ template<typename DataType, size_t N> void poisson(DataType (&win)[N], float_t t
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename DataType, size_t N> void barthann(DataType (&win)[N]) MF_NOEXCEPT {
     for(size_t n = 0; n != N; ++n) {
-        float_t factor = abs(float_t(n) / (float_t(N) - ONE) - HALF);
+        const float_t factor = abs(float_t(n) / (float_t(N) - ONE) - HALF);
         win[n] = MF_FLOAT_MAX_C(0.62) - MF_FLOAT_MAX_C(0.48) * factor + MF_FLOAT_MAX_C(0.38) * cos(TWO_PI * factor);
     }
 }
@@ -385,8 +387,9 @@ template<typename DataType, size_t N> void barthann(DataType (&win)[N]) MF_NOEXC
 //                                                    Other windows                                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename DataType, size_t N> void lanczos(DataType (&win)[N]) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR float_t factor = TWO / (float_t(N) - ONE);
     for(size_t n = 0; n != N; ++n) {
-        win[n] = sinc(TWO * float_t(n) / (float_t(N) - ONE) - ONE);
+        win[n] = sinc(factor * float_t(n) - ONE);
     }
 }
 }} // namespace mf::windows
