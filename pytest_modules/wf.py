@@ -45,7 +45,7 @@ TESTS = [
     ('hann', 'hann'),
     ('hamming', 'hamming'),
     ('blackman', 'blackman'),
-    ('nuttall', 'nuttall'),
+    ('nuttall4c', 'nuttall'),
     ('blackmanharris', 'blackmanharris'),
     ('flattop', 'flattop'),
 

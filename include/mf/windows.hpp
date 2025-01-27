@@ -216,7 +216,58 @@ template<typename DataType, size_t N> void blackman_generic(DataType (&win)[N], 
 template<typename DataType, size_t N> void blackman(DataType (&win)[N]) MF_NOEXCEPT {
     blackman_generic(win, MF_FLOAT_MAX_C(0.16));
 }
-template<typename DataType, size_t N> void nuttall(DataType (&win)[N]) MF_NOEXCEPT {
+template<typename DataType, size_t N> void nuttall3(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.375),
+        MF_FLOAT_MAX_C(0.5),
+        MF_FLOAT_MAX_C(0.125),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall3a(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.40897),
+        MF_FLOAT_MAX_C(0.5),
+        MF_FLOAT_MAX_C(0.09103),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall3b(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.4243801),
+        MF_FLOAT_MAX_C(0.4973406),
+        MF_FLOAT_MAX_C(0.0782793),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall4(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.3125),
+        MF_FLOAT_MAX_C(0.46875),
+        MF_FLOAT_MAX_C(0.1875),
+        MF_FLOAT_MAX_C(0.03125),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall4a(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.338946),
+        MF_FLOAT_MAX_C(0.481973),
+        MF_FLOAT_MAX_C(0.161054),
+        MF_FLOAT_MAX_C(0.018027),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall4b(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.355768),
+        MF_FLOAT_MAX_C(0.487396),
+        MF_FLOAT_MAX_C(0.144232),
+        MF_FLOAT_MAX_C(0.012604),
+    };
+    cosine_sum(win, a);
+}
+template<typename DataType, size_t N> void nuttall4c(DataType (&win)[N]) MF_NOEXCEPT {
     static const float_t a[] = {
         MF_FLOAT_MAX_C(0.3635819),
         MF_FLOAT_MAX_C(0.4891775),
