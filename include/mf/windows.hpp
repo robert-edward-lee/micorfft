@@ -88,13 +88,16 @@ template<size_t N> void fft_radix2(Complex<float_t> (&z)[N]) MF_NOEXCEPT {
     }
 }
 template<size_t N, size_t M>
-void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_t> w, Complex<float_t> a) MF_NOEXCEPT {
+void czt(const Complex<float_t> (&in)[N],
+         Complex<float_t> (&out)[M],
+         const Complex<float_t> &w,
+         const Complex<float_t> &a) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<N + M - 1>::value;
 
     Complex<float_t> zz[fft_size];
     for(size_t k = 0; k < fft_size; ++k) {
         if(k < N) {
-            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * z[k];
+            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * in[k];
         } else {
             zz[k] = 0;
         }
@@ -105,7 +108,6 @@ void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_
     for(size_t k = 0; k < fft_size; ++k) {
         if(k < N + M - 1) {
             const int kshift = k - (N - 1);
-
             w2[k] = w.pow(-HALF * float_t(kshift) * float_t(kshift));
         } else {
             w2[k] = 0;
@@ -129,7 +131,7 @@ void czt(Complex<float_t> (&z)[N], Complex<float_t> (&ztrans)[M], Complex<float_
 
     for(size_t k = 0; k < M; ++k) {
         const Complex<float_t> w3 = w.pow(HALF * float_t(k) * float_t(k));
-        ztrans[k] = w3 * zz[N - 1 + k];
+        out[k] = w3 * zz[N - 1 + k];
     }
 }
 } // namespace detail
