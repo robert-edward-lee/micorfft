@@ -285,6 +285,10 @@ template<typename DataType, size_t N> void blackmanharris(DataType (&win)[N]) MF
     };
     cosine_sum(win, a);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                  Flat-top windows                                                  //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCEPT {
     static const float_t a[] = {
         MF_FLOAT_MAX_C(0.21557895),
@@ -292,6 +296,114 @@ template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCE
         MF_FLOAT_MAX_C(0.277263158),
         MF_FLOAT_MAX_C(0.083578947),
         MF_FLOAT_MAX_C(0.006947368),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Fast decaying 3-term flat top window
+ */
+template<typename DataType, size_t N> void sft3f(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.26526),
+        MF_FLOAT_MAX_C(0.5),
+        MF_FLOAT_MAX_C(0.23474),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Fast decaying 4-term flat top window
+ */
+template<typename DataType, size_t N> void sft4f(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.21706),
+        MF_FLOAT_MAX_C(0.42103),
+        MF_FLOAT_MAX_C(0.28294),
+        MF_FLOAT_MAX_C(0.07897),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Fast decaying 5-term flat top window
+ */
+template<typename DataType, size_t N> void sft5f(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.1881),
+        MF_FLOAT_MAX_C(0.36923),
+        MF_FLOAT_MAX_C(0.28702),
+        MF_FLOAT_MAX_C(0.13077),
+        MF_FLOAT_MAX_C(0.02488),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Minimum sidelobe 3-term flat top window
+ */
+template<typename DataType, size_t N> void sft3m(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.28235),
+        MF_FLOAT_MAX_C(0.52105),
+        MF_FLOAT_MAX_C(0.19659),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Minimum sidelobe 4-term flat top window
+ */
+template<typename DataType, size_t N> void sft4m(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.241906),
+        MF_FLOAT_MAX_C(0.460841),
+        MF_FLOAT_MAX_C(0.255381),
+        MF_FLOAT_MAX_C(0.041872),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Minimum sidelobe 5-term flat top window
+ */
+template<typename DataType, size_t N> void sft5m(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.209671),
+        MF_FLOAT_MAX_C(0.407331),
+        MF_FLOAT_MAX_C(0.281225),
+        MF_FLOAT_MAX_C(0.092669),
+        MF_FLOAT_MAX_C(0.0091036),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief National Instruments flat-top window
+ */
+template<typename DataType, size_t N> void ftni(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(0.2810639),
+        MF_FLOAT_MAX_C(0.5208972),
+        MF_FLOAT_MAX_C(0.1980399),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Old HP flat-top window
+ */
+template<typename DataType, size_t N> void fthp(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.912510941),
+        MF_FLOAT_MAX_C(1.079173272),
+        MF_FLOAT_MAX_C(0.1832630879),
+    };
+    cosine_sum(win, a);
+}
+/**
+ * @brief Stanford Research flat-top window
+ */
+template<typename DataType, size_t N> void ftsrs(DataType (&win)[N]) MF_NOEXCEPT {
+    static const float_t a[] = {
+        MF_FLOAT_MAX_C(1.0),
+        MF_FLOAT_MAX_C(1.93),
+        MF_FLOAT_MAX_C(1.29),
+        MF_FLOAT_MAX_C(0.388),
+        MF_FLOAT_MAX_C(0.028),
     };
     cosine_sum(win, a);
 }
