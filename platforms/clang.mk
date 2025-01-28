@@ -22,13 +22,3 @@ LDLIBS = $(addprefix -l,$(LIBS))
 %.cpp.o: %.cpp
 	$(info $() $()  CXX  $@)
 	@$(CXX) -c $(CXXFLAGS) $^ -o $@
-
-.PHONY: mf_test cmsis_test
-
-mf_test:
-	@$(CXX) $(CXXFLAGS) test/$@.cpp $(TEST_SRC) -o $@
-	@./$@
-
-cmsis_test:
-	@$(CC) $(CFLAGS) -ICMSIS-DSP/Include test/$@.c $(TEST_SRC) $(CMSIS_SRC) -o $@
-	@./$@

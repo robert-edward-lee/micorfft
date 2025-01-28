@@ -81,6 +81,7 @@ clean:
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.o,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.obj,$(dir))) \
 		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.tds,$(dir))) \
+		$(foreach dir,$(WORK_DIRS),$(addsuffix /*.log,$(dir))) \
 		c_wrapper* 2> /dev/null ||:
 
 test: gen_test run_test
