@@ -36,20 +36,6 @@ INCLUDES = include test
 OPT_LEVEL = 3
 LIBS =
 
-TEST_SRC = \
-	test/print_hist.c \
-	test/print_table.c
-
-CMSIS_SRC = \
-	CMSIS-DSP/Source/TransformFunctions/arm_rfft_fast_init_f32.c \
-	CMSIS-DSP/Source/TransformFunctions/arm_cfft_init_f32.c \
-	CMSIS-DSP/Source/CommonTables/arm_common_tables.c \
-	CMSIS-DSP/Source/CommonTables/arm_const_structs.c \
-	CMSIS-DSP/Source/TransformFunctions/arm_bitreversal2.c \
-	CMSIS-DSP/Source/TransformFunctions/arm_cfft_f32.c \
-	CMSIS-DSP/Source/TransformFunctions/arm_cfft_radix8_f32.c \
-	CMSIS-DSP/Source/TransformFunctions/arm_rfft_fast_f32.c
-
 ifeq ($(CC),gcc)
 include platforms/gcc.mk
 else ifeq ($(CC),clang)

@@ -11,7 +11,7 @@ DEF_FLAGS = $(addprefix /D,$(DEFINES))
 # OPT_FLAGS = $(addprefix /O,$(OPT_LEVEL))
 # WARN_FLAGS = /W4
 DEPEND_FLAGS =
-EXTRA_FLAGS = /nologo
+EXTRA_FLAGS += /nologo
 
 LDLIBS = $(addprefix /l,$(LIBS))
 
