@@ -1,5 +1,5 @@
-#ifndef HPP_MF_STATISTIC_MAX
-#define HPP_MF_STATISTIC_MAX
+#ifndef HPP_MF_STATISTIC_MINMAX
+#define HPP_MF_STATISTIC_MINMAX
 
 #include "mf/config.hpp"
 #include "mf/types/integral.hpp"
@@ -193,4 +193,4 @@ min_element(const DataType (&data)[Size], DataType *value) MF_NOEXCEPT {
 }
 } // namespace mf
 
-#endif // HPP_MF_STATISTIC_MAX
+#endif // HPP_MF_STATISTIC_MINMAX
