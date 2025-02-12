@@ -12,8 +12,8 @@
 #define MF_GCC_VERSION_CHECK(maj, min, patch) (MF_GCC_VERSION_CURRENT >= MF_GCC_VERSION_VALUE(maj, min, patch))
 #define MF_GCC_VERSION_CHECK_STRICT(maj, min, patch) (MF_GCC_VERSION_CURRENT > MF_GCC_VERSION_VALUE(maj, min, patch))
 #else
-#define MF_GCC_VERSION_VALUE(maj, min, patch)
-#define MF_GCC_VERSION_CURRENT
+#define MF_GCC_VERSION_VALUE(maj, min, patch) 0
+#define MF_GCC_VERSION_CURRENT 0
 #define MF_GCC_VERSION_CHECK(maj, min, patch) 0
 #define MF_GCC_VERSION_CHECK_STRICT(maj, min, patch) 0
 #endif
@@ -61,27 +61,19 @@
 //                           Language Feature-Test                            //
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(__cpp_constexpr)
-#if __cpp_constexpr >= 201907
+#if __cpp_constexpr >= 201304
 #define MF_CONST_OR_CONSTEXPR constexpr
 #define MF_CONSTEXPR constexpr
 #define MF_CONSTEXPR_14 constexpr
-#define MF_CONSTEXPR_20 constexpr
-#elif __cpp_constexpr >= 201304
-#define MF_CONST_OR_CONSTEXPR constexpr
-#define MF_CONSTEXPR constexpr
-#define MF_CONSTEXPR_14 constexpr
-#define MF_CONSTEXPR_20 inline
 #else
 #define MF_CONST_OR_CONSTEXPR constexpr
 #define MF_CONSTEXPR constexpr
 #define MF_CONSTEXPR_14 inline
-#define MF_CONSTEXPR_20 inline
 #endif
 #else
 #define MF_CONST_OR_CONSTEXPR const
 #define MF_CONSTEXPR inline
 #define MF_CONSTEXPR_14 inline
-#define MF_CONSTEXPR_20 inline
 #endif
 
 #if MF_CXX_VER >= 201103
@@ -123,18 +115,17 @@
 #define MF_NODISCARD [[nodiscard]]
 #define MF_NODISCARD_MSG(msg) [[nodiscard(msg)]]
 #elif MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201603)
-#define MF_NODISCARD [[nodiscard]]
-#define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #elif MF_GCC_VERSION_CHECK(3, 4, 0) || defined(__clang__)
 #define MF_NODISCARD __attribute__((warn_unused_result))
-#define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #elif MF_MSC_VERSION_CHECK(1700)
 #define MF_NODISCARD _Check_return_
-#define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #else
 #define MF_NODISCARD
-#define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif // nodiscard
+
+#if !defined(MF_NODISCARD_MSG)
+#define MF_NODISCARD_MSG(msg) MF_NODISCARD
+#endif
 
 #if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))

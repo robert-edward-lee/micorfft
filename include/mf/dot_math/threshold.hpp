@@ -15,17 +15,17 @@ limit_by_threshold(DataType (&limited)[Size], const DataType (&threshold)[Size],
     MF_CONST_OR_CONSTEXPR idx_t RESIDUE = Size % BLK_SIZE;
 
     for(idx_t i = 0; i != BLKS; ++i) {
-        if(limited[4 * i + 0] < threshold[4 * i + 0]) {
-            limited[4 * i + 0] = limiter;
+        if(limited[BLK_SIZE * i + 0] < threshold[BLK_SIZE * i + 0]) {
+            limited[BLK_SIZE * i + 0] = limiter;
         }
-        if(limited[4 * i + 1] < threshold[4 * i + 1]) {
-            limited[4 * i + 1] = limiter;
+        if(limited[BLK_SIZE * i + 1] < threshold[BLK_SIZE * i + 1]) {
+            limited[BLK_SIZE * i + 1] = limiter;
         }
-        if(limited[4 * i + 2] < threshold[4 * i + 2]) {
-            limited[4 * i + 2] = limiter;
+        if(limited[BLK_SIZE * i + 2] < threshold[BLK_SIZE * i + 2]) {
+            limited[BLK_SIZE * i + 2] = limiter;
         }
-        if(limited[4 * i + 3] < threshold[4 * i + 3]) {
-            limited[4 * i + 3] = limiter;
+        if(limited[BLK_SIZE * i + 3] < threshold[BLK_SIZE * i + 3]) {
+            limited[BLK_SIZE * i + 3] = limiter;
         }
     }
 
