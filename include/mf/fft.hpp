@@ -2,6 +2,7 @@
 #define HPP_MF_FFT
 
 #include "mf/basic_math/constants.hpp"
+#include "mf/dot_math/complex.hpp"
 #include "mf/fft/transposition.hpp"
 #include "mf/fft/twiddle.hpp"
 #include "mf/traits/enable_if.hpp"
@@ -22,7 +23,7 @@ public:
         Transposition<idx_t, Size, 8> transpos;
         transpos.fill_table(bit_rev_table);
         /* создание таблицы поворотных коэффициентов */
-        fill_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(cfft_twiddle);
+        fill_cfft_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(cfft_twiddle);
     }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации

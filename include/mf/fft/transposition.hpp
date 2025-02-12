@@ -41,9 +41,9 @@ public:
             IdxType x = i;
             IdxType result = 0;
             for(IdxType j = 0; j != bits_list_size; ++j) {
-                IdxType mask = IdxType(-1) >> (sizeof(IdxType) * 8 - bits_list[j]);
+                const IdxType mask = IdxType(-1) >> (sizeof(IdxType) * 8 - bits_list[j]);
                 result = (result << bits_list[j]) | (x & mask);
-                x = x >> bits_list[j];
+                x >>= bits_list[j];
             }
             perm_idx[i] = result;
         }
@@ -51,7 +51,7 @@ public:
 
     MF_CONSTEXPR_14 void fill_table(IdxType *p) const MF_NOEXCEPT {
         std::bitset<N> checked;
-        IdxType pi = 0, tmp;
+        IdxType pi = 0;
         for(idx_fast_t i = 0; i != N; ++i) {
             if(!checked[i]) {
                 checked[i] = true;
@@ -62,10 +62,10 @@ public:
                     j = perm_idx[j];
                     ++cnt;
                 }
-                /* если цикл не единичный, то добавляем в таблицу */
                 j = i;
+                /* если цикл не единичный, то добавляем в таблицу */
                 if(cnt) {
-                    tmp = j;
+                    const IdxType tmp = j;
                     while(!checked[perm_idx[j]]) {
                         p[pi++] = tmp;
                         j = perm_idx[j];
