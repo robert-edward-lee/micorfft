@@ -187,6 +187,10 @@ template<typename DataType, size_t N> void bohman(DataType (&win)[N]) MF_NOEXCEP
 }
 template<typename DataType, size_t N, size_t K> void cosine_sum(DataType (&win)[N], const float_t (&a)[K]) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR float_t factor = TWO_PI / (float_t(N) - ONE);
+    float_t scaler = 0;
+    for(size_t n = 0; n != K; ++n) {
+        scaler += a[n];
+    }
     for(size_t n = 0; n != N; ++n) {
         win[n] = a[0];
         int sgn = 1;
@@ -194,6 +198,7 @@ template<typename DataType, size_t N, size_t K> void cosine_sum(DataType (&win)[
             sgn *= -1;
             win[n] += float_t(sgn) * a[k] * cos(factor * float_t(k) * float_t(n));
         }
+        win[n] /= scaler;
     }
 }
 template<typename DataType, size_t N> void general_hamming(DataType (&win)[N], float_t alpha) {
