@@ -156,7 +156,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(Complex<DataType> (&cdata)[Size]) 
     }
 }
 
-template<typename DataType, size_t Size, bool Inverse>
+template<bool Inverse, typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(DataType (&data)[Size * 2], DataType factor) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
@@ -205,7 +205,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(DataType (&data)[Size * 2], DataType f
     }
 }
 
-template<typename DataType, size_t Size, bool Inverse>
+template<bool Inverse, typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(Complex<DataType> (&cdata)[Size], DataType factor) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 

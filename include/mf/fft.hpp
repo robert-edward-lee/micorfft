@@ -89,7 +89,7 @@ protected:
         }
 
         MF_IF_CONSTEXPR(Inverse) {
-            scale<DataType, Size, true>(data, DataType(1) / DataType(Size));
+            scale<true>(data, DataType(1) / DataType(Size));
         }
     }
 
