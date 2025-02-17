@@ -1,10 +1,64 @@
 #ifndef HPP_MF_DOT_MATH_COMPLEX
 #define HPP_MF_DOT_MATH_COMPLEX
 
+#include "mf/basic_math.hpp"
 #include "mf/config.hpp"
 #include "mf/types/complex.hpp"
 
 namespace mf {
+template<typename DataType, size_t Size>
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
+    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+
+    MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
+    MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
+    MF_CONST_OR_CONSTEXPR idx_t RESIDUE = Size % BLK_SIZE;
+
+    for(idx_t i = 0; i != BLKS; ++i) {
+        dst[BLK_SIZE * i + 0] = sqrt(src[2 * BLK_SIZE * i + 0] * src[2 * BLK_SIZE * i + 0]
+                                     + src[2 * BLK_SIZE * i + 1] * src[2 * BLK_SIZE * i + 1]);
+        dst[BLK_SIZE * i + 1] = sqrt(src[2 * BLK_SIZE * i + 2] * src[2 * BLK_SIZE * i + 2]
+                                     + src[2 * BLK_SIZE * i + 3] * src[2 * BLK_SIZE * i + 3]);
+        dst[BLK_SIZE * i + 2] = sqrt(src[2 * BLK_SIZE * i + 4] * src[2 * BLK_SIZE * i + 4]
+                                     + src[2 * BLK_SIZE * i + 5] * src[2 * BLK_SIZE * i + 5]);
+        dst[BLK_SIZE * i + 3] = sqrt(src[2 * BLK_SIZE * i + 6] * src[2 * BLK_SIZE * i + 6]
+                                     + src[2 * BLK_SIZE * i + 7] * src[2 * BLK_SIZE * i + 7]);
+    }
+
+    MF_IF_CONSTEXPR(RESIDUE != 0) {
+        for(idx_t i = BLKS * BLK_SIZE; i != Size; ++i) {
+            dst[i] = sqrt(src[2 * i] * src[2 * i] + src[2 * i + 1] * src[2 * i + 1]);
+        }
+    }
+}
+
+template<typename DataType, size_t Size>
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const Complex<DataType> (&csrc)[Size], DataType (&dst)[Size]) {
+    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+
+    MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
+    MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
+    MF_CONST_OR_CONSTEXPR idx_t RESIDUE = Size % BLK_SIZE;
+
+    const DataType(&src)[Size * 2] = (const DataType(&)[Size * 2]) csrc;
+    for(idx_t i = 0; i != BLKS; ++i) {
+        dst[BLK_SIZE * i + 0] = sqrt(src[2 * BLK_SIZE * i + 0] * src[2 * BLK_SIZE * i + 0]
+                                     + src[2 * BLK_SIZE * i + 1] * src[2 * BLK_SIZE * i + 1]);
+        dst[BLK_SIZE * i + 1] = sqrt(src[2 * BLK_SIZE * i + 2] * src[2 * BLK_SIZE * i + 2]
+                                     + src[2 * BLK_SIZE * i + 3] * src[2 * BLK_SIZE * i + 3]);
+        dst[BLK_SIZE * i + 2] = sqrt(src[2 * BLK_SIZE * i + 4] * src[2 * BLK_SIZE * i + 4]
+                                     + src[2 * BLK_SIZE * i + 5] * src[2 * BLK_SIZE * i + 5]);
+        dst[BLK_SIZE * i + 3] = sqrt(src[2 * BLK_SIZE * i + 6] * src[2 * BLK_SIZE * i + 6]
+                                     + src[2 * BLK_SIZE * i + 7] * src[2 * BLK_SIZE * i + 7]);
+    }
+
+    MF_IF_CONSTEXPR(RESIDUE != 0) {
+        for(idx_t i = BLKS * BLK_SIZE; i != Size; ++i) {
+            dst[i] = sqrt(src[2 * i] * src[2 * i] + src[2 * i + 1] * src[2 * i + 1]);
+        }
+    }
+}
+
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
