@@ -185,7 +185,8 @@ template<typename DataType, size_t N> void bohman(DataType (&win)[N]) MF_NOEXCEP
         win[n] = (ONE - factor) * cos(PI * factor) + INV_PI * sin(PI * factor);
     }
 }
-template<typename DataType, size_t N, size_t K> void cosine_sum(DataType (&win)[N], const float_t (&a)[K]) MF_NOEXCEPT {
+template<typename DataType, size_t N, size_t K>
+void cosine_sum(DataType (&win)[N], const float_t (&a)[K], bool scale = true) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR float_t factor = TWO_PI / (float_t(N) - ONE);
     float_t scaler = 0;
     for(size_t n = 0; n != K; ++n) {
@@ -198,7 +199,9 @@ template<typename DataType, size_t N, size_t K> void cosine_sum(DataType (&win)[
             sgn *= -1;
             win[n] += float_t(sgn) * a[k] * cos(factor * float_t(k) * float_t(n));
         }
-        win[n] /= scaler;
+        if(scale) {
+            win[n] /= scaler;
+        }
     }
 }
 template<typename DataType, size_t N> void general_hamming(DataType (&win)[N], float_t alpha) {
@@ -304,7 +307,7 @@ template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCE
         MF_FLOAT_MAX_C(0.083578947),
         MF_FLOAT_MAX_C(0.006947368),
     };
-    cosine_sum(win, a);
+    cosine_sum(win, a, false);
 }
 /**
  * @brief Fast decaying 3-term flat top window
