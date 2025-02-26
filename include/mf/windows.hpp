@@ -134,6 +134,12 @@ void czt(const Complex<float_t> (&in)[N],
         out[k] = w3 * zz[N - 1 + k];
     }
 }
+MF_CONSTEXPR float_t sqr(float_t x) MF_NOEXCEPT {
+    return x * x;
+}
+template<size_t N> MF_CONSTEXPR float_t scaler(float_t i) MF_NOEXCEPT {
+    return (i - float_t(N) / TWO + HALF) / float_t(N);
+}
 } // namespace detail
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -647,6 +653,57 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
     }
     for(size_t n = 0; n < N; ++n) {
         win[n] /= maxw;
+    }
+}
+template<typename DataType, size_t N>
+void taylor(DataType (&win)[N], float_t sll = 30, size_t nbar = 4, bool norm = true) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR size_t MAX_NBAR = (N / 2 < 4) ? 4 : N / 2;
+
+    if(nbar > MAX_NBAR) {
+        return;
+    }
+
+    const float_t B = pow(float_t(10), float_t(sll) / float_t(20));
+    const float_t A = acosh(B) / PI;
+    const float_t s2 = detail::sqr(nbar) / (detail::sqr(A) + detail::sqr(nbar - HALF));
+
+    float_t Fm[MAX_NBAR - 1];
+    for(size_t mi = 0; mi < nbar - 1; ++mi) {
+        float_t numer = (mi % 2) ? -1 : 1;
+        for(size_t i = 0; i < nbar - 1; ++i) {
+            numer *= (ONE - detail::sqr(mi + ONE) / (s2 * (detail::sqr(A) + detail::sqr(i + HALF))));
+        }
+
+        float_t denom = TWO;
+        for(size_t i = 0; i < mi; ++i) {
+            denom *= (ONE - detail::sqr(mi + ONE) / detail::sqr(i + ONE));
+        }
+        for(size_t i = mi + 1; i < nbar - 1; ++i) {
+            denom *= (ONE - detail::sqr(mi + ONE) / detail::sqr(i + ONE));
+        }
+
+        Fm[mi] = numer / denom;
+    }
+
+    for(size_t i = 0; i < N; ++i) {
+        float_t sum = 0;
+        for(size_t j = 0; j < nbar - 1; ++j) {
+            sum += Fm[j] * cos(TWO_PI * (float_t(j) + ONE) * detail::scaler<N>(i));
+        }
+
+        win[i] = ONE + TWO * sum;
+    }
+
+    if(norm) {
+        float_t scale = 0;
+        for(size_t j = 0; j < nbar - 1; ++j) {
+            scale += Fm[j] * cos(TWO_PI * (float_t(j) + ONE) * detail::scaler<N>((N - ONE) / TWO));
+        }
+        scale = ONE / (ONE + TWO * scale);
+
+        for(size_t i = 0; i < N; ++i) {
+            win[i] *= scale;
+        }
     }
 }
 template<typename DataType, size_t N> void poisson(DataType (&win)[N], float_t tau) MF_NOEXCEPT {
