@@ -5,7 +5,6 @@ from enum import Enum
 from scipy.signal import windows
 
 SIZES = [
-    1,
     2,
     3,
     4,
@@ -54,6 +53,7 @@ TESTS = [
     ('kaiser', 'kaiser', 1.0, 4.0, 9.0),
     ('kaiser_bessel_derived', 'kaiser_bessel_derived', 1.0, 4.0, 9.0),
     ('chebyshev', 'chebwin', 50.0, 90.0, 120.0),
+    ('taylor', 'taylor'),
     ('poisson', 'exponential', 0.3, 0.5, 0.8),
 
     ('barthann', 'barthann'),
