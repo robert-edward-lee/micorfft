@@ -659,7 +659,7 @@ template<typename DataType, size_t N>
 void taylor(DataType (&win)[N], float_t sll = 30, size_t nbar = 4, bool norm = true) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR size_t MAX_NBAR = (N / 2 < 4) ? 4 : N / 2;
 
-    if(nbar > MAX_NBAR) {
+    if(!(1 < nbar && nbar <= MAX_NBAR)) {
         return;
     }
 
