@@ -30,7 +30,7 @@ MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 DataType sum(const DataType (&data)[
     return init;
 }
 template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 void sum(const DataType (&data)[Size], DataType *init) MF_NOEXCEPT {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void sum(const DataType (&data)[Size], DataType *init) MF_NOEXCEPT {
     typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
