@@ -20,10 +20,10 @@ template<typename DataType, size_t Size> class Cfft {
 public:
     MF_CONSTEXPR_14 Cfft() MF_NOEXCEPT {
         /* создание таблицы для перестановок по основанию 8 */
-        Transposition<idx_t, Size, 8> transpos;
+        Transposition<Size, 8> transpos;
         transpos.fill_table(bit_rev_table);
         /* создание таблицы поворотных коэффициентов */
-        fill_cfft_twiddle_coeff<DataType, idx_t, CFFT_LEN * 2>(cfft_twiddle);
+        fill_cfft_twiddle_coeff<DataType, CFFT_LEN * 2>(cfft_twiddle);
     }
     /**
      * @param[in,out] data Ссылка на действительные данные в комплексной интерпретации
@@ -50,15 +50,15 @@ protected:
     /**
      * @brief Тип для хранения индексов перестановок в таблице
      */
-    typedef typename idx_type_chooser<Size>::type idx_t;
+    typedef typename smallest_integral_type<Size>::type idx_t;
     /**
      * @brief Тип для работы с индексом на стеке, максимально быстрый тип, шириной не менее @ref idx_t
      */
-    typedef typename uint_fast<idx_t>::type idx_fast_t;
+    typedef typename fastest_integral_type<Size>::type idx_fast_t;
     /**
      * @brief Размер комплексного БПФ
      */
-    static MF_CONST_OR_CONSTEXPR idx_t CFFT_LEN = Size;
+    static MF_CONST_OR_CONSTEXPR size_t CFFT_LEN = Size;
     /**
      * @tparam Inverse Флаг обратного БПФ
      * @tparam BitReverse Флаг перестановки индексов
@@ -105,26 +105,26 @@ private:
      * @tparam X Размер БПФ
      * @brief Пока такой вот костыль для статического выделения памяти под таблицу индексов перестановок
      */
-    template<idx_t X> struct bit_rev_len_helper {
+    template<size_t X> struct bit_rev_len_helper {
         /**
          * @brief Размер таблицы индексов перестановок в зависимости от размера БПФ
          */
-        static MF_CONST_OR_CONSTEXPR idx_t value = X == 16   ? 20
-                                                 : X == 32   ? 48
-                                                 : X == 64   ? 56
-                                                 : X == 128  ? 208
-                                                 : X == 256  ? 440
-                                                 : X == 512  ? 448
-                                                 : X == 1024 ? 1800
-                                                 : X == 2048 ? 3808
-                                                 : X == 4096 ? 4032
-                                                 : X == 8192 ? 14576
-                                                             : 0;
+        static MF_CONST_OR_CONSTEXPR size_t value = X == 16   ? 20
+                                                  : X == 32   ? 48
+                                                  : X == 64   ? 56
+                                                  : X == 128  ? 208
+                                                  : X == 256  ? 440
+                                                  : X == 512  ? 448
+                                                  : X == 1024 ? 1800
+                                                  : X == 2048 ? 3808
+                                                  : X == 4096 ? 4032
+                                                  : X == 8192 ? 14576
+                                                              : 0;
     };
     /**
      * @brief Размер таблицы индексов перестановок
      */
-    static MF_CONST_OR_CONSTEXPR idx_t BIT_REV_LEN = bit_rev_len_helper<CFFT_LEN>::value;
+    static MF_CONST_OR_CONSTEXPR size_t BIT_REV_LEN = bit_rev_len_helper<CFFT_LEN>::value;
     /**
      * @tparam L Размер БПФ степенью 8
      * @tparam TwidCoefModifier Модификатор поворотных коэффициент
@@ -750,12 +750,12 @@ template<typename DataType, size_t Size> class Rfft: public Cfft<DataType, Size 
     /**
      * @brief Размер действительного БПФ
      */
-    static MF_CONST_OR_CONSTEXPR idx_t RFFT_LEN = Size;
+    static MF_CONST_OR_CONSTEXPR size_t RFFT_LEN = Size;
 
 public:
     MF_CONSTEXPR_14 Rfft() MF_NOEXCEPT {
         /* создание таблицы поворотных коэффициентов для действительного БПФ */
-        fill_rfft_twiddle_coeff<DataType, idx_t, RFFT_LEN>(rfft_twiddle);
+        fill_rfft_twiddle_coeff<DataType, RFFT_LEN>(rfft_twiddle);
     }
     /**
      * @param[in] in Входные данные во временном представлении

@@ -6,9 +6,9 @@
 
 namespace mf {
 template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename fastest_integral_type<Size>::type
 max_element(const DataType (&data)[Size]) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -51,9 +51,9 @@ max_element(const DataType (&data)[Size]) MF_NOEXCEPT {
     return max_idx;
 }
 template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename fastest_integral_type<Size>::type
 max_element(const DataType (&data)[Size], DataType *value) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -101,9 +101,9 @@ max_element(const DataType (&data)[Size], DataType *value) MF_NOEXCEPT {
 }
 
 template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename fastest_integral_type<Size>::type
 min_element(const DataType (&data)[Size]) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -146,9 +146,9 @@ min_element(const DataType (&data)[Size]) MF_NOEXCEPT {
     return min_idx;
 }
 template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename uint_fast<typename idx_type_chooser<Size>::type>::type
+MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 typename fastest_integral_type<Size>::type
 min_element(const DataType (&data)[Size], DataType *value) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;

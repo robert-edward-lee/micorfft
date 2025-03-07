@@ -9,7 +9,7 @@ template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void subtract(DataType (&difference)[Size],
                                              const DataType (&minuend)[Size],
                                              const DataType (&subtrahend)[Size]) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -32,7 +32,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void subtract(DataType (&difference)[Size],
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void subtract(DataType (&minuend)[Size],
                                              const DataType (&subtrahend)[Size]) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;

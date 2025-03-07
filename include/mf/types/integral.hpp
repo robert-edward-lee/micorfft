@@ -7,6 +7,7 @@
 #include "mf/config.hpp"
 #include "mf/traits/conditional.hpp"
 #include "mf/traits/integral_constant.hpp"
+#include "mf/traits/make_signed.hpp"
 #include "mf/traits/remove_cv.hpp"
 
 #if MF_CXX_VER > 199711L
@@ -15,6 +16,9 @@
 
 namespace mf {
 using std::size_t;
+typedef make_signed<size_t>::type ssize_t;
+using std::ptrdiff_t;
+
 template<int Size> struct UIntTypeWidth {
     typedef typename conditional<
         Size == sizeof(unsigned char) * CHAR_BIT,
@@ -73,12 +77,17 @@ template<> struct uint_fast_helper<8> {
 } // namespace detail
 template<typename IdxType> struct uint_fast: detail::uint_fast_helper<sizeof(IdxType)> {};
 
-template<size_t Size> struct idx_type_chooser {
+// clang-format off
+template<size_t Size> struct smallest_integral_type {
     typedef
-        typename conditional<Size <= (size_t(1) << size_t(6)),
-                             uint8_t,
-                             typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t, uint32_t>::type>::type
-            type;
+        typename conditional<Size <= (size_t(1) << size_t(7)),   uint8_t,
+        typename conditional<Size <= (size_t(1) << size_t(15)), uint16_t,
+        typename conditional<Size <= (size_t(1) << size_t(31)), uint32_t,
+                                                                uint64_t>::type>::type>::type type;
+};
+// clang-format on
+template<size_t Size> struct fastest_integral_type {
+    typedef typename detail::uint_fast_helper<sizeof(typename smallest_integral_type<Size>::type)>::type type;
 };
 } // namespace mf
 

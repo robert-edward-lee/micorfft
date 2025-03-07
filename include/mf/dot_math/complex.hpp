@@ -8,7 +8,7 @@
 namespace mf {
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -34,7 +34,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const DataType (&src)[Size * 2], D
 
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const Complex<DataType> (&csrc)[Size], DataType (&dst)[Size]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -61,7 +61,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude(const Complex<DataType> (&csrc)[Si
 
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const DataType (&src)[Size * 2], DataType (&dst)[Size]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -87,7 +87,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const DataType (&src)[Size * 2
 
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const Complex<DataType> (&csrc)[Size], DataType (&dst)[Size]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -113,7 +113,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void magnitude_sqr(const Complex<DataType> (&csrc
 }
 
 template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(DataType (&data)[Size * 2]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -135,7 +135,7 @@ template<typename DataType, size_t Size> MF_OPTIMIZE(3) MF_CONSTEXPR_14 void con
 
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(Complex<DataType> (&cdata)[Size]) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -158,7 +158,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void conjugate(Complex<DataType> (&cdata)[Size]) 
 
 template<bool Inverse, typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(DataType (&data)[Size * 2], DataType factor) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -207,7 +207,7 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(DataType (&data)[Size * 2], DataType f
 
 template<bool Inverse, typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(Complex<DataType> (&cdata)[Size], DataType factor) {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;

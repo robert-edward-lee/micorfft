@@ -8,7 +8,7 @@ namespace mf {
 template<typename DataType, size_t Size>
 MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 DataType product(const DataType (&data)[Size],
                                                              DataType init = DataType(1)) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
@@ -31,7 +31,7 @@ MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 DataType product(const DataType (&da
 }
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void product(const DataType (&data)[Size], DataType *init) MF_NOEXCEPT {
-    typedef typename uint_fast<typename idx_type_chooser<Size>::type>::type idx_t;
+    typedef typename fastest_integral_type<Size>::type idx_t;
 
     MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
     MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
