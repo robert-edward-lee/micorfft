@@ -2,6 +2,7 @@
 #define HPP_MF_UTILS_TYPES
 
 #include "mf/types/complex.hpp"
+#include "mf/types/fixed.hpp"
 #include "mf/types/floating.hpp"
 #include "mf/types/integral.hpp"
 
