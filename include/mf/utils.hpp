@@ -1,21 +1,24 @@
 #ifndef HPP_MF_UTILS
 #define HPP_MF_UTILS
 
-#include <cstddef>
+#include "mf/config.hpp"
 
-#define MF_DO_CONCAT(x, y) x##y
-#define MF_CONCAT(x, y) MF_DO_CONCAT(x, y)
+namespace mf {
+namespace detail {
+template<typename T, size_t N> char (&countof_helper(T (&)[N]) MF_NOEXCEPT)[N];
+}
 
-#define MF_DO_TRICAT(x, y, z) x##y##z
-#define MF_TRICAT(x, y, z) MF_DO_TRICAT(x, y, z)
+template<typename T, size_t N> MF_CONSTEXPR size_t countof(T (&a)[N]) MF_NOEXCEPT {
+    return sizeof(detail::countof_helper(a));
+}
 
-#define MF_DO_STR(x) #x
-#define MF_STR(x) MF_DO_STR(x)
+#define MF_COUNTOF(a) (mf::countof(a))
 
-namespace mf { namespace detail {
-template<typename T, std::size_t N> char (&countof_helper(T (&)[N]))[N];
-}} // namespace mf::detail
-
-#define MF_COUNTOF(a) sizeof(mf::detail::countof_helper(a))
+template<size_t Begin, size_t End, typename T, size_t Size>
+MF_CONSTEXPR T (&slice_cast(T (&arr)[Size]) MF_NOEXCEPT)[End - Begin] {
+    MF_STATIC_ASSERT_MSG(Begin <= End && End <= Size, "Invalid range for slicing");
+    return reinterpret_cast<T(&)[End - Begin]>(arr[Begin]);
+}
+} // namespace mf
 
 #endif // HPP_MF_UTILS

@@ -1,7 +1,7 @@
 #ifndef HPP_MF_UTILS_CONFIG
 #define HPP_MF_UTILS_CONFIG
 
-#include "mf/utils.hpp"
+#include "mf/basic_utils.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 //                            Compiler Detect Test                            //
@@ -104,7 +104,7 @@
 #endif
 #else
 #define MF_MAKE_ASSERT_NAME(a) MF_CONCAT(a, __COUNTER__)
-#define MF_STATIC_ASSERT(expr) typedef char MF_MAKE_ASSERT_NAME(static_assertion_)[(expr) ? 1 : -1]
+#define MF_STATIC_ASSERT(expr) typedef char MF_MAKE_ASSERT_NAME(static_assertion_)[(expr) ? 1 : -1] MF_MAYBE_UNUSED
 #define MF_STATIC_ASSERT_MSG(expr, msg) MF_STATIC_ASSERT(expr)
 #endif
 
@@ -127,11 +127,19 @@
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif
 
-#if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
+#if (defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
 #else
 #define MF_OPTIMIZE(lvl)
 #endif // optimize
+
+#if MF_HAS_CXX_ATTRIBUTE(maybe_unused)
+#define MF_MAYBE_UNUSED [[maybe_unused]]
+#elif MF_GCC_VERSION_CHECK(2, 7, 0) || MF_HAS_ATTRIBUTE(unused)
+#define MF_MAYBE_UNUSED __attribute__((unused))
+#else
+#define MF_MAYBE_UNUSED
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //                            Compiler Intrinsics                             //

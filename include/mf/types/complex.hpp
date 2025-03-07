@@ -79,7 +79,7 @@ public:
     }
     /* arithmetic */
     MF_CONSTEXPR Complex operator~() const MF_NOEXCEPT {
-        return Complex(re, -im);
+        return conj();
     }
 
     MF_CONSTEXPR_14 Complex &operator+=(const Complex &rhs) MF_NOEXCEPT {

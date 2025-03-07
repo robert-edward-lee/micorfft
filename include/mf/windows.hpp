@@ -97,7 +97,7 @@ void czt(const Complex<float_t> (&in)[N],
     Complex<float_t> zz[fft_size];
     for(size_t k = 0; k < fft_size; ++k) {
         if(k < N) {
-            zz[k] = w.pow(HALF * float_t(k) * float_t(k)) / a.pow(k) * in[k];
+            zz[k] = w.pow(HALF * sqr(k)) / a.pow(k) * in[k];
         } else {
             zz[k] = 0;
         }
@@ -108,7 +108,7 @@ void czt(const Complex<float_t> (&in)[N],
     for(size_t k = 0; k < fft_size; ++k) {
         if(k < N + M - 1) {
             const int kshift = k - (N - 1);
-            w2[k] = w.pow(-HALF * float_t(kshift) * float_t(kshift));
+            w2[k] = w.pow(-HALF * sqr(kshift));
         } else {
             w2[k] = 0;
         }
@@ -130,12 +130,9 @@ void czt(const Complex<float_t> (&in)[N],
     }
 
     for(size_t k = 0; k < M; ++k) {
-        const Complex<float_t> w3 = w.pow(HALF * float_t(k) * float_t(k));
+        const Complex<float_t> w3 = w.pow(HALF * sqr(k));
         out[k] = w3 * zz[N - 1 + k];
     }
-}
-MF_CONSTEXPR float_t sqr(float_t x) MF_NOEXCEPT {
-    return x * x;
 }
 template<size_t N> MF_CONSTEXPR float_t scaler(float_t i) MF_NOEXCEPT {
     return (i - float_t(N) / TWO + HALF) / float_t(N);
@@ -159,7 +156,7 @@ template<typename DataType, size_t N> void bartlett(DataType (&win)[N]) MF_NOEXC
 }
 template<typename DataType, size_t N> void triang(DataType (&win)[N]) MF_NOEXCEPT {
     static MF_CONST_OR_CONSTEXPR DataType subtractor = (float_t(N) - ONE) / TWO;
-    static MF_CONST_OR_CONSTEXPR DataType divider = N % 2 ? (float_t(N) + ONE) / TWO : float_t(N) / TWO;
+    static MF_CONST_OR_CONSTEXPR DataType divider = (float_t(N) + N % 2) / TWO;
     for(size_t n = 0; n != N; ++n) {
         win[n] = ONE - abs((float_t(n) - subtractor) / divider);
     }
@@ -169,8 +166,8 @@ template<typename DataType, size_t N> void parzen(DataType (&win)[N]) MF_NOEXCEP
         DataType x = abs(TWO * float_t(n) - (float_t(N) - ONE)) / float_t(N);
         DataType y = ONE - x;
 
-        x = ONE - float_t(6) * x * x + float_t(6) * x * x * x;
-        y = TWO * y * y * y;
+        x = ONE - float_t(6) * sqr(x) + float_t(6) * cub(x);
+        y = TWO * cub(y);
 
         win[n] = min(x, y);
     }
@@ -541,7 +538,7 @@ template<typename DataType, size_t N> void gaussian(DataType (&win)[N], float_t 
     MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
     for(size_t n = 0; n != N; ++n) {
         const float_t x = float_t(n) - subtractor;
-        win[n] = exp(-HALF * x * x / (sigma * sigma));
+        win[n] = exp(-HALF * sqr(x) / sqr(sigma));
     }
 }
 template<typename DataType, size_t N> void tukey(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
@@ -568,7 +565,7 @@ template<typename DataType, size_t N> void tukey(DataType (&win)[N], float_t alp
 template<typename DataType, size_t N> void kaiser(DataType (&win)[N], float_t beta) MF_NOEXCEPT {
     for(size_t n = 0; n != N; ++n) {
         const float_t factor = TWO * float_t(n) / (float_t(N) - ONE) - ONE;
-        win[n] = bessel::i0(beta * sqrt(ONE - factor * factor)) / bessel::i0(beta);
+        win[n] = bessel::i0(beta * sqrt(ONE - sqr(factor))) / bessel::i0(beta);
     }
 }
 template<typename DataType, size_t N> void kaiser_bessel_derived(DataType (&win)[N], float_t beta) MF_NOEXCEPT {
@@ -665,21 +662,21 @@ void taylor(DataType (&win)[N], float_t sll = 30, size_t nbar = 4, bool norm = t
 
     const float_t B = pow(float_t(10), float_t(sll) / float_t(20));
     const float_t A = acosh(B) / PI;
-    const float_t s2 = detail::sqr(nbar) / (detail::sqr(A) + detail::sqr(nbar - HALF));
+    const float_t s2 = sqr(nbar) / (sqr(A) + sqr(nbar - HALF));
 
     float_t Fm[MAX_NBAR - 1];
     for(size_t mi = 0; mi < nbar - 1; ++mi) {
         float_t numer = (mi % 2) ? -1 : 1;
         for(size_t i = 0; i < nbar - 1; ++i) {
-            numer *= (ONE - detail::sqr(mi + ONE) / (s2 * (detail::sqr(A) + detail::sqr(i + HALF))));
+            numer *= (ONE - sqr(mi + ONE) / (s2 * (sqr(A) + sqr(i + HALF))));
         }
 
         float_t denom = TWO;
         for(size_t i = 0; i < mi; ++i) {
-            denom *= (ONE - detail::sqr(mi + ONE) / detail::sqr(i + ONE));
+            denom *= (ONE - sqr(mi + ONE) / sqr(i + ONE));
         }
         for(size_t i = mi + 1; i < nbar - 1; ++i) {
-            denom *= (ONE - detail::sqr(mi + ONE) / detail::sqr(i + ONE));
+            denom *= (ONE - sqr(mi + ONE) / sqr(i + ONE));
         }
 
         Fm[mi] = numer / denom;
