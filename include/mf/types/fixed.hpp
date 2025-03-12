@@ -15,8 +15,6 @@ template<size_t Bit, typename T> MF_CONSTEXPR T ssat(T x) MF_NOEXCEPT {
         MF_CONST_OR_CONSTEXPR T max = (T(1) << (Bit - T(1))) - T(1);
         MF_CONST_OR_CONSTEXPR T min = T(-1) - max;
 
-        std::cout << "[" << min << ";" << max << "]\n";
-
         if(x > max) {
             return max;
         } else if(x < min) {
@@ -120,16 +118,9 @@ std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> 
     s.imbue(o.getloc());
     s.precision(o.precision());
 
-    BaseType c = abs(BaseType(x));
-    int sign = 1;
-    if(x < 0) {
-        c = x - 1;
-        c = ~c;
-        sign = -1;
-    }
-    const float_max_t f = float_max_t(sign) * c / pow(float_max_t(2), FractionBits);
-
+    const float_max_t f = float_max_t(x) / pow(float_max_t(2), FractionBits);
     s << f;
+    s << "(" << BaseType(x) << ")";
     return o << s.str();
 }
 } // namespace mf
