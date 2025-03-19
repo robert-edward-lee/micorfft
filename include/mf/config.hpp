@@ -127,7 +127,7 @@
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif
 
-#if (defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
+#if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
 #else
 #define MF_OPTIMIZE(lvl)

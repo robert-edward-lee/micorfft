@@ -1,54 +1,24 @@
 #ifndef HPP_MF_STATISTIC_PRODUCT
 #define HPP_MF_STATISTIC_PRODUCT
 
-#include "mf/config.hpp"
-#include "mf/types/integral.hpp"
+#include "mf/statistic/common.hpp"
 
 namespace mf {
-template<typename DataType, size_t Size>
-MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 DataType product(const DataType (&data)[Size],
-                                                             DataType init = DataType(1)) MF_NOEXCEPT {
-    typedef typename fastest_integral_type<Size>::type idx_t;
-
-    MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
-    MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
-    MF_CONST_OR_CONSTEXPR idx_t RESIDUE = Size % BLK_SIZE;
-
-    for(idx_t i = 0; i != BLKS; ++i) {
-        init *= data[BLK_SIZE * i + 0];
-        init *= data[BLK_SIZE * i + 1];
-        init *= data[BLK_SIZE * i + 2];
-        init *= data[BLK_SIZE * i + 3];
-    }
-
-    MF_IF_CONSTEXPR(RESIDUE != 0) {
-        for(idx_t i = BLKS * BLK_SIZE; i != Size; ++i) {
-            init *= data[i];
-        }
-    }
-
-    return init;
+namespace statistic {
+template<typename LhsDataType, typename RhsDataType>
+MF_OPTIMIZE(3) MF_CONSTEXPR void product_op(LhsDataType &lhs, const RhsDataType &rhs) MF_NOEXCEPT {
+    lhs *= rhs;
 }
-template<typename DataType, size_t Size>
-MF_OPTIMIZE(3) MF_CONSTEXPR_14 void product(const DataType (&data)[Size], DataType *init) MF_NOEXCEPT {
-    typedef typename fastest_integral_type<Size>::type idx_t;
+} // namespace statistic
 
-    MF_CONST_OR_CONSTEXPR idx_t BLK_SIZE = 4;
-    MF_CONST_OR_CONSTEXPR idx_t BLKS = Size / BLK_SIZE;
-    MF_CONST_OR_CONSTEXPR idx_t RESIDUE = Size % BLK_SIZE;
-
-    for(idx_t i = 0; i != BLKS; ++i) {
-        *init *= data[BLK_SIZE * i + 0];
-        *init *= data[BLK_SIZE * i + 1];
-        *init *= data[BLK_SIZE * i + 2];
-        *init *= data[BLK_SIZE * i + 3];
-    }
-
-    MF_IF_CONSTEXPR(RESIDUE != 0) {
-        for(idx_t i = BLKS * BLK_SIZE; i != Size; ++i) {
-            *init *= data[i];
-        }
-    }
+template<typename OutDataType, typename DataType, size_t Size>
+MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 OutDataType product(const DataType (&data)[Size],
+                                                                const OutDataType &init = OutDataType(1)) MF_NOEXCEPT {
+    return statistic::loop_unroller<16>(data, init, statistic::product_op<OutDataType>);
+}
+template<typename OutDataType, typename DataType, size_t Size>
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void product(const DataType (&data)[Size], OutDataType &init) MF_NOEXCEPT {
+    statistic::loop_unroller<16>(data, init, statistic::product_op);
 }
 } // namespace mf
 
