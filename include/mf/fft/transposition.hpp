@@ -16,14 +16,14 @@ namespace mf {
  * @brief Класс для генерации таблицы индексов перестановок
  */
 template<size_t N, size_t Radix> class Transposition {
-    MF_STATIC_ASSERT((trait::is_pow_of_2<N>::value) && N > Radix);
+    MF_STATIC_ASSERT((trait::is_pow_of_2<size_t, N>::value) && N > Radix);
 
     typedef typename smallest_integral_type<N>::type idx_t;
     typedef typename fastest_integral_type<N>::type idx_fast_t;
 
 public:
-    static MF_CONST_OR_CONSTEXPR idx_t log2N = trait::log2<N>::value;
-    static MF_CONST_OR_CONSTEXPR idx_t log2Radix = trait::log2<Radix>::value;
+    static MF_CONST_OR_CONSTEXPR idx_t log2N = trait::log2<idx_t, N>::value;
+    static MF_CONST_OR_CONSTEXPR idx_t log2Radix = trait::log2<idx_t, Radix>::value;
     static MF_CONST_OR_CONSTEXPR idx_t bits_list_size = log2N / log2Radix + !!(log2N % log2Radix);
 
     MF_CONSTEXPR_14 Transposition() MF_NOEXCEPT {

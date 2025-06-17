@@ -22,6 +22,9 @@ template<> struct is_integral_helper<signed long>: true_type {};
 #if MF_CXX_VER > 199711L
 template<> struct is_integral_helper<unsigned long long>: true_type {};
 template<> struct is_integral_helper<signed long long>: true_type {};
+#else
+// TODO что то тут сделать!
+template<> struct is_integral_helper<size_t>: true_type {};
 #endif
 } // namespace detail
 template<typename T> struct is_integral: detail::is_integral_helper<typename remove_cv<T>::type>::type {};

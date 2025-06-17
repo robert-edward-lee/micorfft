@@ -92,7 +92,7 @@ void czt(const Complex<float_t> (&in)[N],
          Complex<float_t> (&out)[M],
          const Complex<float_t> &w,
          const Complex<float_t> &a) MF_NOEXCEPT {
-    MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<N + M - 1>::value;
+    MF_CONST_OR_CONSTEXPR size_t fft_size = trait::clp2<size_t, N + M - 1>::value;
 
     Complex<float_t> zz[fft_size];
     for(size_t k = 0; k < fft_size; ++k) {
@@ -625,7 +625,7 @@ template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t
             }
         }
 
-        MF_IF_CONSTEXPR(trait::is_pow_of_2<N>::value) {
+        MF_IF_CONSTEXPR(trait::is_pow_of_2<size_t, N>::value) {
             detail::fft_radix2(W);
         } else {
             detail::czt(W, W, Complex<float_t>::polar(ONE, -TWO_PI / float_t(N)), ONE);
