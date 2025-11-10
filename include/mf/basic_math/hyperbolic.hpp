@@ -8,7 +8,7 @@
 namespace mf {
 using std::sinh;
 using std::cosh;
-#if defined(__STRICT_ANSI__)
+#if defined(__STRICT_ANSI__) || (defined(__GNUC__) && (__cplusplus < 201100))
 extern "C" double acosh(double);
 extern "C" double asinh(double);
 #else

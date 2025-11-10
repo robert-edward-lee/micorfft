@@ -111,10 +111,13 @@
 /******************************************************************************/
 /*                           Attribute Feature-Test                           */
 /******************************************************************************/
-#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907) /* nodiscard */
+#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907) && !(defined(__clang__) && (__cplusplus < 201703L)) \
+    && !(defined(__GNUC__) && (__cplusplus < 201100)) /* nodiscard */
 #define MF_NODISCARD [[nodiscard]]
 #define MF_NODISCARD_MSG(msg) [[nodiscard(msg)]]
-#elif MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201603)
+#elif MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201603) && !(defined(__clang__) && (__cplusplus < 201703L)) \
+    && !(defined(__GNUC__) && (__cplusplus < 201100))
+#define MF_NODISCARD [[nodiscard]]
 #elif MF_GCC_VERSION_CHECK(3, 4, 0) || defined(__clang__)
 #define MF_NODISCARD __attribute__((warn_unused_result))
 #elif MF_MSC_VERSION_CHECK(1700)
@@ -123,9 +126,9 @@
 #define MF_NODISCARD
 #endif /* nodiscard */
 
-#if !defined(MF_NODISCARD_MSG)
+#if !defined(MF_NODISCARD_MSG) /* nodiscard */
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
-#endif
+#endif /* nodiscard */
 
 #if (defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) /* optimize */
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
@@ -133,7 +136,7 @@
 #define MF_OPTIMIZE(lvl)
 #endif /* optimize */
 
-#if MF_HAS_CXX_ATTRIBUTE(maybe_unused)
+#if MF_HAS_CXX_ATTRIBUTE(maybe_unused) && !(defined(__GNUC__) && (__cplusplus < 201100))
 #define MF_MAYBE_UNUSED [[maybe_unused]]
 #elif MF_GCC_VERSION_CHECK(2, 7, 0) || MF_HAS_ATTRIBUTE(unused)
 #define MF_MAYBE_UNUSED __attribute__((unused))
