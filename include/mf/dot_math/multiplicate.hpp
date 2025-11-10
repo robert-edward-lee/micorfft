@@ -13,7 +13,7 @@ template<typename DataType>
 MF_OPTIMIZE(3) MF_CONSTEXPR void mul_assign(DataType &lhs, const DataType &rhs) MF_NOEXCEPT {
     lhs *= rhs;
 }
-} // namespace dot_math
+} /* namespace dot_math */
 
 template<typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void multiplicate(DataType (&product)[Size],
@@ -35,10 +35,11 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void multiplicate(DataType (&multiplier)[Size],
 }
 
 template<typename DataType, size_t Size>
-MF_OPTIMIZE(3) MF_CONSTEXPR_14 void multiplicate(DataType (&multiplier)[Size], const DataType &multiplicand) MF_NOEXCEPT {
+MF_OPTIMIZE(3) MF_CONSTEXPR_14 void multiplicate(DataType (&multiplier)[Size],
+                                                 const DataType &multiplicand) MF_NOEXCEPT {
     dot_math::loop_unroller<16>(multiplier, multiplicand, dot_math::mul_assign);
 }
 
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_DOT_MATH_MULTIPLICATE
+#endif /* HPP_MF_DOT_MATH_MULTIPLICATE */

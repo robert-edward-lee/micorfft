@@ -11,8 +11,8 @@ template<typename T> struct is_valid_idx_type_helper: false_type {};
 template<> struct is_valid_idx_type_helper<uint8_t>: true_type {};
 template<> struct is_valid_idx_type_helper<uint16_t>: true_type {};
 template<> struct is_valid_idx_type_helper<uint32_t>: true_type {};
-} // namespace detail
+} /* namespace detail */
 template<typename T> struct is_valid_idx_type: detail::is_valid_idx_type_helper<typename remove_cv<T>::type> {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_IS_VALID_IDX_TYPE
+#endif /* HPP_MF_TRAITS_IS_VALID_IDX_TYPE */

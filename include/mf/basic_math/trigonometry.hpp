@@ -19,6 +19,6 @@ template<bool Norm, typename T> MF_CONSTEXPR_14 T sinc(T x) MF_NOEXCEPT {
 template<typename T> MF_CONSTEXPR T sinc(T x) MF_NOEXCEPT {
     return sinc<true>(x);
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_BASIC_MATH_TRIGONOMETRY
+#endif /* HPP_MF_BASIC_MATH_TRIGONOMETRY */

@@ -90,6 +90,6 @@ template<typename idx_t, idx_t N> MF_CONSTEXPR_14 void print_bit_rev_index_table
     printf("};\n");
 }
 
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRANSPOSITION
+#endif /* HPP_MF_TRANSPOSITION */

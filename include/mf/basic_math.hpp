@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "mf/basic_math/constants.hpp"
+#include "mf/basic_math/hyperbolic.hpp"
 #include "mf/basic_math/trigonometry.hpp"
 
 namespace mf {
@@ -35,6 +36,6 @@ template<typename T> MF_CONSTEXPR T max(T a, T b) MF_NOEXCEPT {
 using std::exp;
 using std::sqrt;
 using std::pow;
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_UTILS_MATH
+#endif /* HPP_MF_UTILS_MATH */

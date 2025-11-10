@@ -137,11 +137,11 @@ void czt(const Complex<float_t> (&in)[N],
 template<size_t N> MF_CONSTEXPR float_t scaler(float_t i) MF_NOEXCEPT {
     return (i - float_t(N) / TWO + HALF) / float_t(N);
 }
-} // namespace detail
+} /* namespace detail */
 
-////////////////////////////////////////////////////////////////////////////////
-//                              B-spline windows                              //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                              B-spline windows                              */
+/******************************************************************************/
 template<typename DataType, size_t N> void rect(DataType (&win)[N]) MF_NOEXCEPT {
     for(size_t n = 0; n != N; ++n) {
         win[n] = ONE;
@@ -173,9 +173,9 @@ template<typename DataType, size_t N> void parzen(DataType (&win)[N]) MF_NOEXCEP
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                 Cosine-sum windows                                                 //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                             Cosine-sum windows                             */
+/******************************************************************************/
 template<typename DataType, size_t N> void cosine(DataType (&win)[N]) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR float_t factor = PI / float_t(N);
     for(size_t n = 0; n != N; ++n) {
@@ -299,9 +299,9 @@ template<typename DataType, size_t N> void blackmanharris(DataType (&win)[N]) MF
     cosine_sum(win, a);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//                              Flat-top windows                              //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                              Flat-top windows                              */
+/******************************************************************************/
 template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCEPT {
     static const float_t a[] = {
         MF_FLOAT_MAX_C(0.21557895),
@@ -531,9 +531,9 @@ template<typename DataType, size_t N> void hft248d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//                             Adjustable windows                             //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                             Adjustable windows                             */
+/******************************************************************************/
 template<typename DataType, size_t N> void gaussian(DataType (&win)[N], float_t sigma) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
     for(size_t n = 0; n != N; ++n) {
@@ -710,9 +710,9 @@ template<typename DataType, size_t N> void poisson(DataType (&win)[N], float_t t
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//                               Hybrid windows                               //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                               Hybrid windows                               */
+/******************************************************************************/
 template<typename DataType, size_t N> void barthann(DataType (&win)[N]) MF_NOEXCEPT {
     for(size_t n = 0; n != N; ++n) {
         const float_t factor = abs(float_t(n) / (float_t(N) - ONE) - HALF);
@@ -720,15 +720,15 @@ template<typename DataType, size_t N> void barthann(DataType (&win)[N]) MF_NOEXC
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//                               Other windows                                //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                               Other windows                                */
+/******************************************************************************/
 template<typename DataType, size_t N> void lanczos(DataType (&win)[N]) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR float_t factor = TWO / (float_t(N) - ONE);
     for(size_t n = 0; n != N; ++n) {
         win[n] = sinc(factor * float_t(n) - ONE);
     }
 }
-}} // namespace mf::windows
+}} /* namespace mf::windows */
 
-#endif // HPP_MF_WINDOWS
+#endif /* HPP_MF_WINDOWS */

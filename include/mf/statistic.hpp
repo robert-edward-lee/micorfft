@@ -5,4 +5,4 @@
 #include "mf/statistic/product.hpp"
 #include "mf/statistic/sum.hpp"
 
-#endif // HPP_MF_STATISTIC
+#endif /* HPP_MF_STATISTIC */

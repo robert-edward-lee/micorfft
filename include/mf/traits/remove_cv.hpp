@@ -14,6 +14,6 @@ template<typename T> struct remove_cv<volatile T> {
 template<typename T> struct remove_cv<const volatile T> {
     typedef T type;
 };
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_REMOVE_CV
+#endif /* HPP_MF_TRAITS_REMOVE_CV */

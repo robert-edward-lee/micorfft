@@ -17,4 +17,4 @@
 #include "mf/traits/math.hpp"
 #include "mf/traits/remove_cv.hpp"
 
-#endif // HPP_MF_UTILS_TRAITS
+#endif /* HPP_MF_UTILS_TRAITS */

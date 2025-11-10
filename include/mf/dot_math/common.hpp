@@ -182,6 +182,6 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void loop_unroller(DataType (&out)[Size],
         }
     }
 }
-}} // namespace mf::dot_math
+}} /* namespace mf::dot_math */
 
-#endif // HPP_MF_DOT_MATH_COMMON
+#endif /* HPP_MF_DOT_MATH_COMMON */

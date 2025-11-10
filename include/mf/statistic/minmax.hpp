@@ -191,6 +191,6 @@ min_element(const DataType (&data)[Size], DataType *value) MF_NOEXCEPT {
     *value = min_val;
     return min_idx;
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_STATISTIC_MINMAX
+#endif /* HPP_MF_STATISTIC_MINMAX */

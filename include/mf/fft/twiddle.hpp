@@ -41,6 +41,6 @@ MF_CONSTEXPR_14 void fill_rfft_twiddle_coeff(DataType (&table)[Size]) MF_NOEXCEP
         table[2 * i + 1] = cos(float_max_t(i) * factor);
     }
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TWIDDLE
+#endif /* HPP_MF_TWIDDLE */

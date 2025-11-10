@@ -74,10 +74,10 @@ template<> struct uint_fast_helper<8> {
     typedef uint64_t type;
 };
 #endif
-} // namespace detail
+} /* namespace detail */
 template<typename IdxType> struct uint_fast: detail::uint_fast_helper<sizeof(IdxType)> {};
 
-// clang-format off
+/* clang-format off */
 template<size_t Size> struct smallest_integral_type {
     typedef
         typename conditional<Size <= (size_t(1) << size_t(7)),   uint8_t,
@@ -85,10 +85,10 @@ template<size_t Size> struct smallest_integral_type {
         typename conditional<Size <= (size_t(1) << size_t(31)), uint32_t,
                                                                 uint64_t>::type>::type>::type type;
 };
-// clang-format on
+/* clang-format on */
 template<size_t Size> struct fastest_integral_type {
     typedef typename detail::uint_fast_helper<sizeof(typename smallest_integral_type<Size>::type)>::type type;
 };
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TYPES_INTEGRAL
+#endif /* HPP_MF_TYPES_INTEGRAL */

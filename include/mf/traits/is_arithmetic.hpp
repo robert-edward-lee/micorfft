@@ -8,6 +8,6 @@
 
 namespace mf {
 template<typename T> struct is_arithmetic: integral_constant<bool, is_integral<T>::value || is_floating<T>::value> {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_IS_ARITHMETIC
+#endif /* HPP_MF_TRAITS_IS_ARITHMETIC */

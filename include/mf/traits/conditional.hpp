@@ -8,6 +8,6 @@ template<bool Cond, class T1, class T2> struct conditional {
 template<class T1, class T2> struct conditional<false, T1, T2> {
     typedef T2 type;
 };
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_CONDITIONAL
+#endif /* HPP_MF_TRAITS_CONDITIONAL */

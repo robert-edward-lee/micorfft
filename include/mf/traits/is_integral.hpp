@@ -26,8 +26,8 @@ template<> struct is_integral_helper<signed long long>: true_type {};
 // TODO что то тут сделать!
 template<> struct is_integral_helper<size_t>: true_type {};
 #endif
-} // namespace detail
+} /* namespace detail */
 template<typename T> struct is_integral: detail::is_integral_helper<typename remove_cv<T>::type>::type {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_IS_INTEGRAL
+#endif /* HPP_MF_TRAITS_IS_INTEGRAL */

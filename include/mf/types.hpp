@@ -5,4 +5,4 @@
 #include "mf/types/floating.hpp"
 #include "mf/types/integral.hpp"
 
-#endif // HPP_MF_UTILS_TYPES
+#endif /* HPP_MF_UTILS_TYPES */

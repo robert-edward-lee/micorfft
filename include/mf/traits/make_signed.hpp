@@ -50,9 +50,9 @@ template<typename T> class make_signed_helper {
 public:
     typedef typename cv_selector<pure_type, is_const<T>::value, is_volatile<T>::value>::type type;
 };
-} // namespace detail
+} /* namespace detail */
 
 template<typename T> struct make_signed: detail::make_signed_helper<T> {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_MAKE_SIGNED
+#endif /* HPP_MF_TRAITS_MAKE_SIGNED */

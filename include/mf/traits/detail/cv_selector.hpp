@@ -15,6 +15,6 @@ template<typename Unqualified> struct cv_selector<Unqualified, true, false> {
 template<typename Unqualified> struct cv_selector<Unqualified, true, true> {
     typedef const volatile Unqualified type;
 };
-}} // namespace mf::detail
+}} /* namespace mf::detail */
 
-#endif // HPP_MF_TRAITS_DETAIL_CV_SELECTOR
+#endif /* HPP_MF_TRAITS_DETAIL_CV_SELECTOR */

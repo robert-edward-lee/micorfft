@@ -9,7 +9,7 @@ template<typename LhsDataType, typename RhsDataType>
 MF_OPTIMIZE(3) MF_CONSTEXPR void sum_op(LhsDataType &lhs, const RhsDataType &rhs) MF_NOEXCEPT {
     lhs += rhs;
 }
-} // namespace statistic
+} /* namespace statistic */
 
 template<typename OutDataType, typename DataType, size_t Size>
 MF_NODISCARD MF_OPTIMIZE(3) MF_CONSTEXPR_14 OutDataType sum(const DataType (&data)[Size],
@@ -20,6 +20,6 @@ template<typename OutDataType, typename DataType, size_t Size>
 MF_OPTIMIZE(3) MF_CONSTEXPR_14 void sum(const DataType (&data)[Size], OutDataType &init) MF_NOEXCEPT {
     statistic::loop_unroller<16>(data, init, statistic::sum_op);
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_STATISTIC_SUM
+#endif /* HPP_MF_STATISTIC_SUM */

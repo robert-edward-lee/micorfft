@@ -6,6 +6,6 @@ template<bool Cond, typename T = void> struct enable_if {};
 template<typename T> struct enable_if<true, T> {
     typedef T type;
 };
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_ENABLE_IF
+#endif /* HPP_MF_TRAITS_ENABLE_IF */

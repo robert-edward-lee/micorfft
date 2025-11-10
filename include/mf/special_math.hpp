@@ -3,4 +3,4 @@
 
 #include "mf/special_math/bessel.hpp"
 
-#endif // HPP_MF_SPECIAL_MATH
+#endif /* HPP_MF_SPECIAL_MATH */

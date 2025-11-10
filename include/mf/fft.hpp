@@ -854,18 +854,18 @@ private:
         twR = *pCoeff++;
         twI = *pCoeff++;
 
-        // U1 = XA(1) + XB(1); % It is real
+        /* U1 = XA(1) + XB(1); % It is real */
         t1a = xBR + xAR;
 
-        // U2 = XB(1) - XA(1); % It is imaginary
+        /* U2 = XB(1) - XA(1); % It is imaginary */
         t1b = xBI + xAI;
 
-        // real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI);
-        // imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI);
+        /* real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI); */
+        /* imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI); */
         *pOut++ = (DataType(1) / DataType(2)) * (t1a + t1b);
         *pOut++ = (DataType(1) / DataType(2)) * (t1a - t1b);
 
-        // XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) ));
+        /* XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) )); */
         pB = in + 2 * k;
         pA += 2;
 
@@ -896,15 +896,15 @@ private:
             t1a = xBR - xAR;
             t1b = xBI + xAI;
 
-            // real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI);
-            // imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI);
+            /* real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI); */
+            /* imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI); */
             p0 = twR * t1a;
             p1 = twI * t1a;
             p2 = twR * t1b;
             p3 = twI * t1b;
 
-            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR + p0 + p3); // xAR
-            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + p1 - p2); // xAI
+            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR + p0 + p3); /* xAR */
+            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + p1 - p2); /* xAI */
 
             pA += 2;
             pB -= 2;
@@ -940,8 +940,10 @@ private:
 
         while(k > 0) {
             /* G is half of the frequency complex spectrum */
-            // for k = 2:N
-            //     Xk(k) = 1/2 * (G(k) + conj(G(N-k+2)) + Tw(k)*( G(k) - conj(G(N-k+2))));
+            /*
+                for k = 2:N
+                    Xk(k) = 1/2 * (G(k) + conj(G(N-k+2)) + Tw(k)*( G(k) - conj(G(N-k+2))));
+            */
             xBI = pB[1];
             xBR = pB[0];
             xAR = pA[0];
@@ -958,10 +960,10 @@ private:
             t = twI * t1a;
             u = twR * t1b;
 
-            // real(tw * (xA - xB)) = twR * (xAR - xBR) - twI * (xAI - xBI);
-            // imag(tw * (xA - xB)) = twI * (xAR - xBR) + twR * (xAI - xBI);
-            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR - r - s); // xAR
-            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + t - u); // xAI
+            /* real(tw * (xA - xB)) = twR * (xAR - xBR) - twI * (xAI - xBI); */
+            /* imag(tw * (xA - xB)) = twI * (xAR - xBR) + twR * (xAI - xBI); */
+            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR - r - s); /* xAR */
+            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + t - u); /* xAI */
 
             pA += 2;
             pB -= 2;
@@ -974,6 +976,6 @@ private:
      */
     DataType rfft_twiddle[RFFT_LEN];
 };
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_FFT
+#endif /* HPP_MF_FFT */

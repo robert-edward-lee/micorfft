@@ -92,6 +92,6 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void loop_unroller(const InDataType (&data)[Size]
         }
     }
 }
-}} // namespace mf::statistic
+}} /* namespace mf::statistic */
 
-#endif // HPP_MF_STATISTIC_COMMON
+#endif /* HPP_MF_STATISTIC_COMMON */

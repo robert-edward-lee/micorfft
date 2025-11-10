@@ -51,9 +51,9 @@ template<typename T> class make_unsigned_helper {
 public:
     typedef typename cv_selector<pure_type, is_const<T>::value, is_volatile<T>::value>::type type;
 };
-} // namespace detail
+} /* namespace detail */
 
 template<typename T> struct make_unsigned: detail::make_unsigned_helper<T> {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_MAKE_UNSIGNED
+#endif /* HPP_MF_TRAITS_MAKE_UNSIGNED */

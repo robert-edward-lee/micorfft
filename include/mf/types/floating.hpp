@@ -16,7 +16,7 @@
 #error The compiler does not support any radix-2 floating-point types required for <mf/types/floating.hpp>.
 #endif
 
-#if defined(FLT_MANT_DIG) && defined(FLT_MAX_EXP) // float test
+#if defined(FLT_MANT_DIG) && defined(FLT_MAX_EXP) /* float test */
 #if FLT_MANT_DIG == 11 && FLT_MAX_EXP == 16 && !MF_HAS_FLOAT16_TYPE
 #define MF_FLOAT16_TYPE float
 #undef MF_FLOAT_MAX_WIDTH
@@ -63,9 +63,9 @@
 #define MF_FLOAT128_MIN FLT_MIN
 #define MF_FLOAT128_MAX FLT_MAX
 #endif
-#endif // float test
+#endif /* float test */
 
-#if defined(DBL_MANT_DIG) && defined(DBL_MAX_EXP) // double test
+#if defined(DBL_MANT_DIG) && defined(DBL_MAX_EXP) /* double test */
 #if DBL_MANT_DIG == 11 && DBL_MAX_EXP == 16 && !MF_HAS_FLOAT16_TYPE
 #define MF_FLOAT16_TYPE double
 #undef MF_FLOAT_MAX_WIDTH
@@ -112,9 +112,9 @@
 #define MF_FLOAT128_MIN DBL_MIN
 #define MF_FLOAT128_MAX DBL_MAX
 #endif
-#endif // double test
+#endif /* double test */
 
-#if defined(LDBL_MANT_DIG) && defined(LDBL_MAX_EXP) // long double test
+#if defined(LDBL_MANT_DIG) && defined(LDBL_MAX_EXP) /* long double test */
 #if LDBL_MANT_DIG == 11 && LDBL_MAX_EXP == 16 && !MF_HAS_FLOAT16_TYPE
 #define MF_FLOAT16_TYPE long double
 #undef MF_FLOAT_MAX_WIDTH
@@ -161,9 +161,9 @@
 #define MF_FLOAT128_MIN LDBL_MIN
 #define MF_FLOAT128_MAX LDBL_MAX
 #endif
-#endif // long double test
+#endif /* long double test */
 
-#if !MF_HAS_FLOAT128_TYPE // float128 extension test
+#if !MF_HAS_FLOAT128_TYPE /* float128 extension test */
 #if defined(__GNUC__) && defined(__SIZEOF_INT128__)
 #define MF_FLOAT128_TYPE __float128
 #undef MF_FLOAT_MAX_WIDTH
@@ -183,7 +183,7 @@
 #define MF_FLOAT128_MIN 3.36210314311209350626267781732175260e-4932q
 #define MF_FLOAT128_MAX 1.18973149535723176508575932662800702e+4932q
 #endif
-#endif // float128 extension test
+#endif /* float128 extension test */
 
 namespace mf {
 #if MF_HAS_FLOAT16_TYPE
@@ -208,6 +208,6 @@ typedef MF_FLOAT128_TYPE float128_t;
 
 typedef long double float_max_t;
 #define MF_FLOAT_MAX_C(x) MF_CONCAT(x, l)
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TYPES_FLOATING
+#endif /* HPP_MF_TYPES_FLOATING */

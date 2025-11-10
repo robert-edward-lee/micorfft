@@ -50,6 +50,6 @@ template<typename T> MF_NODISCARD MF_CONSTEXPR_14 T i0(T x) MF_NOEXCEPT {
     }
     return exp(x) * chbevl(T(32) / x - T(2), B) / sqrt(x);
 }
-}} // namespace mf::bessel
+}} /* namespace mf::bessel */
 
-#endif // HPP_MF_SPECIAL_MATH_BESSEL
+#endif /* HPP_MF_SPECIAL_MATH_BESSEL */

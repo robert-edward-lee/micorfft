@@ -10,6 +10,6 @@ template<typename T> struct is_volatile<volatile T>: true_type {};
 
 template<typename T> struct is_const: false_type {};
 template<typename T> struct is_const<const T>: true_type {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_IS_VOLATILE
+#endif /* HPP_MF_TRAITS_IS_VOLATILE */

@@ -252,6 +252,6 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void scale(Complex<DataType> (&cdata)[Size], Data
         }
     }
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_DOT_MATH_COMPLEX
+#endif /* HPP_MF_DOT_MATH_COMPLEX */

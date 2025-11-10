@@ -23,6 +23,6 @@ template<size_t Begin, typename T, size_t Size> MF_CONSTEXPR T (&slice_cast(T (&
     MF_STATIC_ASSERT_MSG(Begin < Size, "Invalid range for slicing");
     return reinterpret_cast<T(&)[Size - Begin]>(arr[Begin]);
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_UTILS
+#endif /* HPP_MF_UTILS */

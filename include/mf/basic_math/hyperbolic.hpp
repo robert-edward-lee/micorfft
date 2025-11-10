@@ -15,6 +15,6 @@ extern "C" double asinh(double);
 using std::asinh;
 using std::acosh;
 #endif
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_BASIC_MATH_HYPERBOLIC
+#endif /* HPP_MF_BASIC_MATH_HYPERBOLIC */

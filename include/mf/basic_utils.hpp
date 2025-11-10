@@ -10,4 +10,4 @@
 #define MF_DO_STR(x) #x
 #define MF_STR(x) MF_DO_STR(x)
 
-#endif // HPP_MF_BASIC_UTILS
+#endif /* HPP_MF_BASIC_UTILS */

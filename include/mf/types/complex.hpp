@@ -172,6 +172,6 @@ std::basic_ostream<CharT, Traits> &operator<<(std::basic_ostream<CharT, Traits> 
     s << "(" << x.real() << (x.imag() < 0 ? " - j" : " + j") << abs(x.imag()) << ")";
     return o << s.str();
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_COMPLEX
+#endif /* HPP_MF_COMPLEX */

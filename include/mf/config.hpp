@@ -3,9 +3,9 @@
 
 #include "mf/basic_utils.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
-//                            Compiler Detect Test                            //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                            Compiler Detect Test                            */
+/******************************************************************************/
 #if defined(__GNUC__) && !defined(__clang__)
 #define MF_GCC_VERSION_VALUE(maj, min, patch) (10000 * (maj) + 100 * (min) + (patch))
 #define MF_GCC_VERSION_CURRENT MF_GCC_VERSION_VALUE(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
@@ -57,9 +57,9 @@
 #define MF_HAS_BUILTIN(a) 0
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
-//                           Language Feature-Test                            //
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+/*                           Language Feature-Test                            */
+/******************************************************************************/
 #if defined(__cpp_constexpr)
 #if __cpp_constexpr >= 201304
 #define MF_CONST_OR_CONSTEXPR constexpr
@@ -108,10 +108,10 @@
 #define MF_STATIC_ASSERT_MSG(expr, msg) MF_STATIC_ASSERT(expr)
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
-//                           Attribute Feature-Test                           //
-////////////////////////////////////////////////////////////////////////////////
-#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907) // nodiscard
+/******************************************************************************/
+/*                           Attribute Feature-Test                           */
+/******************************************************************************/
+#if MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201907) /* nodiscard */
 #define MF_NODISCARD [[nodiscard]]
 #define MF_NODISCARD_MSG(msg) [[nodiscard(msg)]]
 #elif MF_HAS_CXX_ATTRIBUTE_VER(nodiscard, 201603)
@@ -121,17 +121,17 @@
 #define MF_NODISCARD _Check_return_
 #else
 #define MF_NODISCARD
-#endif // nodiscard
+#endif /* nodiscard */
 
 #if !defined(MF_NODISCARD_MSG)
 #define MF_NODISCARD_MSG(msg) MF_NODISCARD
 #endif
 
-#if(defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) // optimize
+#if (defined(__GNUC__) && !defined(__clang__)) || MF_HAS_ATTRIBUTE(optimize) /* optimize */
 #define MF_OPTIMIZE(lvl) __attribute__((optimize(MF_STR(MF_CONCAT(-O, lvl)))))
 #else
 #define MF_OPTIMIZE(lvl)
-#endif // optimize
+#endif /* optimize */
 
 #if MF_HAS_CXX_ATTRIBUTE(maybe_unused)
 #define MF_MAYBE_UNUSED [[maybe_unused]]
@@ -141,14 +141,14 @@
 #define MF_MAYBE_UNUSED
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
-//                            Compiler Intrinsics                             //
-////////////////////////////////////////////////////////////////////////////////
-#if MF_HAS_BUILTIN(__builtin_clz) || MF_GCC_VERSION_CHECK(3, 4, 0) // clz
+/******************************************************************************/
+/*                            Compiler Intrinsics                             */
+/******************************************************************************/
+#if MF_HAS_BUILTIN(__builtin_clz) || MF_GCC_VERSION_CHECK(3, 4, 0) /* clz */
 #define MF_HAS_BUILTIN_CLZ
-#endif // clz
+#endif /* clz */
 
-#if MF_GCC_VERSION_CHECK(2, 96, 0) || MF_HAS_BUILTIN(__builtin_expect) // likely
+#if MF_GCC_VERSION_CHECK(2, 96, 0) || MF_HAS_BUILTIN(__builtin_expect) /* likely */
 #define MF_LIKELY(a) __builtin_expect(!!(a), 1)
 #define MF_UNLIKELY(a) __builtin_expect(!!(a), 0)
 #elif MF_HAS_CXX_ATTRIBUTE(likely)
@@ -173,6 +173,6 @@
 #else
 #define MF_LIKELY(a) (a)
 #define MF_UNLIKELY(a) (a)
-#endif // likely
+#endif /* likely */
 
-#endif // HPP_MF_UTILS_CONFIG
+#endif /* HPP_MF_UTILS_CONFIG */

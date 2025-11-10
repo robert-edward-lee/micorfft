@@ -28,8 +28,8 @@ template<> struct is_floating_helper<float80_t>: true_type {};
 #if MF_HAS_FLOAT128_TYPE
 template<> struct is_floating_helper<float128_t>: true_type {};
 #endif
-} // namespace detail
+} /* namespace detail */
 template<typename T> struct is_floating: detail::is_floating_helper<typename remove_cv<T>::type>::type {};
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_TRAITS_IS_FLOATING
+#endif /* HPP_MF_TRAITS_IS_FLOATING */

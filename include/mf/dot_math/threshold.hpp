@@ -65,6 +65,6 @@ MF_OPTIMIZE(3) MF_CONSTEXPR_14 void limit_by_threshold(DataType (&result)[Size],
         }
     }
 }
-} // namespace mf
+} /* namespace mf */
 
-#endif // HPP_MF_DOT_MATH_THRESHOLD
+#endif /* HPP_MF_DOT_MATH_THRESHOLD */
