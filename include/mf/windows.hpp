@@ -166,7 +166,7 @@ template<typename DataType, size_t N> void parzen(DataType (&win)[N]) MF_NOEXCEP
         DataType x = abs(TWO * float_t(n) - (float_t(N) - ONE)) / float_t(N);
         DataType y = ONE - x;
 
-        x = ONE - float_t(6) * sqr(x) + float_t(6) * cub(x);
+        x = ONE + MF_FLOAT_MAX_C(6.0) * sqr(x) * (x - ONE);
         y = TWO * cub(y);
 
         win[n] = min(x, y);
@@ -601,7 +601,7 @@ template<typename DataType, size_t N> void kaiser_bessel_derived(DataType (&win)
 }
 template<typename DataType, size_t N> void chebyshev(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
     MF_CONST_OR_CONSTEXPR size_t order = N - 1;
-    const float_t amp = pow(float_t(10), abs(alpha) / float_t(20));
+    const float_t amp = pow(MF_FLOAT_MAX_C(10.0), abs(alpha) / MF_FLOAT_MAX_C(20.0));
     const float_t beta = cosh(acosh(amp) / order);
 
     Complex<float_t> W[N];
@@ -678,7 +678,7 @@ void taylor(DataType (&win)[N], float_t sll = 30, size_t nbar = 4, bool norm = t
         return;
     }
 
-    const float_t B = pow(float_t(10), float_t(sll) / float_t(20));
+    const float_t B = pow(MF_FLOAT_MAX_C(10.0), float_t(sll) / MF_FLOAT_MAX_C(20.0));
     const float_t A = acosh(B) / PI;
     const float_t s2 = sqr(nbar) / (sqr(A) + sqr(nbar - HALF));
 
