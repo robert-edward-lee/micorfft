@@ -10,12 +10,12 @@
 namespace mf { namespace windows {
 typedef float_max_t float_t;
 
-static MF_CONST_OR_CONSTEXPR float_t ONE = MF_FLOAT_MAX_C(1.0);
-static MF_CONST_OR_CONSTEXPR float_t TWO = MF_FLOAT_MAX_C(2.0);
-static MF_CONST_OR_CONSTEXPR float_t HALF = ONE / TWO;
-static MF_CONST_OR_CONSTEXPR float_t PI = pi<float_t>::value;
-static MF_CONST_OR_CONSTEXPR float_t TWO_PI = two_pi<float_t>::value;
-static MF_CONST_OR_CONSTEXPR float_t INV_PI = inv_pi<float_t>::value;
+MF_CONST_OR_CONSTEXPR float_t ONE = MF_FLOAT_MAX_C(1.0);
+MF_CONST_OR_CONSTEXPR float_t TWO = MF_FLOAT_MAX_C(2.0);
+MF_CONST_OR_CONSTEXPR float_t HALF = ONE / TWO;
+MF_CONST_OR_CONSTEXPR float_t PI = pi<float_t>::value;
+MF_CONST_OR_CONSTEXPR float_t TWO_PI = two_pi<float_t>::value;
+MF_CONST_OR_CONSTEXPR float_t INV_PI = inv_pi<float_t>::value;
 
 namespace detail {
 template<typename T, T N> class FftIdx {
@@ -148,15 +148,15 @@ template<typename DataType, size_t N> void rect(DataType (&win)[N]) MF_NOEXCEPT 
     }
 }
 template<typename DataType, size_t N> void bartlett(DataType (&win)[N]) MF_NOEXCEPT {
-    static MF_CONST_OR_CONSTEXPR DataType subtractor = (float_t(N) - ONE) / TWO;
-    static MF_CONST_OR_CONSTEXPR DataType divider = (float_t(N) - ONE) / TWO;
+    MF_CONST_OR_CONSTEXPR DataType subtractor = (float_t(N) - ONE) / TWO;
+    MF_CONST_OR_CONSTEXPR DataType divider = (float_t(N) - ONE) / TWO;
     for(size_t n = 0; n != N; ++n) {
         win[n] = ONE - abs((float_t(n) - subtractor) / divider);
     }
 }
 template<typename DataType, size_t N> void triang(DataType (&win)[N]) MF_NOEXCEPT {
-    static MF_CONST_OR_CONSTEXPR DataType subtractor = (float_t(N) - ONE) / TWO;
-    static MF_CONST_OR_CONSTEXPR DataType divider = (float_t(N) + N % 2) / TWO;
+    MF_CONST_OR_CONSTEXPR DataType subtractor = (float_t(N) - ONE) / TWO;
+    MF_CONST_OR_CONSTEXPR DataType divider = (float_t(N) + N % 2) / TWO;
     for(size_t n = 0; n != N; ++n) {
         win[n] = ONE - abs((float_t(n) - subtractor) / divider);
     }
@@ -208,29 +208,47 @@ void cosine_sum(DataType (&win)[N], const float_t (&a)[K], bool scale = true) MF
     }
 }
 template<typename DataType, size_t N> void general_hamming(DataType (&win)[N], float_t alpha) {
-    static float_t a[2];
-    a[0] = alpha;
-    a[1] = ONE - alpha;
+    const float_t a[] = {alpha, ONE - alpha};
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hamming(DataType (&win)[N]) MF_NOEXCEPT {
     general_hamming(win, MF_FLOAT_MAX_C(0.54));
 }
+/**
+ * @brief Точный Хэмминг с α = 25/46
+ * @note https://ccrma.stanford.edu/~jos/sasp/Hamming_Window.html
+ */
+template<typename DataType, size_t N> void hamming_ex(DataType (&win)[N]) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
+        MF_FLOAT_MAX_C(25.0) / MF_FLOAT_MAX_C(46.0),
+        MF_FLOAT_MAX_C(21.0) / MF_FLOAT_MAX_C(46.0),
+    };
+    cosine_sum(win, a);
+}
 template<typename DataType, size_t N> void hann(DataType (&win)[N]) MF_NOEXCEPT {
     general_hamming(win, HALF);
 }
-template<typename DataType, size_t N> void blackman_generic(DataType (&win)[N], float_t alpha) MF_NOEXCEPT {
-    static float_t a[3];
-    a[0] = (ONE - alpha) / TWO;
-    a[1] = HALF;
-    a[2] = alpha / TWO;
+template<typename DataType, size_t N> void blackman_generic(DataType (&win)[N], float_t alpha = 0.16) MF_NOEXCEPT {
+    const float_t a[] = {(ONE - alpha) / TWO, HALF, alpha / TWO};
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void blackman(DataType (&win)[N]) MF_NOEXCEPT {
     blackman_generic(win, MF_FLOAT_MAX_C(0.16));
 }
+/**
+ * @brief Точный Блэкман
+ * @note https://mathworld.wolfram.com/BlackmanFunction.html
+ */
+template<typename DataType, size_t N> void blackman_ex(DataType (&win)[N]) MF_NOEXCEPT {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
+        MF_FLOAT_MAX_C(7938.0) / MF_FLOAT_MAX_C(18608.0),
+        MF_FLOAT_MAX_C(9240.0) / MF_FLOAT_MAX_C(18608.0),
+        MF_FLOAT_MAX_C(1430.0) / MF_FLOAT_MAX_C(18608.0),
+    };
+    cosine_sum(win, a);
+}
 template<typename DataType, size_t N> void nuttall3(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.375),
         MF_FLOAT_MAX_C(0.5),
         MF_FLOAT_MAX_C(0.125),
@@ -238,7 +256,7 @@ template<typename DataType, size_t N> void nuttall3(DataType (&win)[N]) MF_NOEXC
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall3a(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.40897),
         MF_FLOAT_MAX_C(0.5),
         MF_FLOAT_MAX_C(0.09103),
@@ -246,7 +264,7 @@ template<typename DataType, size_t N> void nuttall3a(DataType (&win)[N]) MF_NOEX
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall3b(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.4243801),
         MF_FLOAT_MAX_C(0.4973406),
         MF_FLOAT_MAX_C(0.0782793),
@@ -254,7 +272,7 @@ template<typename DataType, size_t N> void nuttall3b(DataType (&win)[N]) MF_NOEX
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall4(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.3125),
         MF_FLOAT_MAX_C(0.46875),
         MF_FLOAT_MAX_C(0.1875),
@@ -263,7 +281,7 @@ template<typename DataType, size_t N> void nuttall4(DataType (&win)[N]) MF_NOEXC
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall4a(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.338946),
         MF_FLOAT_MAX_C(0.481973),
         MF_FLOAT_MAX_C(0.161054),
@@ -272,7 +290,7 @@ template<typename DataType, size_t N> void nuttall4a(DataType (&win)[N]) MF_NOEX
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall4b(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.355768),
         MF_FLOAT_MAX_C(0.487396),
         MF_FLOAT_MAX_C(0.144232),
@@ -281,7 +299,7 @@ template<typename DataType, size_t N> void nuttall4b(DataType (&win)[N]) MF_NOEX
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void nuttall4c(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.3635819),
         MF_FLOAT_MAX_C(0.4891775),
         MF_FLOAT_MAX_C(0.1365995),
@@ -290,7 +308,7 @@ template<typename DataType, size_t N> void nuttall4c(DataType (&win)[N]) MF_NOEX
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void blackmanharris(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.35875),
         MF_FLOAT_MAX_C(0.48829),
         MF_FLOAT_MAX_C(0.14128),
@@ -303,7 +321,7 @@ template<typename DataType, size_t N> void blackmanharris(DataType (&win)[N]) MF
 /*                              Flat-top windows                              */
 /******************************************************************************/
 template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.21557895),
         MF_FLOAT_MAX_C(0.41663158),
         MF_FLOAT_MAX_C(0.277263158),
@@ -316,7 +334,7 @@ template<typename DataType, size_t N> void flattop(DataType (&win)[N]) MF_NOEXCE
  * @brief Fast decaying 3-term flat top window
  */
 template<typename DataType, size_t N> void sft3f(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.26526),
         MF_FLOAT_MAX_C(0.5),
         MF_FLOAT_MAX_C(0.23474),
@@ -327,7 +345,7 @@ template<typename DataType, size_t N> void sft3f(DataType (&win)[N]) MF_NOEXCEPT
  * @brief Fast decaying 4-term flat top window
  */
 template<typename DataType, size_t N> void sft4f(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.21706),
         MF_FLOAT_MAX_C(0.42103),
         MF_FLOAT_MAX_C(0.28294),
@@ -339,7 +357,7 @@ template<typename DataType, size_t N> void sft4f(DataType (&win)[N]) MF_NOEXCEPT
  * @brief Fast decaying 5-term flat top window
  */
 template<typename DataType, size_t N> void sft5f(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.1881),
         MF_FLOAT_MAX_C(0.36923),
         MF_FLOAT_MAX_C(0.28702),
@@ -352,7 +370,7 @@ template<typename DataType, size_t N> void sft5f(DataType (&win)[N]) MF_NOEXCEPT
  * @brief Minimum sidelobe 3-term flat top window
  */
 template<typename DataType, size_t N> void sft3m(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.28235),
         MF_FLOAT_MAX_C(0.52105),
         MF_FLOAT_MAX_C(0.19659),
@@ -363,7 +381,7 @@ template<typename DataType, size_t N> void sft3m(DataType (&win)[N]) MF_NOEXCEPT
  * @brief Minimum sidelobe 4-term flat top window
  */
 template<typename DataType, size_t N> void sft4m(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.241906),
         MF_FLOAT_MAX_C(0.460841),
         MF_FLOAT_MAX_C(0.255381),
@@ -375,7 +393,7 @@ template<typename DataType, size_t N> void sft4m(DataType (&win)[N]) MF_NOEXCEPT
  * @brief Minimum sidelobe 5-term flat top window
  */
 template<typename DataType, size_t N> void sft5m(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.209671),
         MF_FLOAT_MAX_C(0.407331),
         MF_FLOAT_MAX_C(0.281225),
@@ -388,7 +406,7 @@ template<typename DataType, size_t N> void sft5m(DataType (&win)[N]) MF_NOEXCEPT
  * @brief National Instruments flat-top window
  */
 template<typename DataType, size_t N> void ftni(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(0.2810639),
         MF_FLOAT_MAX_C(0.5208972),
         MF_FLOAT_MAX_C(0.1980399),
@@ -399,7 +417,7 @@ template<typename DataType, size_t N> void ftni(DataType (&win)[N]) MF_NOEXCEPT 
  * @brief Old HP flat-top window
  */
 template<typename DataType, size_t N> void fthp(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.912510941),
         MF_FLOAT_MAX_C(1.079173272),
@@ -411,7 +429,7 @@ template<typename DataType, size_t N> void fthp(DataType (&win)[N]) MF_NOEXCEPT 
  * @brief Stanford Research flat-top window
  */
 template<typename DataType, size_t N> void ftsrs(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.93),
         MF_FLOAT_MAX_C(1.29),
@@ -421,7 +439,7 @@ template<typename DataType, size_t N> void ftsrs(DataType (&win)[N]) MF_NOEXCEPT
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft70(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.90796),
         MF_FLOAT_MAX_C(1.07349),
@@ -430,7 +448,7 @@ template<typename DataType, size_t N> void hft70(DataType (&win)[N]) MF_NOEXCEPT
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft95(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.9383379),
         MF_FLOAT_MAX_C(1.3045202),
@@ -440,7 +458,7 @@ template<typename DataType, size_t N> void hft95(DataType (&win)[N]) MF_NOEXCEPT
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft90d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.942604),
         MF_FLOAT_MAX_C(1.340318),
@@ -450,7 +468,7 @@ template<typename DataType, size_t N> void hft90d(DataType (&win)[N]) MF_NOEXCEP
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft116d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.9575375),
         MF_FLOAT_MAX_C(1.4780705),
@@ -461,7 +479,7 @@ template<typename DataType, size_t N> void hft116d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft144d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.96760033),
         MF_FLOAT_MAX_C(1.57983607),
@@ -473,7 +491,7 @@ template<typename DataType, size_t N> void hft144d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft169d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.97441843),
         MF_FLOAT_MAX_C(1.65409889),
@@ -486,7 +504,7 @@ template<typename DataType, size_t N> void hft169d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft196d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.979280420),
         MF_FLOAT_MAX_C(1.710288951),
@@ -500,7 +518,7 @@ template<typename DataType, size_t N> void hft196d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft223d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.98298997309),
         MF_FLOAT_MAX_C(1.75556083063),
@@ -515,7 +533,7 @@ template<typename DataType, size_t N> void hft223d(DataType (&win)[N]) MF_NOEXCE
     cosine_sum(win, a);
 }
 template<typename DataType, size_t N> void hft248d(DataType (&win)[N]) MF_NOEXCEPT {
-    static const float_t a[] = {
+    MF_CONST_OR_CONSTEXPR float_t a[] = {
         MF_FLOAT_MAX_C(1.0),
         MF_FLOAT_MAX_C(1.985844164102),
         MF_FLOAT_MAX_C(1.791176438506),
@@ -704,7 +722,7 @@ void taylor(DataType (&win)[N], float_t sll = 30, size_t nbar = 4, bool norm = t
     }
 }
 template<typename DataType, size_t N> void poisson(DataType (&win)[N], float_t tau) MF_NOEXCEPT {
-    static MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
+    MF_CONST_OR_CONSTEXPR float_t subtractor = (float_t(N) - ONE) / TWO;
     for(size_t n = 0; n != N; ++n) {
         win[n] = exp(-abs(float_t(n) - subtractor) / tau);
     }
