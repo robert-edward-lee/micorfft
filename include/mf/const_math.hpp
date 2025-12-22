@@ -1,21 +1,25 @@
 #ifndef HPP_MF_CONST_MATH
 #define HPP_MF_CONST_MATH
 
-#if defined(__cpp_constexpr) && __cpp_constexpr >= 201304
+#if defined(__cpp_constexpr)
 #include <limits>
 
 #include "basic_math/constants.hpp"
 
-namespace mf { namespace cm {
+namespace mf {
+/**
+ * @brief constexpr math
+ */
+namespace cm {
 namespace detail {
 template<typename T> constexpr T sqrt_recurrent(T a, T xk, T xk_1) noexcept {
     return xk == xk_1 ? xk : sqrt_recurrent(a, (xk + a / xk) / T(2), xk);
 }
 
 template<typename T> constexpr T exp_recurrent(T x, T res = 1, T term = 1, unsigned n = 1) noexcept {
-    term *= x / T(n);
-    res += term;
-    return term < res * std::numeric_limits<T>::epsilon() ? res : exp_recurrent(x, res, term, n + 1);
+    return term < res * std::numeric_limits<T>::epsilon()
+             ? res
+             : exp_recurrent(x, res + term * (x / T(n)), term * (x / T(n)), n + 1);
 }
 } /* namespace detail */
 
@@ -40,7 +44,8 @@ template<typename T> constexpr T exp10(T x) noexcept {
     return exp(x * ln10<T>::value);
 }
 
-}} /* namespace mf::cm */
+} /* namespace cm */
+} /* namespace mf */
 
 #endif /* __cpp_constexpr */
 
