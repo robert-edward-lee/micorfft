@@ -2,7 +2,7 @@
 #define HPP_MF_CONST_MATH
 
 #if defined(__cpp_constexpr)
-#include "mf/const_math/abs.cpp"
+#include "mf/const_math/abs.hpp"
 #include "mf/const_math/exp.hpp"
 #include "mf/const_math/sqrt.hpp"
 #include "mf/const_math/trigonometry.hpp"
