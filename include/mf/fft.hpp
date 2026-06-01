@@ -833,12 +833,10 @@ private:
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void stage(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
         MF_CONST_OR_CONSTEXPR DataType half = DataType(1) / DataType(2);
-        /* real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI); */
-        /* imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI); */
+
         out[0] = in[0] + in[1];
         out[1] = 0;
 
-        /* XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) )); */
         const DataType *pA = &in[2];
         const DataType *pB = &in[Size - 2];
         DataType *pOut = &out[2];
@@ -890,57 +888,45 @@ private:
      * @brief
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void merge(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
-        DataType twR, twI; /* RFFT Twiddle coefficients */
-        const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
-        const DataType *pA = in; /* increasing pointer */
-        const DataType *pB = in; /* decreasing pointer */
-        DataType *pOut = out;
-        DataType xAR, xAI, xBR, xBI; /* temporary variables */
-        DataType t1a, t1b, r, s, t, u; /* temporary variables */
+        MF_CONST_OR_CONSTEXPR DataType half = DataType(1) / DataType(2);
 
-        idx_fast_t k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
+        out[0] = half * (in[0] + in[1]);
+        out[1] = half * (in[0] - in[1]);
 
-        xAR = pA[0];
-        xAI = pA[1];
+        const DataType *pA = &in[2];
+        const DataType *pB = &in[Size - 2];
+        DataType *pOut = &out[2];
 
-        pCoeff += 2;
-
-        *pOut++ = (DataType(1) / DataType(2)) * (xAR + xAI);
-        *pOut++ = (DataType(1) / DataType(2)) * (xAR - xAI);
-
-        pB = in + 2 * k;
-        pA += 2;
-
-        while(k > 0) {
-            /* G is half of the frequency complex spectrum */
+        const DataType *pTw = &rfft_twiddle[2];
+        idx_fast_t k = ParentCfft::CFFT_LEN - 1;
+        while(k--) {
             /*
+                G is half of the frequency complex spectrum
                 for k = 2:N
                     Xk(k) = 1/2 * (G(k) + conj(G(N-k+2)) + Tw(k)*( G(k) - conj(G(N-k+2))));
             */
-            xBI = pB[1];
-            xBR = pB[0];
-            xAR = pA[0];
-            xAI = pA[1];
 
-            twR = *pCoeff++;
-            twI = *pCoeff++;
+            const DataType xBI = pB[1];
+            const DataType xBR = pB[0];
+            const DataType xAR = pA[0];
+            const DataType xAI = pA[1];
 
-            t1a = xAR - xBR;
-            t1b = xAI + xBI;
+            const DataType twR = pTw[0];
+            const DataType twI = pTw[1];
 
-            r = twR * t1a;
-            s = twI * t1b;
-            t = twI * t1a;
-            u = twR * t1b;
+            const DataType t1a = xAR - xBR;
+            const DataType t1b = xAI + xBI;
 
+            const DataType real_part = twR * t1a + twI * t1b;
+            const DataType imag_part = twI * t1a - twR * t1b;
             /* real(tw * (xA - xB)) = twR * (xAR - xBR) - twI * (xAI - xBI); */
             /* imag(tw * (xA - xB)) = twI * (xAR - xBR) + twR * (xAI - xBI); */
-            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR - r - s); /* xAR */
-            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + t - u); /* xAI */
+            *pOut++ = half * (xAR + xBR - real_part); /* xAR */
+            *pOut++ = half * (xAI - xBI + imag_part); /* xAI */
 
             pA += 2;
             pB -= 2;
-            k--;
+            pTw += 2;
         }
     }
 
