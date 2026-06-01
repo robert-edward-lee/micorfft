@@ -94,6 +94,14 @@
 #define MF_NOEXCEPT throw()
 #endif
 
+#if defined(__GNUC__) || defined(__clang__)
+#define MF_RESTRICT __restrict__
+#elif defined(_MSC_VER)
+#define MF_RESTRICT __restrict
+#else
+#define MF_RESTRICT
+#endif
+
 #if defined(__cpp_static_assert)
 #if __cpp_static_assert >= 201411
 #define MF_STATIC_ASSERT(expr) static_assert(expr)

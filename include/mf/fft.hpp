@@ -837,11 +837,11 @@ private:
         out[0] = in[0] + in[1];
         out[1] = 0;
 
-        const DataType *pA = &in[2];
-        const DataType *pB = &in[Size - 2];
-        DataType *pOut = &out[2];
+        const DataType *MF_RESTRICT pA = &in[2];
+        const DataType *MF_RESTRICT pB = &in[Size - 2];
+        DataType *MF_RESTRICT pOut = &out[2];
 
-        const DataType *pTw = &rfft_twiddle[2];
+        const DataType *MF_RESTRICT pTw = &rfft_twiddle[2];
         idx_fast_t k = ParentCfft::CFFT_LEN - 1;
         while(k--) {
             /*
@@ -893,11 +893,11 @@ private:
         out[0] = half * (in[0] + in[1]);
         out[1] = half * (in[0] - in[1]);
 
-        const DataType *pA = &in[2];
-        const DataType *pB = &in[Size - 2];
-        DataType *pOut = &out[2];
+        const DataType *MF_RESTRICT pA = &in[2];
+        const DataType *MF_RESTRICT pB = &in[Size - 2];
+        DataType *MF_RESTRICT pOut = &out[2];
 
-        const DataType *pTw = &rfft_twiddle[2];
+        const DataType *MF_RESTRICT pTw = &rfft_twiddle[2];
         idx_fast_t k = ParentCfft::CFFT_LEN - 1;
         while(k--) {
             /*
