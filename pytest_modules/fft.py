@@ -3,7 +3,7 @@ from ctypes import *
 from enum import Enum
 
 import numpy as np
-from scipy.fft import fft, rfft
+from scipy.fft import fft, rfft, irfft
 
 VALID_FFT_SIZES = [
     16,
@@ -125,8 +125,9 @@ class Test(object):
 
     def rfft_test(self, data_t):
         data_f = rfft(data_t)
-        # cutdown Nyquist frequency
-        self.rfft_forward_test(data_t, data_f[:-1])
+        self.rfft_forward_test(data_t, data_f)
+        data_f[-1] = 0 # cutdown Nyquist frequency
+        data_t = irfft(data_f)
         self.rfft_inverse_test(data_t, data_f)
 
     def rfft_forward_test(self, data_t, data_f):
@@ -169,17 +170,17 @@ class Test(object):
 
         self._c_irfft(self._complex_data, self._real_data)
         if self._data_type == DataTypes.FLOAT32:
-            testing_data = np.array(self._complex_data, dtype=np.float32).view(np.complex64)
+            testing_data = np.array(self._real_data, dtype=np.float32)
         elif self._data_type == DataTypes.FLOAT64:
-            testing_data = np.array(self._complex_data, dtype=np.float64).view(np.complex128)
+            testing_data = np.array(self._real_data, dtype=np.float64)
         # print('mf:')
         # print(testing_data)
 
         out = f'test for rfft<{self._data_type.value}, {self._size * 2}>::inverse with {self._epsilon:.0e} accuracy...\n'
         mismatches = 0
-        for i in range(testing_data.size // 2):
+        for i in range(testing_data.size):
             xn = testing_data[i]
-            ref = data_f[i]
+            ref = data_t[i]
 
             if abs(xn - ref) > self._epsilon:
                 out += f'[{i:03}]: {xn} != {ref}\n'
