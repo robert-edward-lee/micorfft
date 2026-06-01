@@ -769,7 +769,6 @@ public:
         ParentCfft::template cfft<false, true>((Complex<DataType>(&)[Size / 2]) in);
         /* Real FFT extraction */
         stage(in, out);
-        out[1] = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void forward(DataType (&in)[Size],
                                                 Complex<DataType> (&out)[Size / 2]) const MF_NOEXCEPT {
@@ -777,7 +776,6 @@ public:
         ParentCfft::template cfft<false, true>((Complex<DataType>(&)[Size / 2]) in);
         /* Real FFT extraction */
         stage(in, (DataType(&)[Size])out);
-        out[0].imag() = 0; /* костыль для зануления мнимой части нулевой гармоники */
     }
     /**
      * @param[in] in Выходные данные во временном представлении
@@ -787,14 +785,14 @@ public:
      * @note входные данные модифицируются!
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
-        /*  Real FFT compression */
+        /* Real FFT compression */
         merge(in, out);
         /* Complex radix-4 IFFT process */
         ParentCfft::template cfft<true, true>((Complex<DataType>(&)[Size / 2]) out);
     }
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void inverse(Complex<DataType> (&in)[Size / 2],
                                                 DataType (&out)[Size]) const MF_NOEXCEPT {
-        /*  Real FFT compression */
+        /* Real FFT compression */
         merge((DataType(&)[Size])in, out);
         /* Complex radix-4 IFFT process */
         ParentCfft::template cfft<true, true>((Complex<DataType>(&)[Size / 2]) out);
@@ -834,42 +832,20 @@ private:
      * @brief
      */
     MF_OPTIMIZE(3) MF_CONSTEXPR_14 void stage(const DataType (&in)[Size], DataType (&out)[Size]) const MF_NOEXCEPT {
-        DataType twR, twI; /* RFFT Twiddle coefficients */
-        const DataType *pCoeff = rfft_twiddle; /* Points to RFFT Twiddle factors */
-        const DataType *pA = in; /* increasing pointer */
-        const DataType *pB = in; /* decreasing pointer */
-        DataType *pOut = out;
-        DataType xAR, xAI, xBR, xBI; /* temporary variables */
-        DataType t1a, t1b; /* temporary variables */
-        DataType p0, p1, p2, p3; /* temporary variables */
-
-        idx_fast_t k = ParentCfft::CFFT_LEN - 1; /* Loop Counter */
-
-        /* Pack first and last sample of the frequency domain together */
-        xBR = pB[0];
-        xBI = pB[1];
-        xAR = pA[0];
-        xAI = pA[1];
-
-        twR = *pCoeff++;
-        twI = *pCoeff++;
-
-        /* U1 = XA(1) + XB(1); % It is real */
-        t1a = xBR + xAR;
-
-        /* U2 = XB(1) - XA(1); % It is imaginary */
-        t1b = xBI + xAI;
-
+        MF_CONST_OR_CONSTEXPR DataType half = DataType(1) / DataType(2);
         /* real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI); */
         /* imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI); */
-        *pOut++ = (DataType(1) / DataType(2)) * (t1a + t1b);
-        *pOut++ = (DataType(1) / DataType(2)) * (t1a - t1b);
+        out[0] = in[0] + in[1];
+        out[1] = 0;
 
         /* XA(1) = 1/2*( U1 - imag(U2) +  i*( U1 +imag(U2) )); */
-        pB = in + 2 * k;
-        pA += 2;
+        const DataType *pA = &in[2];
+        const DataType *pB = &in[Size - 2];
+        DataType *pOut = &out[2];
 
-        do {
+        const DataType *pTw = &rfft_twiddle[2];
+        idx_fast_t k = ParentCfft::CFFT_LEN - 1;
+        while(k--) {
             /*
                function X = my_split_rfft(X, ifftFlag)
                % X is a series of real numbers
@@ -885,31 +861,28 @@ private:
                X = XA;
             */
 
-            xBI = pB[1];
-            xBR = pB[0];
-            xAR = pA[0];
-            xAI = pA[1];
+            const DataType xBI = pB[1];
+            const DataType xBR = pB[0];
+            const DataType xAR = pA[0];
+            const DataType xAI = pA[1];
 
-            twR = *pCoeff++;
-            twI = *pCoeff++;
+            const DataType twR = pTw[0];
+            const DataType twI = pTw[1];
 
-            t1a = xBR - xAR;
-            t1b = xBI + xAI;
+            const DataType t1a = xBR - xAR;
+            const DataType t1b = xBI + xAI;
 
+            const DataType real_part = twR * t1a + twI * t1b;
+            const DataType imag_part = twI * t1a - twR * t1b;
             /* real(tw * (xB - xA)) = twR * (xBR - xAR) - twI * (xBI - xAI); */
             /* imag(tw * (xB - xA)) = twI * (xBR - xAR) + twR * (xBI - xAI); */
-            p0 = twR * t1a;
-            p1 = twI * t1a;
-            p2 = twR * t1b;
-            p3 = twI * t1b;
-
-            *pOut++ = (DataType(1) / DataType(2)) * (xAR + xBR + p0 + p3); /* xAR */
-            *pOut++ = (DataType(1) / DataType(2)) * (xAI - xBI + p1 - p2); /* xAI */
+            *pOut++ = half * (xAR + xBR + real_part); /* xAR */
+            *pOut++ = half * (xAI - xBI + imag_part); /* xAI */
 
             pA += 2;
             pB -= 2;
-            k--;
-        } while(k);
+            pTw += 2;
+        }
     }
     /**
      * @param[in] in
